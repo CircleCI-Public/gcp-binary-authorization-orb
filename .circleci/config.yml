@@ -8,6 +8,7 @@ jobs:
     executor: gcp-cli/default
     steps:
       - checkout
+
       - gcp-cli/install
       - gcp-cli/initialize
 
