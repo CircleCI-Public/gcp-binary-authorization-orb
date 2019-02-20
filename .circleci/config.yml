@@ -13,12 +13,25 @@ jobs:
       - gcp-cli/initialize
 
       - run:
+          name: set default GCP project
+          command: |
+            gcloud config set project $GOOGLE_PROJECT_ID
+
+      - run:
           name: enable api's
           command: |
             gcloud services enable \
-                container.googleapis.com \
-                containeranalysis.googleapis.com \
-                binaryauthorization.googleapis.com
+              container.googleapis.com \
+              containeranalysis.googleapis.com \
+              binaryauthorization.googleapis.com
+
+      - run:
+          name: create BinAuthz-enabled GKE cluster
+          command: |
+            gcloud beta container clusters create \
+              --enable-binauthz \
+              --zone $GOOGLE_COMPUTE_ZONE \
+              test-cluster
 
 workflows:
   lint_pack-validate_publish-dev:
