@@ -1,0 +1,17 @@
+version: 2.1
+
+orbs:
+  gcp-cli: circleci/gcp-cli@1.0.4
+
+jobs:
+  build:
+    executor: gcp-cli/default
+    steps:
+      - checkout
+      - gcp-cli/install
+      - gcp-cli/initialize
+
+workflows:
+  lint_pack-validate_publish-dev:
+    jobs:
+      - build
