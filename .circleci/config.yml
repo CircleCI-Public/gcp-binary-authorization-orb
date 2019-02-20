@@ -12,6 +12,14 @@ jobs:
       - gcp-cli/install
       - gcp-cli/initialize
 
+      - run:
+          name: enable api's
+          command: |
+            gcloud services enable \
+                container.googleapis.com \
+                containeranalysis.googleapis.com \
+                binaryauthorization.googleapis.com
+
 workflows:
   lint_pack-validate_publish-dev:
     jobs:
