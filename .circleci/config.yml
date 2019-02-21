@@ -16,6 +16,7 @@ jobs:
           name: set default GCP project
           command: |
             gcloud config set project $GOOGLE_PROJECT_ID
+            gcloud config set account $GCLOUD_SERVICE_ACCOUNT
 
       - run:
           name: enable api's
