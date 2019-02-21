@@ -22,6 +22,8 @@ jobs:
             # Store service account
             echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
 
+            export CLOUDSDK_PYTHON_SITEPACKAGES=1
+
             # Initialize gcloud CLI
             $SUDO gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
               --key-file=${HOME}/gcloud-service-key.json \
@@ -44,6 +46,7 @@ jobs:
               --verbosity=debug
 
             gcloud services enable \
+              serviceusage.googleapis.com \
               container.googleapis.com \
               containeranalysis.googleapis.com \
               binaryauthorization.googleapis.com --verbosity=debug
