@@ -17,10 +17,18 @@ jobs:
           command: |
             gcloud config set project $GOOGLE_PROJECT_ID
             gcloud config set account $GCLOUD_SERVICE_ACCOUNT
+
+      - run:
+          name: enable api's
+          command: |
             gcloud services enable \
               container.googleapis.com \
               containeranalysis.googleapis.com \
               binaryauthorization.googleapis.com
+
+      - run:
+          name: create BinAuthz-enabled GKE cluster
+          command: |
             gcloud beta container clusters create \
               --enable-binauthz \
               --zone $GOOGLE_COMPUTE_ZONE \
