@@ -25,47 +25,40 @@ jobs:
             # Initialize gcloud CLI
             $SUDO gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
               --key-file=${HOME}/gcloud-service-key.json \
+                --verbosity=debug
+
+            $SUDO gcloud --quiet config set project $GOOGLE_PROJECT_ID --verbosity=debug
+            $SUDO gcloud --quiet config set compute/zone $GOOGLE_COMPUTE_ZONE --verbosity=debug
+
+      - run:
+          name: set default GCP project
+          command: |
+            gcloud config set project $GOOGLE_PROJECT_ID --verbosity=debug
+            gcloud config set account $GCLOUD_SERVICE_ACCOUNT --verbosity=debug
+
+      - run:
+          name: enable api's
+          command: |
+            $SUDO gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
+              --key-file=${HOME}/gcloud-service-key.json \
               --verbosity=debug
 
-            $SUDO gcloud \
-              --quiet config set project $GOOGLE_PROJECT_ID \
-              --verbosity=debug
-
-            $SUDO gcloud \
-              --quiet config set compute/zone $GOOGLE_COMPUTE_ZONE \
-              --verbosity=debug
-
-            $SUDO gcloud config set project $GOOGLE_PROJECT_ID \
-              --verbosity=debug
-
-            $SUDO gcloud config set account $GCLOUD_SERVICE_ACCOUNT \
-              --verbosity=debug
-
-            $SUDO gcloud services enable \
+            gcloud services enable \
               container.googleapis.com \
               containeranalysis.googleapis.com \
               binaryauthorization.googleapis.com --verbosity=debug
 
-            $SUDO gcloud beta container clusters create \
-              --enable-binauthz \
-              --zone $GOOGLE_COMPUTE_ZONE \
-              test-cluster \
+      - run:
+          name: create BinAuthz-enabled GKE cluster
+          command: |
+            $SUDO gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
+              --key-file=${HOME}/gcloud-service-key.json \
               --verbosity=debug
 
-      # - run:
-      #     name: set default GCP project
-      #     command: |
-
-
-      # - run:
-      #     name: enable api's
-      #     command: |
-
-
-      # - run:
-      #     name: create BinAuthz-enabled GKE cluster
-      #     command: |
-
+            gcloud beta container clusters create \
+              --enable-binauthz \
+              --zone $GOOGLE_COMPUTE_ZONE \
+              test-cluster --verbosity=debug
 
 workflows:
   lint_pack-validate_publish-dev:
