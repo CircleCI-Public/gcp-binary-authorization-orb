@@ -12,13 +12,29 @@ jobs:
       - checkout
 
       - gcp-cli/install
-      - gcp-cli/initialize
+
+      - run:
+          name: Initialize gcloud CLI to connect to Google Cloud
+          command: |
+            # Set sudo to work whether logged in as root user or non-root user
+            if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
+
+            # Store service account
+            echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+
+            # Initialize gcloud CLI
+            $SUDO gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
+              --key-file=${HOME}/gcloud-service-key.json \
+                --verbosity=debug
+
+            $SUDO gcloud --quiet config set project $GOOGLE_PROJECT_ID --verbosity=debug
+            $SUDO gcloud --quiet config set compute/zone $GOOGLE_COMPUTE_ZONE --verbosity=debug
 
       - run:
           name: set default GCP project
           command: |
-            gcloud config set project $GOOGLE_PROJECT_ID
-            gcloud config set account $GCLOUD_SERVICE_ACCOUNT
+            gcloud config set project $GOOGLE_PROJECT_ID --verbosity=debug
+            gcloud config set account $GCLOUD_SERVICE_ACCOUNT --verbosity=debug
 
       - run:
           name: enable api's
@@ -26,7 +42,7 @@ jobs:
             gcloud services enable \
               container.googleapis.com \
               containeranalysis.googleapis.com \
-              binaryauthorization.googleapis.com
+              binaryauthorization.googleapis.com --verbosity=debug
 
       - run:
           name: create BinAuthz-enabled GKE cluster
@@ -34,7 +50,7 @@ jobs:
             gcloud beta container clusters create \
               --enable-binauthz \
               --zone $GOOGLE_COMPUTE_ZONE \
-              test-cluster
+              test-cluster --verbosity=debug
 
 workflows:
   lint_pack-validate_publish-dev:
