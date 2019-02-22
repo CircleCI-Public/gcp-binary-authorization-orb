@@ -104,13 +104,15 @@ jobs:
       #       gcloud beta container binauthz attestors list
 
       # customer will create keypair outside of the orb
-      # store private key in SSH Permissions
+      # store both keys in circle (contexts or env var)
+      # replace newlines with \n
 
       - run:
           name: add pub key to attestor
           command: |
             ATTESTOR=test-attestor
-            echo $BIN_AUTHZ_PUBLIC_KEY > /tmp/generated-key.pgp
+            # use -e to change \n into an actual newline
+            echo -e $BIN_AUTHZ_PUBLIC_KEY > /tmp/generated-key.pgp
 
             gcloud beta container binauthz attestors public-keys add \
               --attestor=${ATTESTOR} \
