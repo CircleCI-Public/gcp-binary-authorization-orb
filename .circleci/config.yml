@@ -36,6 +36,11 @@ jobs:
             gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
               --key-file=${HOME}/gcloud-service-key.json \
 
+            gcloud beta container clusters delete \
+              --enable-binauthz \
+              --zone $GOOGLE_COMPUTE_ZONE \
+              test-cluster
+
             gcloud beta container clusters create \
               --enable-binauthz \
               --zone $GOOGLE_COMPUTE_ZONE \
