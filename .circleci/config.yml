@@ -90,7 +90,7 @@ jobs:
             # Create the attestor in Binary Authorization:
             gcloud beta container binauthz attestors create ${ATTESTOR} \
             --attestation-authority-note=${NOTE_ID} \
-            --attestation-authority-note-project=${PROJECT_ID}
+            --attestation-authority-note-project=${GOOGLE_PROJECT_ID}
 
             # Verify that the attestor was created:
             gcloud beta container binauthz attestors list
