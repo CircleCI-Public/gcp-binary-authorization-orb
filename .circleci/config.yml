@@ -55,55 +55,68 @@ jobs:
               --zone $GOOGLE_COMPUTE_ZONE \
               test-cluster
 
+      # - run:
+      #     name: Create Container Analysis note
+      #     command: |
+      #       # Set variables that store the name of your attestor and Container Analysis note:
+      #       ATTESTOR=test-attestor
+      #       NOTE_ID=test-attestor-note
+
+      #       # Create a JSON file in /tmp/note_payload.json that describes the Container Analysis note:
+      #       cat > /tmp/note_payload.json \<< EOM
+      #       {
+      #         "name": "projects/${GOOGLE_PROJECT_ID}/notes/${NOTE_ID}",
+      #         "attestation_authority": {
+      #           "hint": {
+      #             "human_readable_name": "Attestor Note"
+      #           }
+      #         }
+      #       }
+      #       EOM
+
+      #       # Create the note by sending an HTTP request to the Container Analysis REST API:
+      #       curl -X POST \
+      #         -H "Content-Type: application/json" \
+      #         -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
+      #         --data-binary @/tmp/note_payload.json  \
+      #         "https://containeranalysis.googleapis.com/v1beta1/projects/${GOOGLE_PROJECT_ID}/notes/?noteId=${NOTE_ID}"
+
+      #       # Verify that the note was created:
+      #       curl \
+      #         -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+      #         "https://containeranalysis.googleapis.com/v1beta1/projects/${GOOGLE_PROJECT_ID}/notes/${NOTE_ID}"
+
+      # - run:
+      #     name: Create the attestor
+      #     command: |
+      #       ATTESTOR=test-attestor
+      #       NOTE_ID=test-attestor-note
+
+      #       # delete first
+      #       gcloud beta container binauthz attestors delete ${ATTESTOR}
+
+      #       # Create the attestor in Binary Authorization:
+      #       gcloud beta container binauthz attestors create ${ATTESTOR} \
+      #       --attestation-authority-note=${NOTE_ID} \
+      #       --attestation-authority-note-project=${GOOGLE_PROJECT_ID}
+
+      #       # Verify that the attestor was created:
+      #       gcloud beta container binauthz attestors list
+
       - run:
-          name: Create Container Analysis note
+          name: Generate GPG key pair
           command: |
-            # Set variables that store the name of your attestor and Container Analysis note:
-            ATTESTOR=test-attestor
-            NOTE_ID=test-attestor-note
+            gpg --batch --gen-key <(
+              cat \<<- EOF
+                Key-Type: RSA
+                Key-Length: 2048
+                Name-Real: "Test Attestor"
+                Name-Email: "test-attestor@example.com"
+                %commit
+            EOF
+            )
 
-            # Create a JSON file in /tmp/note_payload.json that describes the Container Analysis note:
-            cat > /tmp/note_payload.json \<< EOM
-            {
-              "name": "projects/${GOOGLE_PROJECT_ID}/notes/${NOTE_ID}",
-              "attestation_authority": {
-                "hint": {
-                  "human_readable_name": "Attestor Note"
-                }
-              }
-            }
-            EOM
-
-            # Create the note by sending an HTTP request to the Container Analysis REST API:
-            curl -X POST \
-              -H "Content-Type: application/json" \
-              -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
-              --data-binary @/tmp/note_payload.json  \
-              "https://containeranalysis.googleapis.com/v1beta1/projects/${GOOGLE_PROJECT_ID}/notes/?noteId=${NOTE_ID}"
-
-            # Verify that the note was created:
-            curl \
-              -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-              "https://containeranalysis.googleapis.com/v1beta1/projects/${GOOGLE_PROJECT_ID}/notes/${NOTE_ID}"
-
-      - run:
-          name: Create the attestor
-          command: |
-            ATTESTOR=test-attestor
-            NOTE_ID=test-attestor-note
-
-            # delete first
-            gcloud beta container binauthz attestors delete ${ATTESTOR}
-
-            # Create the attestor in Binary Authorization:
-            gcloud beta container binauthz attestors create ${ATTESTOR} \
-            --attestation-authority-note=${NOTE_ID} \
-            --attestation-authority-note-project=${GOOGLE_PROJECT_ID}
-
-            # Verify that the attestor was created:
-            gcloud beta container binauthz attestors list
-
-
+            gpg --list-keys "test-attestor@example.com"
 
 workflows:
   lint_pack-validate_publish-dev:
