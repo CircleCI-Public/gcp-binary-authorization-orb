@@ -103,20 +103,18 @@ jobs:
       #       # Verify that the attestor was created:
       #       gcloud beta container binauthz attestors list
 
-      - run:
-          name: Generate GPG key pair
-          command: |
-            gpg --batch --generate-key <(
-              cat \<<- EOF
-                Key-Type: RSA
-                Key-Length: 2048
-                Name-Real: "Test Attestor"
-                Name-Email: "test-attestor@example.com"
-                %commit
-            EOF
-            )
+      # customer will create keypair outside of the orb
+      # store private key in SSH Permissions
 
-            gpg --list-keys "test-attestor@example.com"
+      - run:
+          name: add pub key to attestor
+          command: |
+            ATTESTOR=test-attestor
+            echo $BIN_AUTHZ_PUB_KEY > /tmp/generated-key.pgp
+
+            gcloud beta container binauthz attestors public-keys add \
+              --attestor=${ATTESTOR} \
+              --public-key-file=/tmp/generated-key.pgp
 
 workflows:
   lint_pack-validate_publish-dev:
