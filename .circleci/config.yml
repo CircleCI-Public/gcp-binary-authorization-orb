@@ -106,7 +106,7 @@ jobs:
       - run:
           name: Generate GPG key pair
           command: |
-            gpg --batch --gen-key <(
+            gpg --batch --generate-key <(
               cat \<<- EOF
                 Key-Type: RSA
                 Key-Length: 2048
