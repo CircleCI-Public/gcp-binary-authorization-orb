@@ -16,21 +16,18 @@ jobs:
       - run:
           name: Initialize gcloud CLI to connect to Google Cloud
           command: |
-            # Set sudo to work whether logged in as root user or non-root user
-            if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
-
             # Store service account
             echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
 
-            export CLOUDSDK_PYTHON_SITEPACKAGES=1
+            # export CLOUDSDK_PYTHON_SITEPACKAGES=1
 
             # Initialize gcloud CLI
-            $SUDO gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
+            gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
               --key-file=${HOME}/gcloud-service-key.json \
                 --verbosity=debug
 
-            $SUDO gcloud --quiet config set project $GOOGLE_PROJECT_ID --verbosity=debug
-            $SUDO gcloud --quiet config set compute/zone $GOOGLE_COMPUTE_ZONE --verbosity=debug
+            gcloud --quiet config set project $GOOGLE_PROJECT_ID --verbosity=debug
+            gcloud --quiet config set compute/zone $GOOGLE_COMPUTE_ZONE --verbosity=debug
 
       - run:
           name: set default GCP project
@@ -41,10 +38,6 @@ jobs:
       - run:
           name: enable api's
           command: |
-            $SUDO gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
-              --key-file=${HOME}/gcloud-service-key.json \
-              --verbosity=debug
-
             gcloud services enable \
               serviceusage.googleapis.com \
               container.googleapis.com \
@@ -54,10 +47,6 @@ jobs:
       - run:
           name: create BinAuthz-enabled GKE cluster
           command: |
-            $SUDO gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
-              --key-file=${HOME}/gcloud-service-key.json \
-              --verbosity=debug
-
             gcloud beta container clusters create \
               --enable-binauthz \
               --zone $GOOGLE_COMPUTE_ZONE \
