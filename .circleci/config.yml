@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  gcp-cli: circleci/gcp-cli@1.0.4
+  gcp-cli: circleci/gcp-cli@1.0.5
 
 jobs:
   build:
@@ -13,27 +13,13 @@ jobs:
 
       - gcp-cli/install
 
-      - run:
-          name: Initialize gcloud CLI to connect to Google Cloud
-          command: |
-            # Store service account
-            echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+      - gcp-cli/initialize
 
-            # export CLOUDSDK_PYTHON_SITEPACKAGES=1
-
-            # Initialize gcloud CLI
-            gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
-              --key-file=${HOME}/gcloud-service-key.json \
-                --verbosity=debug
-
-            gcloud --quiet config set project $GOOGLE_PROJECT_ID --verbosity=debug
-            gcloud --quiet config set compute/zone $GOOGLE_COMPUTE_ZONE --verbosity=debug
-
-      - run:
-          name: set default GCP project
-          command: |
-            gcloud config set project $GOOGLE_PROJECT_ID --verbosity=debug
-            gcloud config set account $GCLOUD_SERVICE_ACCOUNT --verbosity=debug
+      # - run:
+      #     name: set default GCP project
+      #     command: |
+      #       gcloud config set project $GOOGLE_PROJECT_ID
+      #       gcloud config set account $GCLOUD_SERVICE_ACCOUNT
 
       - run:
           name: enable api's
@@ -42,18 +28,18 @@ jobs:
               serviceusage.googleapis.com \
               container.googleapis.com \
               containeranalysis.googleapis.com \
-              binaryauthorization.googleapis.com --verbosity=debug
+              binaryauthorization.googleapis.com
 
       - run:
           name: create BinAuthz-enabled GKE cluster
           command: |
             gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
               --key-file=${HOME}/gcloud-service-key.json \
-                --verbosity=debug
+
             gcloud beta container clusters create \
               --enable-binauthz \
               --zone $GOOGLE_COMPUTE_ZONE \
-              test-cluster --verbosity=debug
+              test-cluster
 
 workflows:
   lint_pack-validate_publish-dev:
