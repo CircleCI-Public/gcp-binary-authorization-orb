@@ -110,7 +110,7 @@ jobs:
           name: add pub key to attestor
           command: |
             ATTESTOR=test-attestor
-            echo $BIN_AUTHZ_PUB_KEY > /tmp/generated-key.pgp
+            echo $BIN_AUTHZ_PUBLIC_KEY > /tmp/generated-key.pgp
 
             gcloud beta container binauthz attestors public-keys add \
               --attestor=${ATTESTOR} \
