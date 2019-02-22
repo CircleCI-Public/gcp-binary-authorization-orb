@@ -6,8 +6,8 @@ orbs:
 jobs:
   build:
     executor: gcp-cli/default
-    environment:
-      CLOUDSDK_PYTHON_SITEPACKAGES: 1
+    # environment:
+    #   # CLOUDSDK_PYTHON_SITEPACKAGES: 1
     steps:
       - checkout
 
@@ -50,50 +50,50 @@ jobs:
               --zone $GOOGLE_COMPUTE_ZONE \
               test-cluster
 
-        - run:
-            name: Create Container Analysis note
-            command: |
-              # Set variables that store the name of your attestor and Container Analysis note:
-              ATTESTOR=test-attestor
-              NOTE_ID=test-attestor-note
+      - run:
+          name: Create Container Analysis note
+          command: |
+            # Set variables that store the name of your attestor and Container Analysis note:
+            ATTESTOR=test-attestor
+            NOTE_ID=test-attestor-note
 
-              # Create a JSON file in /tmp/note_payload.json that describes the Container Analysis note:
-              cat > /tmp/note_payload.json << EOM
-              {
-                "name": "projects/${PROJECT_ID}/notes/${NOTE_ID}",
-                "attestation_authority": {
-                  "hint": {
-                    "human_readable_name": "Attestor Note"
-                  }
+            # Create a JSON file in /tmp/note_payload.json that describes the Container Analysis note:
+            cat > /tmp/note_payload.json \<< EOM
+            {
+              "name": "projects/${PROJECT_ID}/notes/${NOTE_ID}",
+              "attestation_authority": {
+                "hint": {
+                  "human_readable_name": "Attestor Note"
                 }
               }
-              EOM
+            }
+            EOM
 
-              # Create the note by sending an HTTP request to the Container Analysis REST API:
-              curl -X POST \
-                -H "Content-Type: application/json" \
-                -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
-                --data-binary @/tmp/note_payload.json  \
-                "https://containeranalysis.googleapis.com/v1beta1/projects/${PROJECT_ID}/notes/?noteId=${NOTE_ID}"
+            # Create the note by sending an HTTP request to the Container Analysis REST API:
+            curl -X POST \
+              -H "Content-Type: application/json" \
+              -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
+              --data-binary @/tmp/note_payload.json  \
+              "https://containeranalysis.googleapis.com/v1beta1/projects/${PROJECT_ID}/notes/?noteId=${NOTE_ID}"
 
-              # Verify that the note was created:
-              curl \
-                -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-                "https://containeranalysis.googleapis.com/v1beta1/projects/${PROJECT_ID}/notes/${NOTE_ID}"
+            # Verify that the note was created:
+            curl \
+              -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+              "https://containeranalysis.googleapis.com/v1beta1/projects/${PROJECT_ID}/notes/${NOTE_ID}"
 
-            - run:
-                name: Create the attestor
-                command: |
-                  ATTESTOR=test-attestor
-                  NOTE_ID=test-attestor-note
+      - run:
+          name: Create the attestor
+          command: |
+            ATTESTOR=test-attestor
+            NOTE_ID=test-attestor-note
 
-                  # Create the attestor in Binary Authorization:
-                  gcloud beta container binauthz attestors create ${ATTESTOR} \
-                  --attestation-authority-note=${NOTE_ID} \
-                  --attestation-authority-note-project=${PROJECT_ID}
+            # Create the attestor in Binary Authorization:
+            gcloud beta container binauthz attestors create ${ATTESTOR} \
+            --attestation-authority-note=${NOTE_ID} \
+            --attestation-authority-note-project=${PROJECT_ID}
 
-                  # Verify that the attestor was created:
-                  gcloud beta container binauthz attestors list
+            # Verify that the attestor was created:
+            gcloud beta container binauthz attestors list
 
 
 
