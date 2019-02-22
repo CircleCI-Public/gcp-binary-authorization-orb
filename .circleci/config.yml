@@ -21,30 +21,81 @@ jobs:
       #       gcloud config set project $GOOGLE_PROJECT_ID
       #       gcloud config set account $GCLOUD_SERVICE_ACCOUNT
 
-      - run:
-          name: enable api's
-          command: |
-            gcloud services enable \
-              serviceusage.googleapis.com \
-              container.googleapis.com \
-              containeranalysis.googleapis.com \
-              binaryauthorization.googleapis.com
+      # - run:
+      #     name: enable api's
+      #     command: |
+      #       gcloud services enable \
+      #         serviceusage.googleapis.com \
+      #         container.googleapis.com \
+      #         containeranalysis.googleapis.com \
+      #         binaryauthorization.googleapis.com
+
+      # - run:
+      #     name: create BinAuthz-enabled GKE cluster
+      #     command: |
+      #       gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
+      #         --key-file=${HOME}/gcloud-service-key.json \
+
+      #       gcloud beta container clusters create \
+      #         --enable-binauthz \
+      #         --zone $GOOGLE_COMPUTE_ZONE \
+      #         test-cluster
 
       - run:
-          name: create BinAuthz-enabled GKE cluster
+          name: Configure kubectl
           command: |
-            gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
-              --key-file=${HOME}/gcloud-service-key.json \
+            # You must also update the local kubeconfig file for your kubectl installation. This provides the credentials and endpoint information required to access the cluster in Google Kubernetes Engine.
 
-            gcloud beta container clusters delete \
-              --enable-binauthz \
+            gcloud container clusters get-credentials \
               --zone $GOOGLE_COMPUTE_ZONE \
               test-cluster
 
-            gcloud beta container clusters create \
-              --enable-binauthz \
-              --zone $GOOGLE_COMPUTE_ZONE \
-              test-cluster
+        - run:
+            name: Create Container Analysis note
+            command: |
+              # Set variables that store the name of your attestor and Container Analysis note:
+              ATTESTOR=test-attestor
+              NOTE_ID=test-attestor-note
+
+              # Create a JSON file in /tmp/note_payload.json that describes the Container Analysis note:
+              cat > /tmp/note_payload.json << EOM
+              {
+                "name": "projects/${PROJECT_ID}/notes/${NOTE_ID}",
+                "attestation_authority": {
+                  "hint": {
+                    "human_readable_name": "Attestor Note"
+                  }
+                }
+              }
+              EOM
+
+              # Create the note by sending an HTTP request to the Container Analysis REST API:
+              curl -X POST \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
+                --data-binary @/tmp/note_payload.json  \
+                "https://containeranalysis.googleapis.com/v1beta1/projects/${PROJECT_ID}/notes/?noteId=${NOTE_ID}"
+
+              # Verify that the note was created:
+              curl \
+                -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+                "https://containeranalysis.googleapis.com/v1beta1/projects/${PROJECT_ID}/notes/${NOTE_ID}"
+
+            - run:
+                name: Create the attestor
+                command: |
+                  ATTESTOR=test-attestor
+                  NOTE_ID=test-attestor-note
+
+                  # Create the attestor in Binary Authorization:
+                  gcloud beta container binauthz attestors create ${ATTESTOR} \
+                  --attestation-authority-note=${NOTE_ID} \
+                  --attestation-authority-note-project=${PROJECT_ID}
+
+                  # Verify that the attestor was created:
+                  gcloud beta container binauthz attestors list
+
+
 
 workflows:
   lint_pack-validate_publish-dev:
