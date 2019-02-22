@@ -60,7 +60,7 @@ jobs:
             # Create a JSON file in /tmp/note_payload.json that describes the Container Analysis note:
             cat > /tmp/note_payload.json \<< EOM
             {
-              "name": "projects/${PROJECT_ID}/notes/${NOTE_ID}",
+              "name": "projects/${GOOGLE_PROJECT_ID}/notes/${NOTE_ID}",
               "attestation_authority": {
                 "hint": {
                   "human_readable_name": "Attestor Note"
@@ -74,12 +74,12 @@ jobs:
               -H "Content-Type: application/json" \
               -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
               --data-binary @/tmp/note_payload.json  \
-              "https://containeranalysis.googleapis.com/v1beta1/projects/${PROJECT_ID}/notes/?noteId=${NOTE_ID}"
+              "https://containeranalysis.googleapis.com/v1beta1/projects/${GOOGLE_PROJECT_ID}/notes/?noteId=${NOTE_ID}"
 
             # Verify that the note was created:
             curl \
               -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-              "https://containeranalysis.googleapis.com/v1beta1/projects/${PROJECT_ID}/notes/${NOTE_ID}"
+              "https://containeranalysis.googleapis.com/v1beta1/projects/${GOOGLE_PROJECT_ID}/notes/${NOTE_ID}"
 
       - run:
           name: Create the attestor
