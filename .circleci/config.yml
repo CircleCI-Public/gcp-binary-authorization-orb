@@ -107,16 +107,37 @@ jobs:
       # store both keys in circle (contexts or env var)
       # replace newlines with \n
 
+      # - run:
+      #     name: add pub key to attestor
+      #     command: |
+      #       ATTESTOR=test-attestor
+      #       # use -e to change \n into an actual newline
+      #       echo -e $BIN_AUTHZ_PUBLIC_KEY > /tmp/generated-key.pgp
+
+      #       gcloud beta container binauthz attestors public-keys add \
+      #         --attestor=${ATTESTOR} \
+      #         --public-key-file=/tmp/generated-key.pgp
+
       - run:
-          name: add pub key to attestor
+          name: create & import policy
           command: |
             ATTESTOR=test-attestor
-            # use -e to change \n into an actual newline
-            echo -e $BIN_AUTHZ_PUBLIC_KEY > /tmp/generated-key.pgp
 
-            gcloud beta container binauthz attestors public-keys add \
-              --attestor=${ATTESTOR} \
-              --public-key-file=/tmp/generated-key.pgp
+            cat > /tmp/policy.yaml \<< EOM
+                admissionWhitelistPatterns:
+                - namePattern: gcr.io/google_containers/*
+                - namePattern: gcr.io/google-containers/*
+                - namePattern: k8s.gcr.io/*
+                - namePattern: gcr.io/stackdriver-agents/*
+                defaultAdmissionRule:
+                  evaluationMode: REQUIRE_ATTESTATION
+                  enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
+                  requireAttestationsBy:
+                    - projects/${GOOGLE_PROJECT_ID}/attestors/${ATTESTOR}
+                name: projects/${GOOGLE_PROJECT_ID}/policy
+            EOM
+
+            gcloud beta container binauthz policy import /tmp/policy.yaml
 
 workflows:
   lint_pack-validate_publish-dev:
