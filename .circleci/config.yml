@@ -47,6 +47,9 @@ jobs:
       - run:
           name: create BinAuthz-enabled GKE cluster
           command: |
+            gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
+              --key-file=${HOME}/gcloud-service-key.json \
+                --verbosity=debug
             gcloud beta container clusters create \
               --enable-binauthz \
               --zone $GOOGLE_COMPUTE_ZONE \
