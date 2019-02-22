@@ -36,6 +36,11 @@ jobs:
       #       gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
       #         --key-file=${HOME}/gcloud-service-key.json \
 
+      #       # destroy first
+      #       gcloud beta container clusters destroy \
+      #         --zone $GOOGLE_COMPUTE_ZONE \
+      #         test-cluster
+
       #       gcloud beta container clusters create \
       #         --enable-binauthz \
       #         --zone $GOOGLE_COMPUTE_ZONE \
@@ -86,6 +91,9 @@ jobs:
           command: |
             ATTESTOR=test-attestor
             NOTE_ID=test-attestor-note
+
+            # delete first
+            gcloud beta container binauthz attestors delete ${ATTESTOR}
 
             # Create the attestor in Binary Authorization:
             gcloud beta container binauthz attestors create ${ATTESTOR} \
