@@ -95,10 +95,10 @@ jobs:
             # delete first
             # gcloud beta container binauthz attestors delete ${ATTESTOR}
 
-            # # Create the attestor in Binary Authorization:
-            # gcloud beta container binauthz attestors create ${ATTESTOR} \
-            # --attestation-authority-note=${NOTE_ID} \
-            # --attestation-authority-note-project=${GOOGLE_PROJECT_ID}
+            # Create the attestor in Binary Authorization:
+            gcloud beta container binauthz attestors create ${ATTESTOR} \
+            --attestation-authority-note=${NOTE_ID} \
+            --attestation-authority-note-project=${GOOGLE_PROJECT_ID}
 
       - run:
           name: verify attestor
