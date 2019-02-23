@@ -37,7 +37,7 @@ jobs:
               --key-file=${HOME}/gcloud-service-key.json \
 
             # destroy first
-            gcloud beta container clusters destroy \
+            gcloud beta container clusters delete \
               --zone $GOOGLE_COMPUTE_ZONE \
               test-cluster
 
