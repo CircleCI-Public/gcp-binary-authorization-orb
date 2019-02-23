@@ -41,10 +41,10 @@ jobs:
             #   --zone $GOOGLE_COMPUTE_ZONE \
             #   test-cluster
 
-            # gcloud beta container clusters create \
-            #   --enable-binauthz \
-            #   --zone $GOOGLE_COMPUTE_ZONE \
-            #   test-cluster
+            gcloud beta container clusters create \
+              --enable-binauthz \
+              --zone $GOOGLE_COMPUTE_ZONE \
+              test-cluster
 
       - run:
           name: Configure kubectl
@@ -59,27 +59,27 @@ jobs:
           name: Create Container Analysis note
           command: |
             # Set variables that store the name of your attestor and Container Analysis note:
-            ATTESTOR=test-attestor2
-            NOTE_ID=test-attestor-note2
+            # ATTESTOR=test-attestor2
+            # NOTE_ID=test-attestor-note2
 
-            # Create a JSON file in /tmp/note_payload.json that describes the Container Analysis note:
-            cat > /tmp/note_payload.json \<< EOM
-            {
-              "name": "projects/${GOOGLE_PROJECT_ID}/notes/${NOTE_ID}",
-              "attestation_authority": {
-                "hint": {
-                  "human_readable_name": "Attestor Note"
-                }
-              }
-            }
-            EOM
+            # # Create a JSON file in /tmp/note_payload.json that describes the Container Analysis note:
+            # cat > /tmp/note_payload.json \<< EOM
+            # {
+            #   "name": "projects/${GOOGLE_PROJECT_ID}/notes/${NOTE_ID}",
+            #   "attestation_authority": {
+            #     "hint": {
+            #       "human_readable_name": "Attestor Note"
+            #     }
+            #   }
+            # }
+            # EOM
 
             # Create the note by sending an HTTP request to the Container Analysis REST API:
-            curl -X POST \
-              -H "Content-Type: application/json" \
-              -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
-              --data-binary @/tmp/note_payload.json  \
-              "https://containeranalysis.googleapis.com/v1beta1/projects/${GOOGLE_PROJECT_ID}/notes/?noteId=${NOTE_ID}"
+            # curl -X POST \
+            #   -H "Content-Type: application/json" \
+            #   -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
+            #   --data-binary @/tmp/note_payload.json  \
+            #   "https://containeranalysis.googleapis.com/v1beta1/projects/${GOOGLE_PROJECT_ID}/notes/?noteId=${NOTE_ID}"
 
             # Verify that the note was created:
             curl \
