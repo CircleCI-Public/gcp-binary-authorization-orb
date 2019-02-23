@@ -167,58 +167,58 @@ jobs:
       #     name: clean up
       #     command: kubectl delete deployment hello-server
 
-      # - run:
-      #     name: create attestation 1
-      #     command: |
-            # IMAGE_PATH="gcr.io/google-samples/hello-app"
-            # IMAGE_DIGEST="sha256:c62ead5b8c15c231f9e786250b07909daf6c266d0fcddd93fea882eb722c3be4"
+      - run:
+          name: create attestation 1
+          command: |
+            IMAGE_PATH="gcr.io/google-samples/hello-app"
+            IMAGE_DIGEST="sha256:c62ead5b8c15c231f9e786250b07909daf6c266d0fcddd93fea882eb722c3be4"
 
-      #       gcloud beta container binauthz create-signature-payload \
-      #       --artifact-url=${IMAGE_PATH}@${IMAGE_DIGEST} > /tmp/generated_payload.json
+            gcloud beta container binauthz create-signature-payload \
+            --artifact-url=${IMAGE_PATH}@${IMAGE_DIGEST} > /tmp/generated_payload.json
 
-      # - run:
-      #     name: set up signing
-      #     command: |
-      #       echo -e $BIN_AUTHZ_PUBLIC_KEY > public.key
-      #       echo -e $BIN_AUTHZ_PRIVATE_KEY > private.key
+      - run:
+          name: set up signing
+          command: |
+            echo -e $BIN_AUTHZ_PUBLIC_KEY > public.key
+            echo -e $BIN_AUTHZ_PRIVATE_KEY > private.key
 
-      #       gpg --import public.key
-      #       gpg --import private.key
+            gpg --import public.key
+            gpg --import private.key
 
-      #       sudo apt-get -y install expect
+            sudo apt-get -y install expect
 
-      #       expect -c "spawn gpg --edit-key $BIN_AUTHZ_KEY_ID trust quit; send \"5\ry\r\"; expect eof"
+            expect -c "spawn gpg --edit-key $BIN_AUTHZ_KEY_ID trust quit; send \"5\ry\r\"; expect eof"
 
-      # - run:
-      #     name: sign attestation
-      #     command: |
-      #       gpg \
-      #         --local-user "test-attestor@example.com" \
-      #         --armor \
-      #         --output /tmp/generated_signature.pgp \
-      #         --sign /tmp/generated_payload.json
+      - run:
+          name: sign attestation
+          command: |
+            gpg \
+              --local-user "test-attestor@example.com" \
+              --armor \
+              --output /tmp/generated_signature.pgp \
+              --sign /tmp/generated_payload.json
 
-      # - run:
-      #     name: create attestation 2
-      #     command: |
-      #       IMAGE_PATH="gcr.io/google-samples/hello-app"
-      #       IMAGE_DIGEST="sha256:c62ead5b8c15c231f9e786250b07909daf6c266d0fcddd93fea882eb722c3be4"
+      - run:
+          name: create attestation 2
+          command: |
+            IMAGE_PATH="gcr.io/google-samples/hello-app"
+            IMAGE_DIGEST="sha256:c62ead5b8c15c231f9e786250b07909daf6c266d0fcddd93fea882eb722c3be4"
 
-      #       ATTESTOR=test-attestor
+            ATTESTOR=test-attestor
 
-      #       gcloud beta container binauthz attestations create \
-      #         --artifact-url="${IMAGE_PATH}@${IMAGE_DIGEST}" \
-      #         --attestor="projects/${GOOGLE_PROJECT_ID}/attestors/${ATTESTOR}" \
-      #         --signature-file=/tmp/generated_signature.pgp \
-      #         --pgp-key-fingerprint="${BIN_AUTHZ_PUBLIC_KEY_FINGERPRINT}"
+            gcloud beta container binauthz attestations create \
+              --artifact-url="${IMAGE_PATH}@${IMAGE_DIGEST}" \
+              --attestor="projects/${GOOGLE_PROJECT_ID}/attestors/${ATTESTOR}" \
+              --signature-file=/tmp/generated_signature.pgp \
+              --pgp-key-fingerprint="${BIN_AUTHZ_PUBLIC_KEY_FINGERPRINT}"
 
-      # - run:
-      #     name: verify attestation
-      #     command: |
-      #       ATTESTOR=test-attestor
+      - run:
+          name: verify attestation
+          command: |
+            ATTESTOR=test-attestor
 
-      #       gcloud beta container binauthz attestations list \
-      #       --attestor=$ATTESTOR --attestor-project=$GOOGLE_PROJECT_ID
+            gcloud beta container binauthz attestations list \
+            --attestor=$ATTESTOR --attestor-project=$GOOGLE_PROJECT_ID
 
       - run:
           name: restest
