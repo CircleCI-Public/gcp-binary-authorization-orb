@@ -157,10 +157,15 @@ jobs:
             kubectl run hello-server --image gcr.io/google-samples/hello-app:1.0 --port 8080
             kubectl get pods
 
+      - run:
+          name: test blockage 2
+          command: |
             kubectl get event --template \
             '{{range.items}}{{"\033[0;36m"}}{{.reason}}:{{"\033[0m"}}\{{.message}}{{"\n"}}{{end}}'
 
-            kubectl delete deployment hello-server
+      - run:
+          name: clean up
+          command: kubectl delete deployment hello-server
 
 workflows:
   lint_pack-validate_publish-dev:
