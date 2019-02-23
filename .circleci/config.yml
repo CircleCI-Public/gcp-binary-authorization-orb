@@ -37,14 +37,14 @@ jobs:
               --key-file=${HOME}/gcloud-service-key.json \
 
             # destroy first
-            gcloud beta container clusters delete \
-              --zone $GOOGLE_COMPUTE_ZONE \
-              test-cluster
+            # gcloud beta container clusters delete \
+            #   --zone $GOOGLE_COMPUTE_ZONE \
+            #   test-cluster
 
-            gcloud beta container clusters create \
-              --enable-binauthz \
-              --zone $GOOGLE_COMPUTE_ZONE \
-              test-cluster
+            # gcloud beta container clusters create \
+            #   --enable-binauthz \
+            #   --zone $GOOGLE_COMPUTE_ZONE \
+            #   test-cluster
 
       - run:
           name: Configure kubectl
