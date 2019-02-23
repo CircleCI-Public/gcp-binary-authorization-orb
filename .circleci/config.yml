@@ -170,8 +170,8 @@ jobs:
       # - run:
       #     name: create attestation 1
       #     command: |
-      #       IMAGE_PATH="gcr.io/google-samples/hello-app"
-      #       IMAGE_DIGEST="sha256:c62ead5b8c15c231f9e786250b07909daf6c266d0fcddd93fea882eb722c3be4"
+            # IMAGE_PATH="gcr.io/google-samples/hello-app"
+            # IMAGE_DIGEST="sha256:c62ead5b8c15c231f9e786250b07909daf6c266d0fcddd93fea882eb722c3be4"
 
       #       gcloud beta container binauthz create-signature-payload \
       #       --artifact-url=${IMAGE_PATH}@${IMAGE_DIGEST} > /tmp/generated_payload.json
@@ -223,6 +223,9 @@ jobs:
       - run:
           name: restest
           command: |
+            IMAGE_PATH="gcr.io/google-samples/hello-app"
+            IMAGE_DIGEST="sha256:c62ead5b8c15c231f9e786250b07909daf6c266d0fcddd93fea882eb722c3be4"
+
             kubectl run hello-server --image ${IMAGE_PATH}@${IMAGE_DIGEST} --port 8080
 
       - run:
