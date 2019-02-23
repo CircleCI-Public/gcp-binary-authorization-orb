@@ -168,7 +168,7 @@ jobs:
       #     command: kubectl delete deployment hello-server
 
       - run:
-          name: create attestation
+          name: create attestation 1
           command: |
             IMAGE_PATH="gcr.io/google-samples/hello-app"
             IMAGE_DIGEST="sha256:c62ead5b8c15c231f9e786250b07909daf6c266d0fcddd93fea882eb722c3be4"
@@ -187,7 +187,7 @@ jobs:
 
             sudo apt-get -y install expect
 
-            expect -c "spawn gpg --edit-key CE604DD5975DB1A2 trust quit; send \"5\ry\r\"; expect eof"
+            expect -c "spawn gpg --edit-key $BIN_AUTHZ_KEY_ID trust quit; send \"5\ry\r\"; expect eof"
 
       - run:
           name: sign attestation
@@ -197,6 +197,28 @@ jobs:
               --armor \
               --output /tmp/generated_signature.pgp \
               --sign /tmp/generated_payload.json
+
+      - run:
+          name: create attestation 2
+          command: |
+            IMAGE_PATH="gcr.io/google-samples/hello-app"
+            IMAGE_DIGEST="sha256:c62ead5b8c15c231f9e786250b07909daf6c266d0fcddd93fea882eb722c3be4"
+
+            ATTESTOR=test-attestor
+
+            gcloud beta container binauthz attestations create \
+              --artifact-url="${IMAGE_PATH}@${IMAGE_DIGEST}" \
+              --attestor="projects/${GOOGLE_PROJECT_ID}/attestors/${ATTESTOR}" \
+              --signature-file=/tmp/generated_signature.pgp \
+              --pgp-key-fingerprint="${BIN_AUTHZ_PUBLIC_KEY_FINGERPRINT}"
+
+      - run:
+          name: verify attestation
+          command: |
+            ATTESTOR=test-attestor
+
+            gcloud beta container binauthz attestations list \
+            --attestor=$ATTESTOR --attestor-project=$GOOGLE_PROJECT_ID
 
 workflows:
   lint_pack-validate_publish-dev:
