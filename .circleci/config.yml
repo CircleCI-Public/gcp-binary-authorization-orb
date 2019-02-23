@@ -179,6 +179,16 @@ jobs:
       - run:
           name: sign attestation
           command: |
+            echo -e $BIN_AUTHZ_PUBLIC_KEY > public.key
+            echo -e $BIN_AUTHZ_PRIVATE_KEY > private.key
+
+            gpg --import public.key
+            gpg --import private.key
+
+            sudo apt-get -y install expect
+
+            expect -c "spawn gpg --edit-key CE604DD5975DB1A2 trust quit; send \"5\ry\r\"; expect eof"
+
             gpg \
               --local-user "test-attestor@example.com" \
               --armor \
