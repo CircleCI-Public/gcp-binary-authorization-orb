@@ -141,7 +141,19 @@ jobs:
 
       - run:
           name: test that deployment was blocked (should fail)
-          command:
+          command: |
+            # get latest kubectl release
+            KUBECTL_VERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
+
+            # download kubectl
+            curl -LO https://storage.googleapis.com/kubernetes-release/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl
+
+            sudo chmod +x ./kubectl || \
+              chmod +x ./kubectl
+
+            sudo mv ./kubectl /usr/local/bin || \
+              mv ./kubectl /usr/local/bin
+
             kubectl run hello-server --image gcr.io/google-samples/hello-app:1.0 --port 8080
             kubectl get pods
 
