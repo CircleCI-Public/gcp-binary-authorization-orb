@@ -1,242 +1,39 @@
 version: 2.1
 
 orbs:
+  bin-authz: circleci/gcp-bin-authz@dev:alpha
   gcp-cli: circleci/gcp-cli@1.0.5
+  orb-tools: circleci/orb-tools@8.3.0
 
-jobs:
-  build:
-    executor: gcp-cli/default
-    # environment:
-    #   # CLOUDSDK_PYTHON_SITEPACKAGES: 1
-    steps:
-      - checkout
+  workflows:
+    lint_pack-validate_publish-dev:
+      jobs:
+        - orb-tools/lint
 
-      - gcp-cli/install
+        - orb-tools/pack:
+            requires:
+              - orb-tools/lint
 
-      - gcp-cli/initialize
+        - orb-tools/publish-dev:
+            orb-name: circleci/gcp-bin-authz
+            requires:
+              - orb-tools/pack
 
-      # - run:
-      #     name: set default GCP project
-      #     command: |
-            # gcloud config set project $GOOGLE_PROJECT_ID
-            # gcloud config set account $GCLOUD_SERVICE_ACCOUNT
+        - orb-tools/trigger-integration-workflow:
+            name: trigger-integration-dev
+            ssh-fingerprints:   30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
+            requires:
+              - orb-tools/publish-dev
+            filters:
+              branches:
+                ignore: master
 
-      # - run:
-      #     name: enable api's
-      #     command: |
-      #       gcloud services enable \
-      #         serviceusage.googleapis.com \
-      #         container.googleapis.com \
-      #         containeranalysis.googleapis.com \
-      #         binaryauthorization.googleapis.com
-
-      - run:
-          name: create BinAuthz-enabled GKE cluster
-          command: |
-            gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT \
-              --key-file=${HOME}/gcloud-service-key.json \
-
-            # destroy first
-            # gcloud beta container clusters delete \
-            #   --zone $GOOGLE_COMPUTE_ZONE \
-            #   test-cluster
-
-            # gcloud beta container clusters create \
-            #   --enable-binauthz \
-            #   --zone $GOOGLE_COMPUTE_ZONE \
-            #   test-cluster
-
-      - run:
-          name: Configure kubectl
-          command: |
-            # You must also update the local kubeconfig file for your kubectl installation. This provides the credentials and endpoint information required to access the cluster in Google Kubernetes Engine.
-
-            gcloud container clusters get-credentials \
-              --zone $GOOGLE_COMPUTE_ZONE \
-              test-cluster
-
-      - run:
-          name: Create Container Analysis note
-          command: |
-            # Set variables that store the name of your attestor and Container Analysis note:
-            # ATTESTOR=test-attestor2
-            # NOTE_ID=test-attestor-note2
-
-            # # Create a JSON file in /tmp/note_payload.json that describes the Container Analysis note:
-            # cat > /tmp/note_payload.json \<< EOM
-            # {
-            #   "name": "projects/${GOOGLE_PROJECT_ID}/notes/${NOTE_ID}",
-            #   "attestation_authority": {
-            #     "hint": {
-            #       "human_readable_name": "Attestor Note"
-            #     }
-            #   }
-            # }
-            # EOM
-
-            # Create the note by sending an HTTP request to the Container Analysis REST API:
-            # curl -X POST \
-            #   -H "Content-Type: application/json" \
-            #   -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
-            #   --data-binary @/tmp/note_payload.json  \
-            #   "https://containeranalysis.googleapis.com/v1beta1/projects/${GOOGLE_PROJECT_ID}/notes/?noteId=${NOTE_ID}"
-
-            # Verify that the note was created:
-            curl \
-              -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-              "https://containeranalysis.googleapis.com/v1beta1/projects/${GOOGLE_PROJECT_ID}/notes/${NOTE_ID}"
-
-      - run:
-          name: Create the attestor
-          command: |
-            ATTESTOR=test-attestor2
-            NOTE_ID=test-attestor-note2
-
-            # delete first
-            # gcloud beta container binauthz attestors delete ${ATTESTOR}
-
-            # Create the attestor in Binary Authorization:
-            gcloud beta container binauthz attestors create ${ATTESTOR} \
-            --attestation-authority-note=${NOTE_ID} \
-            --attestation-authority-note-project=${GOOGLE_PROJECT_ID}
-
-      - run:
-          name: verify attestor
-          command: |
-            # Verify that the attestor was created:
-            gcloud beta container binauthz attestors list
-
-      # customer will create keypair outside of the orb
-      # store both keys in circle (contexts or env var)
-      # replace newlines with \n
-
-      - run:
-          name: add pub key to attestor
-          command: |
-            ATTESTOR=test-attestor2
-            # use -e to change \n into an actual newline
-            echo -e $BIN_AUTHZ_PUBLIC_KEY > /tmp/generated-key.pgp
-
-            gcloud beta container binauthz attestors public-keys add \
-              --attestor=${ATTESTOR} \
-              --public-key-file=/tmp/generated-key.pgp
-
-      - run:
-          name: create & import policy
-          command: |
-            ATTESTOR=test-attestor2
-
-            cat > /tmp/policy.yaml \<< EOM
-                admissionWhitelistPatterns:
-                - namePattern: gcr.io/google_containers/*
-                - namePattern: gcr.io/google-containers/*
-                - namePattern: k8s.gcr.io/*
-                - namePattern: gcr.io/stackdriver-agents/*
-                defaultAdmissionRule:
-                  evaluationMode: REQUIRE_ATTESTATION
-                  enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
-                  requireAttestationsBy:
-                    - projects/${GOOGLE_PROJECT_ID}/attestors/${ATTESTOR}
-                name: projects/${GOOGLE_PROJECT_ID}/policy
-            EOM
-
-            gcloud beta container binauthz policy import /tmp/policy.yaml
-
-      - run:
-          name: test that deployment was blocked (should fail)
-          command: |
-            # get latest kubectl release
-            KUBECTL_VERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
-
-            # download kubectl
-            curl -LO https://storage.googleapis.com/kubernetes-release/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl
-
-            sudo chmod +x ./kubectl || \
-              chmod +x ./kubectl
-
-            sudo mv ./kubectl /usr/local/bin || \
-              mv ./kubectl /usr/local/bin
-
-            kubectl run hello-server --image gcr.io/google-samples/hello-app:1.0 --port 8080
-            kubectl get pods
-
-      - run:
-          name: test blockage 2
-          command: |
-            kubectl get event --template \
-            '{{range.items}}{{"\033[0;36m"}}{{.reason}}:{{"\033[0m"}}\{{.message}}{{"\n"}}{{end}}'
-
-      - run:
-          name: clean up
-          command: kubectl delete deployment hello-server
-
-      - run:
-          name: create attestation 1
-          command: |
-            IMAGE_PATH="gcr.io/google-samples/hello-app"
-            IMAGE_DIGEST="sha256:c62ead5b8c15c231f9e786250b07909daf6c266d0fcddd93fea882eb722c3be4"
-
-            gcloud beta container binauthz create-signature-payload \
-            --artifact-url=${IMAGE_PATH}@${IMAGE_DIGEST} > /tmp/generated_payload.json
-
-      - run:
-          name: set up signing
-          command: |
-            echo -e $BIN_AUTHZ_PUBLIC_KEY > public.key
-            echo -e $BIN_AUTHZ_PRIVATE_KEY > private.key
-
-            gpg --import public.key
-            gpg --import private.key
-
-            sudo apt-get -y install expect
-
-            expect -c "spawn gpg --edit-key $BIN_AUTHZ_KEY_ID trust quit; send \"5\ry\r\"; expect eof"
-
-      - run:
-          name: sign attestation
-          command: |
-            gpg \
-              --local-user "test-attestor@example.com" \
-              --armor \
-              --output /tmp/generated_signature.pgp \
-              --sign /tmp/generated_payload.json
-
-      - run:
-          name: create attestation 2
-          command: |
-            IMAGE_PATH="gcr.io/google-samples/hello-app"
-            IMAGE_DIGEST="sha256:c62ead5b8c15c231f9e786250b07909daf6c266d0fcddd93fea882eb722c3be4"
-
-            ATTESTOR=test-attestor2
-
-            gcloud beta container binauthz attestations create \
-              --artifact-url="${IMAGE_PATH}@${IMAGE_DIGEST}" \
-              --attestor="projects/${GOOGLE_PROJECT_ID}/attestors/${ATTESTOR}" \
-              --signature-file=/tmp/generated_signature.pgp \
-              --pgp-key-fingerprint="${BIN_AUTHZ_PUBLIC_KEY_FINGERPRINT}"
-
-      - run:
-          name: verify attestation
-          command: |
-            ATTESTOR=test-attestor2
-
-            gcloud beta container binauthz attestations list \
-            --attestor=$ATTESTOR --attestor-project=$GOOGLE_PROJECT_ID
-
-      - run:
-          name: restest
-          command: |
-            IMAGE_PATH="gcr.io/google-samples/hello-app"
-            IMAGE_DIGEST="sha256:c62ead5b8c15c231f9e786250b07909daf6c266d0fcddd93fea882eb722c3be4"
-
-            kubectl run hello-server --image ${IMAGE_PATH}@${IMAGE_DIGEST} --port 8080
-
-      - run:
-          name: verify
-          command: kubectl get pods
-
-workflows:
-  lint_pack-validate_publish-dev:
-    jobs:
-      - build:
-          context: orb-publishing
+        - orb-tools/trigger-integration-workflow:
+            name: trigger-integration-master
+            ssh-fingerprints:   30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
+            tag: master
+            requires:
+              - orb-tools/publish-dev
+            filters:
+              branches:
+                only: master
