@@ -15,7 +15,8 @@ workflows:
             - orb-tools/lint
 
       - orb-tools/publish-dev:
-          orb-name: circleci/gcp-bin
+          orb-name: circleci/gcp-bin-authz
+          context: orb-publishing
           requires:
             - orb-tools/pack
 
