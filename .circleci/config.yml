@@ -79,8 +79,12 @@ workflows:
     jobs:
       - test-google:
           context: orb-publishing
+          use-gke-env-var: false
+          gke-cluster-name: test-cluster
           filters: *integration-dev_filters
 
       - test-machine:
           context: orb-publishing
+          use-gke-env-var: false
+          gke-cluster-name: test-cluster
           filters: *integration-dev_filters
