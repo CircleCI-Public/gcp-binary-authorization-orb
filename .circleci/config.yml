@@ -1,41 +1,83 @@
 version: 2.1
 
 orbs:
-  bin-authz: circleci/gcp-bin-authz@dev:alpha
-  gcp-cli: circleci/gcp-cli@1.0.5
-  orb-tools: circleci/orb-tools@8.3.0
+	bin-authz: circleci/gcp-bin-authz@dev:alpha
+	gcp-cli: circleci/gcp-cli@1.0.5
+	orb-tools: circleci/orb-tools@8.3.0
+
+commands:
+	test-commands:
+		- checkout
+
+		- gcp-cli/install
+		- gcp-cli/initialize
+
+		- bin-authz/setup
+
+jobs:
+	test:
+		executor: bin-authz/google
+		steps:
+			- test-commands
+
+	test-machine:
+		executor: bin-authz/machine
+		steps:
+			- test-commands
+
+# yaml anchor filters
+integration-dev_filters: &integration-dev_filters
+	branches:
+		ignore: /.*/
+	tags:
+		only: /integration-.*/
+
+integration-master_filters: &integration-master_filters
+	branches:
+		ignore: /.*/
+	tags:
+		only: /master-.*/
 
 workflows:
-  lint_pack-validate_publish-dev:
-    jobs:
-      - orb-tools/lint
+	lint_pack-validate_publish-dev:
+		jobs:
+			- orb-tools/lint
 
-      - orb-tools/pack:
-          requires:
-            - orb-tools/lint
+			- orb-tools/pack:
+					requires:
+						- orb-tools/lint
 
-      - orb-tools/publish-dev:
-          orb-name: circleci/gcp-bin-authz
-          context: orb-publishing
-          requires:
-            - orb-tools/pack
+			- orb-tools/publish-dev:
+					orb-name: circleci/gcp-bin-authz
+					context: orb-publishing
+					requires:
+						- orb-tools/pack
 
-      - orb-tools/trigger-integration-workflow:
-          name: trigger-integration-dev
-          context: orb-publishing
-          ssh-fingerprints:   30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
-          requires:
-            - orb-tools/publish-dev
-          filters:
-            branches:
-              ignore: master
+			- orb-tools/trigger-integration-workflow:
+					name: trigger-integration-dev
+					context: orb-publishing
+					ssh-fingerprints:   30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
+					requires:
+						- orb-tools/publish-dev
+					filters:
+						branches:
+							ignore: master
 
-      - orb-tools/trigger-integration-workflow:
-          name: trigger-integration-master
-          ssh-fingerprints:   30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
-          tag: master
-          requires:
-            - orb-tools/publish-dev
-          filters:
-            branches:
-              only: master
+			- orb-tools/trigger-integration-workflow:
+					name: trigger-integration-master
+					context: orb-publishing
+					ssh-fingerprints:   30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
+					tag: master
+					requires:
+						- orb-tools/publish-dev
+					filters:
+						branches:
+							only: master
+
+	integration-tests_prod-release:
+		jobs:
+			- test-google:
+					filters: *integration-dev_filters
+
+			- test-machine:
+				  filters: *integration-dev_filters

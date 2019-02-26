@@ -1,0 +1,5 @@
+description: >
+  The official Google Docker container with the gcloud SDK pre-installed
+
+docker:
+  - image: google/cloud-sdk
