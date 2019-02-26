@@ -78,7 +78,9 @@ workflows:
   integration-tests_prod-release:
     jobs:
       - test-google:
+          context: orb-publishing
           filters: *integration-dev_filters
 
       - test-machine:
+          context: orb-publishing
           filters: *integration-dev_filters
