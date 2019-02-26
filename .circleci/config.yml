@@ -7,15 +7,16 @@ orbs:
 
 commands:
   test-commands:
-    - checkout
+    steps:
+      - checkout
 
-    - gcp-cli/install
-    - gcp-cli/initialize
+      - gcp-cli/install
+      - gcp-cli/initialize
 
-    - bin-authz/setup
+      - bin-authz/setup
 
 jobs:
-  test:
+  test-google:
     executor: bin-authz/google
     steps:
       - test-commands
