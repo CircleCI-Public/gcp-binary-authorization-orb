@@ -67,7 +67,7 @@ steps:
               gcloud beta container clusters update \
                 $<<parameters.gke-cluster-env-var>> \
                 --enable-binauthz \
-                --zone <<parameters.google-compute-zone>>
+                --zone $<<parameters.google-compute-zone>>
 
   - unless:
       condition: <<parameters.use-gke-env-var>>
@@ -78,4 +78,4 @@ steps:
               gcloud beta container clusters update \
                 <<parameters.gke-cluster-name>> \
                 --enable-binauthz \
-                --zone <<parameters.google-compute-zone>>
+                --zone $<<parameters.google-compute-zone>>
