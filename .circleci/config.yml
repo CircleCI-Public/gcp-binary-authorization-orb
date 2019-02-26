@@ -13,7 +13,9 @@ commands:
       - gcp-cli/install
       - gcp-cli/initialize
 
-      - bin-authz/setup
+      - bin-authz/setup:
+          use-gke-env-var: false
+          gke-cluster-name: test-cluster
 
 jobs:
   test-google:
@@ -79,12 +81,8 @@ workflows:
     jobs:
       - test-google:
           context: orb-publishing
-          use-gke-env-var: false
-          gke-cluster-name: test-cluster
           filters: *integration-dev_filters
 
       - test-machine:
           context: orb-publishing
-          use-gke-env-var: false
-          gke-cluster-name: test-cluster
           filters: *integration-dev_filters
