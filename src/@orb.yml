@@ -5,4 +5,4 @@ description: >
   container images before deployment.
 
 orbs:
-  gcp-cli: circleci/gcp-cli@1.0.5
+  gcp-cli: circleci/gcp-cli@1.1.0

@@ -59,7 +59,7 @@ workflows:
       - orb-tools/trigger-integration-workflow:
           name: trigger-integration-dev
           context: orb-publishing
-          ssh-fingerprints:   30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
+          ssh-fingerprints: 30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
           requires:
             - orb-tools/publish-dev
           filters:
@@ -69,7 +69,7 @@ workflows:
       - orb-tools/trigger-integration-workflow:
           name: trigger-integration-master
           context: orb-publishing
-          ssh-fingerprints:   30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
+          ssh-fingerprints: 30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
           tag: master
           requires:
             - orb-tools/publish-dev
