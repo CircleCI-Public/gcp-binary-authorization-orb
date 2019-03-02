@@ -79,3 +79,10 @@ steps:
                 <<parameters.gke-cluster-name>> \
                 --enable-binauthz \
                 --zone $<<parameters.google-compute-zone>>
+
+  - run:
+      name: Configure kubectl
+      command: |
+        gcloud container clusters get-credentials \
+          --zone $<<parameters.google-compute-zone>> \
+          test-cluster
