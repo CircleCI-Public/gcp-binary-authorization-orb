@@ -33,7 +33,7 @@ parameters:
 
   note-description-short:
     type: string
-    default: Container analysis note from CircleCI job $CIRCLE_JOB, number $CIRCLE_BUILD_NUM, triggered by $CIRCLE_USERNAME.
+    default: Container analysis note from CircleCI job $CIRCLE_JOB, number $CIRCLE_BUILD_NUM, triggered by $CIRCLE_USERNAME
     description: One-sentence description of this note
 
   note-description-long:
@@ -87,7 +87,7 @@ steps:
                 "longDescription": "<<parameters.note-description-long>>",<</parameters.note-description-long>>
                 "attestation_authority": {
                   "hint": {
-                    "human_readable_name": "<<parameters.attestor-hint>>""
+                    "human_readable_name": "<<parameters.attestor-hint>>"
                   }
                 },
                 "relatedUrl": [
