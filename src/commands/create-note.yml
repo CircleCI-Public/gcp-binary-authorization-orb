@@ -101,14 +101,14 @@ steps:
               }
               EOM
 
-  # - run:
-  #     name: Store Container Analysis note
-  #     command: |
-  #       curl -X POST \
-  #         -H "Content-Type: application/json" \
-  #         -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-  #         --data-binary @<<parameters.note-filepath>> \
-  #         "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/?noteId=<<parameters.note-id>>"
+  - run:
+      name: Store Container Analysis note
+      command: |
+        curl -X POST \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
+          --data-binary @<<parameters.note-filepath>>  \
+          "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/?noteId=<<parameters.note-id>>"
 
   # - run:
   #     name: Verify Container Analysis note upload
