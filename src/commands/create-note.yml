@@ -116,4 +116,4 @@ steps:
         curl \
           -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
           "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>" | \
-          grep <<parameters.note-description-short>>
+          grep "<<parameters.note-description-short>>"
