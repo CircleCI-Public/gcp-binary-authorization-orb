@@ -112,7 +112,7 @@ steps:
 
   - run:
       name: Verify Container Analysis note upload
-      commmand: |
+      command: |
         curl \
-          -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+          -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
           "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>"
