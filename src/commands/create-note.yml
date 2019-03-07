@@ -110,9 +110,9 @@ steps:
           --data-binary @<<parameters.note-filepath>>  \
           "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/?noteId=<<parameters.note-id>>"
 
-  # - run:
-  #     name: Verify Container Analysis note upload
-  #     commmand: |
-  #       curl \
-  #         -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-  #         "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>"
+  - run:
+      name: Verify Container Analysis note upload
+      commmand: |
+        curl \
+          -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+          "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>"
