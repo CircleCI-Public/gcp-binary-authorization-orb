@@ -35,8 +35,8 @@ parameters:
     type: boolean
     default: true
     description: >
-      Set this to `false` to instead specify the GKE cluster for which to
-      enable BinAuthz by passing a string literal (defaults to `true`).
+      Set this to `false` to instead pass a string literal to specify the
+      GKE cluster for which to enable BinAuthz (defaults to `true`).
 
   gke-cluster-name:
     type: string

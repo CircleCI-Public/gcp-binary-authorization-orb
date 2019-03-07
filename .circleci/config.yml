@@ -28,6 +28,11 @@ jobs:
     steps:
       - test-commands
 
+  test-docker:
+    executor: gcp-cli/default
+    steps:
+      - test-commands
+
 # yaml anchor filters
 integration-dev_filters: &integration-dev_filters
   branches:
@@ -84,5 +89,9 @@ workflows:
           filters: *integration-dev_filters
 
       - test-machine:
+          context: orb-publishing
+          filters: *integration-dev_filters
+
+      - test-docker:
           context: orb-publishing
           filters: *integration-dev_filters
