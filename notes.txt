@@ -18,3 +18,11 @@
 => accepts either a string parameter policy YAML or an existing policy.yaml
 
 => as part of the CI/CD process for the orb, make sure to test deployments w/o attestations & confirm that they fail for the right reasons; then retest w/attestation & confirm success
+
+=> create attestor: in multi-project job, must add IAM role binding for deployer project:
+
+gcloud --project ${ATTESTOR_PROJECT_ID} \
+    beta container binauthz attestors add-iam-policy-binding \
+    "projects/${ATTESTOR_PROJECT_ID}/attestors/${ATTESTOR}" \
+    --member="serviceAccount:${DEPLOYER_SERVICE_ACCOUNT}" \
+    --role=roles/binaryauthorization.attestorsVerifier

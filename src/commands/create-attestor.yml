@@ -1,0 +1,69 @@
+description: >
+  Create an attestor in Binary Authorization. For details, see:
+  https://cloud.google.com/binary-authorization/docs/key-concepts#attestors
+
+parameters:
+  attestor:
+    type: string
+    default: $CIRCLE_USERNAME
+    description: >
+      Name of the attestation authority for the container analysis note.
+      If the attestor does not yet exist, it will be created. Defaults to
+      the value of the `$CIRCLE_USERNAME` environment variable (VCS user who
+      triggered the CircleCI job).
+
+  attestor-project-id:
+    type: env_var_name
+    default: ATTESTOR_PROJECT_ID
+    description: Google Project ID for the Attestor project
+
+  note-id:
+    type: string
+    default: $CIRCLE_USERNAME-note-$CIRCLE_JOB-$CIRCLE_BUILD_NUM
+    description: >
+      Name of the container analysis note. Defaults to a combination of
+      values from the attestor parameter, and CircleCI job name and number
+      environment variables.
+
+  multi-project-setup:
+    type: boolean
+    default: false
+    description: >
+      Set to `true` if a muliti-GCP project Binary Authorization setup is
+      being used. See the following for details:
+      https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
+
+  deployer-service-account:
+    type: env_var_name
+    default: DEPLOYER_SERVICE_ACCOUNT
+    description: >
+      Service account address for the Deployer project, necessary for
+      multi-GCP project Binary Authorization configurations
+
+steps:
+  - run:
+      name: Create attestor
+      command: |
+        gcloud --project=$<<parameters.attestor-project-id>> \
+            beta container binauthz attestors create <<parameters.attestor>> \
+            --attestation-authority-note=<<parameters.node-id>> \
+            --attestation-authority-note-project=$<<parameters.attestor-project-id>>
+
+  - run:
+      name: Verify attestor creation
+      command: |
+        gcloud --project=$<<parameters.attestor-project-id>> \
+            beta container binauthz attestors list
+            # grep something
+
+  - when:
+      condition: <<parameters.multi-project-setup>>
+      steps:
+        - run:
+            name: Add deployer project IAM role binding
+            command: |
+              gcloud --project $<<parameters.attestor-project-id>> \
+                  beta container binauthz attestors add-iam-policy-binding \
+                  "projects/$<<parameters.attestor-project-id>>/attestors/<<parameters.attestor>>" \
+                  --member="serviceAccount:$<<parameters.deployer-service-account>>" \
+                  --role=roles/binaryauthorization.attestorsVerifier

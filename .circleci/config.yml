@@ -21,6 +21,10 @@ commands:
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           attestor-project-id: GOOGLE_PROJECT_ID
 
+      - bin-authz/create-attestor:
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          attestor-project-id: GOOGLE_PROJECT_ID
+
       - store_artifacts:
           path: /tmp/note_payload.json
 
