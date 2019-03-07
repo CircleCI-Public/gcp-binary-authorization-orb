@@ -53,8 +53,8 @@ steps:
       name: Verify attestor creation
       command: |
         gcloud --project=$<<parameters.attestor-project-id>> \
-            beta container binauthz attestors list
-            # grep something
+          beta container binauthz attestors list | \
+          grep "<<parameters.attestor>>"
 
   - when:
       condition: <<parameters.multi-project-setup>>
@@ -63,7 +63,7 @@ steps:
             name: Add deployer project IAM role binding
             command: |
               gcloud --project $<<parameters.attestor-project-id>> \
-                  beta container binauthz attestors add-iam-policy-binding \
-                  "projects/$<<parameters.attestor-project-id>>/attestors/<<parameters.attestor>>" \
-                  --member="serviceAccount:$<<parameters.deployer-service-account>>" \
-                  --role=roles/binaryauthorization.attestorsVerifier
+                beta container binauthz attestors add-iam-policy-binding \
+                "projects/$<<parameters.attestor-project-id>>/attestors/<<parameters.attestor>>" \
+                --member="serviceAccount:$<<parameters.deployer-service-account>>" \
+                --role=roles/binaryauthorization.attestorsVerifier
