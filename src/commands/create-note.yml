@@ -1,0 +1,118 @@
+description: >
+  Create a Container Analysis note. For details, see the following:
+  https://cloud.google.com/container-registry/docs/container-analysis#note
+
+parameters:
+  attestor:
+    type: string
+    default: $CIRCLE_USERNAME
+    description: >
+      Name of the attestation authority for the container analysis note.
+      If the attestor does not yet exist, it will be created. Defaults to
+      the value of the `$CIRCLE_USERNAME` environment variable (VCS user who
+      triggered the CircleCI job).
+
+  attestor-hint:
+    type: string
+    default: $CIRCLE_USERNAME
+    description: >
+      A human-readable name for this attestation authority (e.g., QA)
+
+  attestor-project-id:
+    type: env_var_name
+    default: ATTESTOR_PROJECT_ID
+    description: Google Project ID for the Attestor project
+
+  note-id:
+    type: string
+    default: <<parameters.attestor>>-note-$CIRCLE_JOB-$CIRCLE_BUILD_NUM
+    description: >
+      Name of the container analysis note. Defaults to a combination of
+      values from the attestor parameter, and CircleCI job name and number
+      environment variables.
+
+  note-description-short:
+    type: string
+    default: Container analysis note from CircleCI job $CIRCLE_JOB, number $CIRCLE_BUILD_NUM, triggered by $CIRCLE_USERNAME.
+    description: One-sentence description of this note
+
+  note-description-long:
+    type: string
+    default: ""
+    description: Longer, more detailed description of this note
+
+  related-url:
+    type: string
+    default: $CIRCLE_BUILD_URL
+    description: Any URL related to the note
+
+  expiration-time:
+    type: string
+    default: ""
+    description: >
+      Timestamp-formatted expiration time for this note (empty if the
+      note does not expire). For details, see the following:
+      https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.Timestamp
+
+  related-note-names:
+    type: string
+    default: ""
+    description: Names of any notes relevant or related to this note
+
+  use-file:
+    type: boolean
+    default: false
+    description: >
+      Upload an existing container analysis note file instead of creating
+      one via this command's paramaters?
+
+  note-filepath:
+    type: string
+    default: /tmp/note_payload.json
+    description: >
+      Path to your container analysis note file. Should be an existing file
+      if `use-file` is `true`; otherwise, note will be created at this path.
+
+steps:
+  - unless:
+      condition: <<parameters.use-file>>
+      steps:
+        - run:
+            name: Create Container Analysis note
+            command: |
+              cat > <<parameters.note-filepath>> \<< EOM
+              {
+                "name": "projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>",
+                "shortDescription": <<parameters.note-description-short>>,
+                <<#parameters.note-description-long>>"longDescription": <<parameters.note-description-long>>,<</parameters.note-description-long>>
+                "attestation_authority": {
+                  "hint": {
+                    "human_readable_name": <<parameters.attestor-hint>>
+                  }
+                },
+                "relatedUrl": [
+                  {
+                    "url": <<parameters.related-url>>,
+                    "label": "related URL"
+                  }
+                ],
+                <<#parameters.expiration-time>>"expirationTime": <<parameters.expiration-time>>,<</parameters.expiration-time>>
+                <<#parameters.related-note-names>>"relatedNoteNames": <<parameters.related-note-names>>,<</parameters.related-note-names>>
+              }
+              EOM
+
+  - run:
+      name: Store Container Analysis note
+      command: |
+        curl -X POST \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+          --data-binary @<<parameters.note-filepath>> \
+          "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/?noteId=<<parameters.note-id>>"
+
+  - run:
+      name: Verify Container Analysis note upload
+      commmand: |
+        curl \
+          -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+          "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>"
