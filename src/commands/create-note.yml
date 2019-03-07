@@ -25,7 +25,7 @@ parameters:
 
   note-id:
     type: string
-    default: <<parameters.attestor>>-note-$CIRCLE_JOB-$CIRCLE_BUILD_NUM
+    default: $CIRCLE_USERNAME-note-$CIRCLE_JOB-$CIRCLE_BUILD_NUM
     description: >
       Name of the container analysis note. Defaults to a combination of
       values from the attestor parameter, and CircleCI job name and number
@@ -101,18 +101,18 @@ steps:
               }
               EOM
 
-  - run:
-      name: Store Container Analysis note
-      command: |
-        curl -X POST \
-          -H "Content-Type: application/json" \
-          -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-          --data-binary @<<parameters.note-filepath>> \
-          "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/?noteId=<<parameters.note-id>>"
+  # - run:
+  #     name: Store Container Analysis note
+  #     command: |
+  #       curl -X POST \
+  #         -H "Content-Type: application/json" \
+  #         -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  #         --data-binary @<<parameters.note-filepath>> \
+  #         "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/?noteId=<<parameters.note-id>>"
 
-  - run:
-      name: Verify Container Analysis note upload
-      commmand: |
-        curl \
-          -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-          "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>"
+  # - run:
+  #     name: Verify Container Analysis note upload
+  #     commmand: |
+  #       curl \
+  #         -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  #         "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>"

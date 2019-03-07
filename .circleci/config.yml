@@ -16,6 +16,7 @@ commands:
       - bin-authz/setup:
           use-gke-env-var: false
           gke-cluster-name: test-cluster
+
       - bin-authz/create-note:
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           attestor-project-id: GOOGLE_PROJECT_ID
@@ -87,14 +88,14 @@ workflows:
 
   integration-tests_prod-release:
     jobs:
+      - test-docker:
+          context: orb-publishing
+          filters: *integration-dev_filters
+
       - test-google:
           context: orb-publishing
           filters: *integration-dev_filters
 
       - test-machine:
-          context: orb-publishing
-          filters: *integration-dev_filters
-
-      - test-docker:
           context: orb-publishing
           filters: *integration-dev_filters
