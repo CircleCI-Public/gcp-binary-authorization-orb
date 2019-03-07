@@ -83,21 +83,21 @@ steps:
               cat > <<parameters.note-filepath>> \<< EOM
               {
                 "name": "projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>",
-                "shortDescription": <<parameters.note-description-short>>,
-                <<#parameters.note-description-long>>"longDescription": <<parameters.note-description-long>>,<</parameters.note-description-long>>
+                "shortDescription": "<<parameters.note-description-short>>",<<#parameters.note-description-long>>
+                "longDescription": "<<parameters.note-description-long>>",<</parameters.note-description-long>>
                 "attestation_authority": {
                   "hint": {
-                    "human_readable_name": <<parameters.attestor-hint>>
+                    "human_readable_name": "<<parameters.attestor-hint>>""
                   }
                 },
                 "relatedUrl": [
                   {
-                    "url": <<parameters.related-url>>,
+                    "url": "<<parameters.related-url>>",
                     "label": "related URL"
                   }
-                ],
-                <<#parameters.expiration-time>>"expirationTime": <<parameters.expiration-time>>,<</parameters.expiration-time>>
-                <<#parameters.related-note-names>>"relatedNoteNames": <<parameters.related-note-names>>,<</parameters.related-note-names>>
+                ],<<#parameters.expiration-time>>
+                "expirationTime": "<<parameters.expiration-time>>",<</parameters.expiration-time>><<#parameters.related-note-names>>
+                "relatedNoteNames": "<<parameters.related-note-names>>",<</parameters.related-note-names>>
               }
               EOM
 
