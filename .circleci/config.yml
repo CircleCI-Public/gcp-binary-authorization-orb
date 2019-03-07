@@ -16,7 +16,6 @@ commands:
       - bin-authz/setup:
           use-gke-env-var: false
           gke-cluster-name: test-cluster
-
       - bin-authz/create-note:
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           attestor-project-id: GOOGLE_PROJECT_ID
