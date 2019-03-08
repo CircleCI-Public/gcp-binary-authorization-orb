@@ -67,6 +67,10 @@ steps:
   - run:
       name: Verify attestor creation with key
       command: |
+        # gcloud --project=$<<parameters.attestor-project-id>> \
+        #   beta container binauthz attestors list | \
+        #   grep '<<parameters.attestor>>  \│ 1'
+
         gcloud --project=$<<parameters.attestor-project-id>> \
           beta container binauthz attestors list | \
           grep '<<parameters.attestor>>  \│ 1'
