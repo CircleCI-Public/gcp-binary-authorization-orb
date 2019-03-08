@@ -69,7 +69,7 @@ steps:
       command: |
         gcloud --project=$<<parameters.attestor-project-id>> \
           beta container binauthz attestors list | \
-          grep '<<parameters.attestor>> \ │ 1'
+          grep '<<parameters.attestor>>  \│ 1'
 
   - when:
       condition: <<parameters.multi-project-setup>>
