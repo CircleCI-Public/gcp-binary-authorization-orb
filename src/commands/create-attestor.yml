@@ -17,7 +17,7 @@ parameters:
     default: ATTESTOR_PROJECT_ID
     description: Google Project ID for the Attestor project
 
-  -:
+  bin-authz-public-key:
     type: env_var_name
     default: BIN_AUTHZ_PUBLIC_KEY
     description: >
