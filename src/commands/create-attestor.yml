@@ -65,11 +65,11 @@ steps:
           --public-key-file=/tmp/generated-key.pgp
 
   - run:
-      name: Verify attestor creation
+      name: Verify attestor creation with key
       command: |
         gcloud --project=$<<parameters.attestor-project-id>> \
           beta container binauthz attestors list | \
-          grep "<<parameters.attestor>>"
+          grep "<<parameters.attestor>>  │ 1"
 
   - when:
       condition: <<parameters.multi-project-setup>>
