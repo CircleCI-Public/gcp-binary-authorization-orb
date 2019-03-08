@@ -17,6 +17,12 @@ parameters:
     default: ATTESTOR_PROJECT_ID
     description: Google Project ID for the Attestor project
 
+  -:
+    type: env_var_name
+    default: BIN_AUTHZ_PUBLIC_KEY
+    description: >
+      Environment variable storing the full public portion of the key pair to use with this attestation, with newlines replaced by `\n`
+
   note-id:
     type: string
     default: $CIRCLE_USERNAME-note-$CIRCLE_JOB-$CIRCLE_BUILD_NUM
@@ -48,6 +54,15 @@ steps:
             beta container binauthz attestors create <<parameters.attestor>> \
             --attestation-authority-note=<<parameters.note-id>> \
             --attestation-authority-note-project=$<<parameters.attestor-project-id>>
+
+  - run:
+      name: Add PGP public key to attestor
+      command: |
+        echo -e $<<parameters.bin-authz-public-key>> > /tmp/generated-key.pgp
+
+        gcloud beta container binauthz attestors public-keys add \
+          --attestor=<<parameters.attestor>> \
+          --public-key-file=/tmp/generated-key.pgp
 
   - run:
       name: Verify attestor creation
