@@ -18,15 +18,21 @@ commands:
           gke-cluster-name: test-cluster
 
       - bin-authz/create-note:
-          attestor: ${CIRCLE_USERNAME}-${CIRCLE_BUILD_NUM}
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           attestor-project-id: GOOGLE_PROJECT_ID
 
       - bin-authz/create-attestor:
-          attestor: ${CIRCLE_USERNAME}-${CIRCLE_BUILD_NUM}
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           attestor-project-id: GOOGLE_PROJECT_ID
+
+      # - bin-authz/configure-policy:
+
 
       - store_artifacts:
           path: /tmp/note_payload.json
+
+      # - store_artifacts:
+      #     path: /tmp/policy.yaml
 
 jobs:
   test-google:
