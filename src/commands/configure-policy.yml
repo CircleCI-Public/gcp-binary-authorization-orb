@@ -1,0 +1,93 @@
+description: >
+  Configure a Binary Authorization deployment policy. See the following:
+  https://cloud.google.com/binary-authorization/docs/key-concepts#policies
+  https://cloud.google.com/binary-authorization/docs/policy-yaml-reference
+
+parameters:
+  attestor-project-id:
+    type: env_var_name
+    default: ATTESTOR_PROJECT_ID
+    description: >
+      Google Project ID for the Attestor project. Only required if using
+      a multi-project setup.
+
+  deployer-project-id:
+    type: env_var_name
+    default: DEPLOYER_PROJECT_ID
+    description: >
+      Google Project ID for the Deployer project. Only required if using
+      a multi-project setup.
+
+  google-project-id:
+    type: env_var_name
+    default: GOOGLE_PROJECT_ID
+    description: >
+      Envirnment variable name storing Google Project ID. Not Required if
+      using a multi-project setup.
+
+  use-file:
+    type: boolean
+    default: false
+    description: >
+      Upload an existing Binary Authorization policy YAML file instead of
+      creating one via this command's paramaters?
+
+  policy-filepath:
+    type: string
+    default: /tmp/policy.yaml
+    description: >
+      Path to your Binary Authorization policy YAML file. Should be an
+      existing file if `use-file` is `true`; otherwise, policy will be
+      created at this path.
+
+  multi-project-setup:
+    type: boolean
+    default: false
+    description: >
+      Set to `true` if a muliti-GCP project Binary Authorization setup is
+      being used. See the following for details:
+      https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
+
+steps:
+  - unless:
+      condition: <<parameters.use-file>>
+      steps:
+        - when:
+            condition: <<parameters.multi-project-setup>>
+            steps:
+              - run:
+                  name: Create policy YAML file
+                  command: |
+                    cat > <<parameters.policy-filepath>> \<< EOM
+                    x #https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
+                    EOM
+
+        - unless:
+            condition: <<parameters.multi-project-setup>>
+            steps:
+              - run:
+                  name: Create policy YAML file
+                  command: |
+                    cat > <<parameters.policy-filepath>> \<< EOM
+                    x #https://cloud.google.com/binary-authorization/docs/getting-started-cli
+                    EOM
+
+  - when:
+      condition: <<parameters.multi-project-setup>>
+      steps:
+        - run:
+            name: Import policy YAML into Binary Authorization
+            command: |
+              gcloud --project=$<<parameters.deployer-project-id>> \
+                beta container binauthz policy import \
+                <<parameters.policy-filepath>>
+
+  - unless:
+      condition: <<parameters.multi-project-setup>>
+      steps:
+        - run:
+            name: Import policy YAML into Binary Authorization
+            command: |
+              gcloud --project=$<<parameters.google-project-id>> \
+                beta container binauthz policy import \
+                <<parameters.policy-filepath>>
