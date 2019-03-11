@@ -168,7 +168,7 @@ steps:
               insert_attestors () {
                 $1=$2
 
-                $3=(${$1//,/ })
+                $3=(${"$1"//,/ })
 
                 for i in "{$3[@]}"; do
                   echo "- $i" \>> $1.txt
