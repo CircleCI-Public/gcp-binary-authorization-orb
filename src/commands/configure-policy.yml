@@ -171,7 +171,7 @@ steps:
                 arrREQUIRED_ATTESTORS=(${REQUIRED_ATTESTORS//,/ })
 
                 for i in "${arrREQUIRED_ATTESTORS[@]}"; do
-                  echo "-\ $i" \>> REQUIRED_ATTESTORS.txt
+                  echo "- $i\\" \>> REQUIRED_ATTESTORS.txt
                 done
 
                 READY_TO_REPLACE=$(cat REQUIRED_ATTESTORS.txt)
