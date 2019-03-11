@@ -1,9 +1,25 @@
 description: >
   Configure a Binary Authorization deployment policy. See the following:
   https://cloud.google.com/binary-authorization/docs/key-concepts#policies
+  https://cloud.google.com/binary-authorization/docs/configuring-policy-cli
   https://cloud.google.com/binary-authorization/docs/policy-yaml-reference
 
 parameters:
+  google-project-id:
+    type: env_var_name
+    default: GOOGLE_PROJECT_ID
+    description: >
+      Envirnment variable name storing Google Project ID. Not Required if
+      using a multi-project setup.
+
+  multi-project-setup:
+    type: boolean
+    default: false
+    description: >
+      Set to `true` if a multi-GCP project Binary Authorization setup is
+      being used. See the following for details:
+      https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
+
   attestor-project-id:
     type: env_var_name
     default: ATTESTOR_PROJECT_ID
@@ -18,35 +34,75 @@ parameters:
       Google Project ID for the Deployer project. Only required if using
       a multi-project setup.
 
-  google-project-id:
-    type: env_var_name
-    default: GOOGLE_PROJECT_ID
-    description: >
-      Envirnment variable name storing Google Project ID. Not Required if
-      using a multi-project setup.
-
   use-file:
     type: boolean
     default: false
     description: >
-      Upload an existing Binary Authorization policy YAML file instead of
+      Use an existing Binary Authorization policy YAML file instead of
       creating one via this command's paramaters?
 
   policy-filepath:
     type: string
     default: /tmp/policy.yaml
     description: >
-      Path to your Binary Authorization policy YAML file. Should be an
-      existing file if `use-file` is `true`; otherwise, policy will be
-      created at this path.
+      Path to a Binary Authorization policy YAML file. Should be an
+      existing file if `use-file` is `true`; otherwise, a policy file
+      will be created at this path.
 
-  multi-project-setup:
+  default-evaluation-mode:
+    type: enum
+    enum: [ALWAYS_ALLOW, ALWAYS_DENY, REQUIRE_ATTESTATION]
+    default: REQUIRE_ATTESTATION
+    description: >
+      By default, how should Binary Authorization evaluate deployment
+      requests? For details on these options, see the following:
+      https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#evaluationmode
+
+  default-required-attestors:
+    type: string
+    default: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+    description: >
+      What attestors will be required to sign releases, by default? Specify
+      attestors in the form `project/PROJECT_ID/attestors/ATTESTOR_NAME`:
+      https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#admission_rule
+      To specify multiple attestors, use a comma-separated string.
+
+  cluster-specific-rules:
     type: boolean
     default: false
     description: >
-      Set to `true` if a muliti-GCP project Binary Authorization setup is
-      being used. See the following for details:
-      https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
+      Specify distinict sets of deployment rules for individual GKE
+      clusters? If so, pass the requisite values to any additional
+      cluster-specific parameters. Currently, only a single set of cluster-
+      specific rules can be specified. For details, see the following:
+      https://cloud.google.com/binary-authorization/docs/key-concepts#cluster-specific_rules
+
+  cluster-specific-specifier:
+    type: string
+    default: ""
+    description: >
+      If specifying a set of cluster-specific rules, what is the name of
+      the GKE cluster to which these rules will apply? Supply a name in
+      the `location.name` format (e.g., `us-east1-a.prod-cluster`).
+
+  cluster-specific-eval-mode:
+    type: enum
+    enum: [ALWAYS_ALLOW, ALWAYS_DENY, REQUIRE_ATTESTATION]
+    default: REQUIRE_ATTESTATION
+    description: >
+      For the specified cluster, how should Binary Authorization evaluate
+      deployment requests? For details on these options, see the following:
+      https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#evaluationmode
+
+  cluster-specific-required-attestors:
+    type: string
+    default: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+    description: >
+      What attestors will be required to sign releases, for cluster-
+      specific rulesets? Specify attestors in the form
+      `project/PROJECT_ID/attestors/ATTESTOR_NAME`, as described here:
+      https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#admission_rule
+      To specify multiple attestors, use a comma-separated string.
 
 steps:
   - unless:
@@ -59,7 +115,24 @@ steps:
                   name: Create policy YAML file
                   command: |
                     cat > <<parameters.policy-filepath>> \<< EOM
-                    x #https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
+                    name: projects/<<parameters.deployer-project-id>>/policy
+
+                    admissionWhitelistPatterns:
+                    - namePattern: <MATCHING_PATTERN>
+
+                    defaultAdmissionRule:
+                      evaluationMode: <<parameters.default-evaluation-mode>>
+                      enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
+                      requireAttestationsBy:
+                      DEFAULT_REQUIRED_ATTESTORS<<#parameters.cluster-specific-rules>>
+
+                    clusterAdmissionRules:
+                      <CLUSTER_SPECIFIER>:
+                        evaluationMode: EVAL_MODE
+                        enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
+                        requireAttestationsBy:
+                        CLUSTER_SPECIFIC_REQUIRED_ATTESTORS<</parameters.cluster-specific-rules>>
+
                     EOM
 
         - unless:
@@ -69,8 +142,55 @@ steps:
                   name: Create policy YAML file
                   command: |
                     cat > <<parameters.policy-filepath>> \<< EOM
-                    x #https://cloud.google.com/binary-authorization/docs/getting-started-cli
+                    name: projects/<<parameters.google-project-id>>/policy
+
+                    admissionWhitelistPatterns:
+                    - namePattern: <MATCHING_PATTERN>
+
+                    defaultAdmissionRule:
+                      evaluationMode: <<parameters.default-evaluation-mode>>
+                      enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
+                      requireAttestationsBy:
+                      DEFAULT_REQUIRED_ATTESTORS<<#parameters.cluster-specific-rules>>
+
+                    clusterAdmissionRules:
+                      <CLUSTER_SPECIFIER>:
+                        evaluationMode: EVAL_MODE
+                        enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
+                        requireAttestationsBy:
+                        CLUSTER_SPECIFIC_REQUIRED_ATTESTORS<</parameters.cluster-specific-rules>>
+
                     EOM
+
+        - run:
+            name: Insert required attestor values
+            command: |
+              insert_attestors () {
+                $1=\<<parameters.$2\>>
+
+                $3=(${$1//,/ })
+
+                for i in "{$3[@]}"; do
+                  echo "- $i" \>> $1.txt
+                done
+
+                READY_TO_REPLACE=`cat $1.txt`
+                sed -i '' -e "s/$1/$READY_TO_REPLACE/" <<parameters.policy-filepath>>
+
+                rm -rf $1.txt
+              }
+
+              insert_attestors \
+                DEFAULT_REQUIRED_ATTESTORS \
+                default-required-attestors \
+                arrDEFAULT_REQUIRED_ATTESTORS
+
+              if <<parameters.cluster-specific-rules>>; then
+                insert_attestors \
+                  CLUSTER_SPECIFIC_REQUIRED_ATTESTORS \
+                  cluster-specific-required-attestors \
+                  arrCLUSTER_SPECIFIC_REQUIRED_ATTESTORS
+              fi
 
   - when:
       condition: <<parameters.multi-project-setup>>

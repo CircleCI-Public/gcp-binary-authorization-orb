@@ -25,14 +25,14 @@ commands:
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           attestor-project-id: GOOGLE_PROJECT_ID
 
-      # - bin-authz/configure-policy:
-
+      - bin-authz/configure-policy:
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
 
       - store_artifacts:
           path: /tmp/note_payload.json
 
-      # - store_artifacts:
-      #     path: /tmp/policy.yaml
+      - store_artifacts:
+          path: /tmp/policy.yaml
 
 jobs:
   test-google:
