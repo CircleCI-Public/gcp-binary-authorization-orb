@@ -170,7 +170,7 @@ steps:
 
                 arrREQUIRED_ATTESTORS=(${REQUIRED_ATTESTORS//,/ })
 
-                let END="${#arrREQUIRED_ATTESTORS[@]}" - 1
+                let END=${#arrREQUIRED_ATTESTORS[@]}-1
 
                 for ((i=0;i<END;i++)); do
                   echo "- ${arrREQUIRED_ATTESTORS[i]}\\" \>> REQUIRED_ATTESTORS.txt
