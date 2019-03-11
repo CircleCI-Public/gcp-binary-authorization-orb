@@ -174,8 +174,8 @@ steps:
                   echo "- $i" \>> REQUIRED_ATTESTORS.txt
                 done
 
-                READY_TO_REPLACE=`cat REQUIRED_ATTESTORS.txt`
-                sed -i '' -e "s/$2/$READY_TO_REPLACE/g" \
+                READY_TO_REPLACE=$(cat REQUIRED_ATTESTORS.txt)
+                sed -i '' -e "s@$2@$READY_TO_REPLACE@g" \
                   <<parameters.policy-filepath>>
 
                 rm -rf REQUIRED_ATTESTORS.txt
