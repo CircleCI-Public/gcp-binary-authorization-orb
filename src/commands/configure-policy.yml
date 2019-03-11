@@ -166,7 +166,7 @@ steps:
             name: Insert required attestor values
             command: |
               insert_attestors () {
-                $1=\<<parameters.$2\>>
+                $1=$2
 
                 $3=(${$1//,/ })
 
@@ -182,13 +182,13 @@ steps:
 
               insert_attestors \
                 DEFAULT_REQUIRED_ATTESTORS \
-                default-required-attestors \
+                <<parameters.default-required-attestors>> \
                 arrDEFAULT_REQUIRED_ATTESTORS
 
               if <<parameters.cluster-specific-rules>>; then
                 insert_attestors \
                   CLUSTER_SPECIFIC_REQUIRED_ATTESTORS \
-                  cluster-specific-required-attestors \
+                  <<parameters.cluster-specific-required-attestors>> \
                   arrCLUSTER_SPECIFIC_REQUIRED_ATTESTORS
               fi
 
