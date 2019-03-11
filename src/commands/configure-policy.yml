@@ -176,8 +176,12 @@ steps:
 
                 READY_TO_REPLACE=$(cat REQUIRED_ATTESTORS.txt)
 
+                echo "ready to replace: $READY_TO_REPLACE"
+
                 sed -i.bak "s@$2@$READY_TO_REPLACE@g" \
                   <<parameters.policy-filepath>>
+
+                echo "sed completed"
 
                 rm -rf REQUIRED_ATTESTORS.txt
               }
