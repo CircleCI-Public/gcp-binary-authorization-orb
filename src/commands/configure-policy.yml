@@ -175,18 +175,20 @@ steps:
                 done
 
                 READY_TO_REPLACE=`cat REQUIRED_ATTESTORS.txt`
-                sed -i '' -e "s/REQUIRED_ATTESTORS/$READY_TO_REPLACE/" \
+                sed -i '' -e "s/$2/$READY_TO_REPLACE/g" \
                   <<parameters.policy-filepath>>
 
                 rm -rf REQUIRED_ATTESTORS.txt
               }
 
               insert_attestors \
-                <<parameters.default-required-attestors>>
+                <<parameters.default-required-attestors>> \
+                DEFAULT_REQUIRED_ATTESTORS
 
               if <<parameters.cluster-specific-rules>>; then
                 insert_attestors \
-                  <<parameters.cluster-specific-required-attestors>>
+                  <<parameters.cluster-specific-required-attestors>> \
+                  CLUSTER_SPECIFIC_REQUIRED_ATTESTORS
               fi
 
   - when:
