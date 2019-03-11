@@ -27,6 +27,7 @@ commands:
 
       - bin-authz/configure-policy:
           default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM,test-attestor,test-attestor2
+          cluster-specific-rules: true
 
       - store_artifacts:
           path: /tmp/note_payload.json
