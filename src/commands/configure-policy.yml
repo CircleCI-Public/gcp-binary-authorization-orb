@@ -171,10 +171,8 @@ steps:
                 arrREQUIRED_ATTESTORS=(${REQUIRED_ATTESTORS//,/ })
 
                 for i in "${arrREQUIRED_ATTESTORS[@]}"; do
-                  echo "- $i" \>> ~/project/REQUIRED_ATTESTORS.txt
+                  echo "-\ $i" \>> REQUIRED_ATTESTORS.txt
                 done
-
-                READY_TO_REPLACE=$(cat ~/project/REQUIRED_ATTESTORS.txt)
 
                 echo "ready to replace: $READY_TO_REPLACE"
                 sed -i.bak "s@$2@$READY_TO_REPLACE@g" \
@@ -182,7 +180,7 @@ steps:
 
                 echo "sed completed"
 
-                # rm -rf REQUIRED_ATTESTORS.txt
+                rm -rf REQUIRED_ATTESTORS.txt
               }
 
               insert_attestors \
