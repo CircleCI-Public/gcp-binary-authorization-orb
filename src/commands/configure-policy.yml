@@ -178,7 +178,7 @@ steps:
                 sed -i '' -e "s@$2@$READY_TO_REPLACE@g" \
                   <<parameters.policy-filepath>>
 
-                rm -rf REQUIRED_ATTESTORS.txt
+                # rm -rf REQUIRED_ATTESTORS.txt
               }
 
               insert_attestors \
