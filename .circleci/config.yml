@@ -26,16 +26,13 @@ commands:
           attestor-project-id: GOOGLE_PROJECT_ID
 
       - bin-authz/configure-policy:
-          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM,test-attestor,test-attestor2
 
       - store_artifacts:
           path: /tmp/note_payload.json
 
       - store_artifacts:
           path: /tmp/policy.yaml
-
-      - store_artifacts:
-          path: ~/project/REQUIRED_ATTESTORS.txt
 
 jobs:
   test-google:

@@ -171,14 +171,15 @@ steps:
                 arrREQUIRED_ATTESTORS=(${REQUIRED_ATTESTORS//,/ })
 
                 for i in "${arrREQUIRED_ATTESTORS[@]}"; do
-                  echo "- $i" \>> ~/project/REQUIRED_ATTESTORS.txt
+                  echo "- $i" \>> REQUIRED_ATTESTORS.txt
                 done
 
-                READY_TO_REPLACE=$(cat ~/project/REQUIRED_ATTESTORS.txt)
+                READY_TO_REPLACE=$(cat REQUIRED_ATTESTORS.txt)
+
                 sed -i.bak "s@$2@$READY_TO_REPLACE@g" \
                   <<parameters.policy-filepath>>
 
-                # rm -rf REQUIRED_ATTESTORS.txt
+                rm -rf REQUIRED_ATTESTORS.txt
               }
 
               insert_attestors \
