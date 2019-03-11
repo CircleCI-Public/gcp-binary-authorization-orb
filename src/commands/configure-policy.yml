@@ -174,7 +174,10 @@ steps:
                   echo "-\ $i" \>> REQUIRED_ATTESTORS.txt
                 done
 
+                READY_TO_REPLACE=$(cat REQUIRED_ATTESTORS.txt)
+
                 echo "ready to replace: $READY_TO_REPLACE"
+
                 sed -i.bak "s@$2@$READY_TO_REPLACE@g" \
                   <<parameters.policy-filepath>>
 
