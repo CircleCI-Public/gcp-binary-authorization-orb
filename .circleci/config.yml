@@ -35,7 +35,7 @@ commands:
           path: /tmp/policy.yaml
 
       - store_artifacts:
-          path: REQUIRED_ATTESTORS.txt
+          path: ~/project/REQUIRED_ATTESTORS.txt
 
 jobs:
   test-google:
