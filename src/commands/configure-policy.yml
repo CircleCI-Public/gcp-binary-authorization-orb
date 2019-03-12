@@ -180,7 +180,9 @@ steps:
                 echo "# use comma delimiters to create array"
                 arrWHITELIST_PATTERNS=(${WHITELIST_PATTERNS//,/ })
 
-                let END=${#arrWHITELIST_PATTERNS[@]}-1
+                # need || true in case array is length 1
+                # in which case, assigning END=0 will exit code 1
+                let END=${#arrWHITELIST_PATTERNS[@]}-1 || true
 
                 echo "# iterate over array to echo admission whitelist patterns into a file"
                 # \\ is required for sed
@@ -215,7 +217,9 @@ steps:
                 echo "# use comma delimiters to create array"
                 arrREQUIRED_ATTESTORS=(${REQUIRED_ATTESTORS//,/ })
 
-                let END=${#arrREQUIRED_ATTESTORS[@]}-1
+                # need || true in case array is length 1
+                # in which case, assigning END=0 will exit code 1
+                let END=${#arrREQUIRED_ATTESTORS[@]}-1 || true
 
                 echo "# iterate over array to echo required attestors into a file"
                 # $3 is offset, to ensure we create valid yaml
