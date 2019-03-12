@@ -65,19 +65,7 @@ steps:
   - run:
       name: Set up attestation signing
       command: |
-        # extract fingerprint from key
-        extract_fingerprint () {
-          FINGERPRINT_STRING=$(gpg \
-            --list-keys --with-fingerprint --with-colons | \
-            grep fpr)
 
-          # use colon delimiters to separate fingerprint
-          arrFINGERPRINT=(${FINGERPRINT_STRING//:/ })
-
-          FINGERPRINT=${arrFINGERPRINT[-2]}
-
-          echo $FINGERPRINT
-        }
 
         echo -e $<<parameters.public-key>> > public.key
         echo -e $<<parameters.private-key>> > private.key
@@ -90,6 +78,16 @@ steps:
 
         $SUDO apt-get -y install expect
 
+        # extract fingerprint from key
+        FINGERPRINT_STRING=$(gpg \
+          --list-keys --with-fingerprint --with-colons | \
+          grep fpr)
+
+        # use colon delimiters to separate fingerprint
+        arrFINGERPRINT=(${FINGERPRINT_STRING//:/ })
+
+        FINGERPRINT=${arrFINGERPRINT[-1]}
+
         expect -c "spawn gpg --edit-key \
-          extract_fingerprint \
+          $FINGERPRINT \
           trust quit; send \"5\ry\r\"; expect eof"
