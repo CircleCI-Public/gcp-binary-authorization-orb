@@ -92,17 +92,12 @@ steps:
       condition: <<parameters.use-existing-keypair>>
       steps:
         - run:
-            name: Create background entropy for key generation
-            background: true
+            name: Boost entropy for key generation
             command: |
               # set sudo to work whether logged in as root user or non-root user
               if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
 
-              $SUDO find /dev/disk/by-uuid/ -type l | xargs md5sum
-
-        - run:
-            name: Allow entropy to build
-            command: sleep 10
+              $SUDO apt-get install haveged
 
         - run:
             name: Generate PGP keypair
