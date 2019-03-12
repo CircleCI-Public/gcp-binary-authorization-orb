@@ -21,9 +21,9 @@ commands:
           # attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           attestor-project-id: GOOGLE_PROJECT_ID
 
-      - bin-authz/create-attestor:
-          # attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          attestor-project-id: GOOGLE_PROJECT_ID
+      # - bin-authz/create-attestor:
+      #     # attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+      #     attestor-project-id: GOOGLE_PROJECT_ID
 
       - bin-authz/configure-policy:
           admission-whitelist-patterns: gcr.io/google_containers/*
