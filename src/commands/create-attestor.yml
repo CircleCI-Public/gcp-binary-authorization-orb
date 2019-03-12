@@ -98,7 +98,7 @@ steps:
               # set sudo to work whether logged in as root user or non-root user
               if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
 
-              $SUDO find / > /dev/null
+              $SUDO find /dev/disk/by-uuid/ -type l | xargs md5sum
 
         - run:
             name: Allow entropy to build
