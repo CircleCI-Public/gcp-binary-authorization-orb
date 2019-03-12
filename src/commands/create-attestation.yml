@@ -86,6 +86,13 @@ parameters:
     type: string
     description: Email address attached to PGP keypair
 
+  keypair-passphrase:
+    type: env_var_name
+    default: BIN_AUTHZ_KEYPAIR_PASSPHRASE
+    description: >
+      Name of environment variable storing the passphrase used to
+      generate PGP keypair
+
   attestor:
     type: string
     default: $CIRCLE_USERNAME
@@ -145,7 +152,7 @@ steps:
   - run:
       name: Sign attestation payload
       command: |
-        gpg \
+        echo $<<parameters.keypair-passphrase>> | gpg \
           --local-user <<parameters.keypair-email>> \
           --armor \
           --output /tmp/generated_signature.pgp \
@@ -166,6 +173,16 @@ steps:
                 --signature-file=/tmp/generated_signature.pgp \
                 --pgp-key-fingerprint="$FINGERPRINT"
 
+                rm -rf FINGERPRINT.txt
+
+        - run:
+            name: Verify attestation creation
+            command: |
+              gcloud --project=$<<parameters.attestation-project-id>> \
+                beta container binauthz attestations list \
+                --attestor=<<parameters.attestor>> \
+                --attestor-project=$<<parameters.attestor-project-id>>
+
   - unless:
       condition: <<parameters.multi-project-setup>>
       steps:
@@ -182,3 +199,11 @@ steps:
                 --pgp-key-fingerprint="$FINGERPRINT"
 
               rm -rf FINGERPRINT.txt
+
+        - run:
+            name: Verify attestation creation
+            command: |
+              gcloud --project=$<<parameters.google-project-id>> \
+                beta container binauthz attestations list \
+                --attestor=<<parameters.attestor>> \
+                --attestor-project=$<<parameters.google-project-id>>
