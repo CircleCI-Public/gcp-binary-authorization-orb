@@ -35,6 +35,7 @@ commands:
           cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
 
       - bin-authz/create-attestation:
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           image-path: gcr.io/google-samples/hello-app
           image-digest: sha256:c62ead5b8c15c231f9e786250b07909daf6c266d0fcddd93fea882eb722c3be4
           keypair-email: rose@circleci.com

@@ -51,11 +51,6 @@ parameters:
     default: /tmp/generated_payload.json
     description: Path at which to generate an attestation payload
 
-  signature-filepath:
-    type: string
-    default: /tmp/generated_signature.pgp
-    description: Path at which to output an attestation signature file
-
   use-existing-keypair:
     type: boolean
     default: true
@@ -91,6 +86,15 @@ parameters:
     type: string
     description: Email address attached to PGP keypair
 
+  attestor:
+    type: string
+    default: $CIRCLE_USERNAME
+    description: >
+      Name of the attestation authority for the container analysis note.
+      If the attestor does not yet exist, it will be created. Defaults to
+      the value of the `$CIRCLE_USERNAME` environment variable (VCS user who
+      triggered the CircleCI job).
+
 steps:
   - run:
       name: Create attestation payload
@@ -100,22 +104,12 @@ steps:
           > <<parameters.payload-filepath>>
 
   - run:
-      name: Set up attestation signing
+      name: Extract keypair fingerprint
       command: |
-        echo -e $<<parameters.public-key>> > public.key
-        echo -e $<<parameters.private-key>> > private.key
-
-        gpg --import public.key
-        gpg --import private.key
-
-        # set sudo to work whether logged in as root user or non-root user
-        if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
-
-        $SUDO apt-get -y install expect
-
         # extract fingerprint from key
         FINGERPRINT_STRING=$(gpg \
-          --list-keys --with-fingerprint --with-colons | \
+          --list-keys --with-fingerprint --with-colons \
+          <<parameters.keypair-email>> | \
           grep fpr)
 
         # use colon delimiters to separate fingerprint
@@ -123,9 +117,30 @@ steps:
 
         FINGERPRINT=${arrFINGERPRINT[-1]}
 
-        expect -c "spawn gpg --edit-key \
-          $FINGERPRINT \
-          trust quit; send \"5\ry\r\"; expect eof"
+        echo $FINGERPRINT > FINGERPRINT.txt
+
+  - when:
+      condition: <<parameters.use-existing-keypair>>
+      steps:
+      - run:
+          name: Set up attestation signing
+          command: |
+            echo -e $<<parameters.public-key>> > public.key
+            echo -e $<<parameters.private-key>> > private.key
+
+            gpg --import public.key
+            gpg --import private.key
+
+            # set sudo to work whether logged in as root user or non-root user
+            if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
+
+            $SUDO apt-get -y install expect
+
+            FINGERPRINT=$(cat FINGERPRINT.txt)
+
+            expect -c "spawn gpg --edit-key \
+              $FINGERPRINT \
+              trust quit; send \"5\ry\r\"; expect eof"
 
   - run:
       name: Sign attestation payload
@@ -133,15 +148,35 @@ steps:
         gpg \
           --local-user <<parameters.keypair-email>> \
           --armor \
-          --output <<parameters.signature-filepath>> \
+          --output /tmp/generated_signature.pgp \
           --sign <<parameters.payload-filepath>>
 
-  - run:
-      name: Create attestation
-      command: |
-        gcloud --project=${ATTESTATION_PROJECT_ID} \
-            beta container binauthz attestations create \
-            --artifact-url="${IMAGE_PATH}@${IMAGE_DIGEST}" \
-            --attestor="projects/${ATTESTOR_PROJECT_ID}/attestors/${ATTESTOR}" \
-            --signature-file=/tmp/generated_signature.pgp \
-            --pgp-key-fingerprint="${FINGERPRINT}"
+  - when:
+      condition: <<parameters.multi-project-setup>>
+      steps:
+        - run:
+            name: Create attestation
+            command: |
+              FINGERPRINT=$(cat FINGERPRINT.txt)
+
+              gcloud --project=$<<parameters.attestation-project-id>> \
+                beta container binauthz attestations create \
+                --artifact-url="<<parameters.image-path>>@$<<parameters.image-digest>>" \
+                --attestor="projects/$<<parameters.attestor-project-id>>/attestors/<<parameters.attestor>>" \
+                --signature-file=/tmp/generated_signature.pgp \
+                --pgp-key-fingerprint="${FINGERPRINT}"
+
+  - unless:
+      condition: <<parameters.multi-project-setup>>
+      steps:
+        - run:
+            name: Create attestation
+            command: |
+              FINGERPRINT=$(cat FINGERPRINT.txt)
+
+              gcloud --project=$<<parameters.google-project-id>> \
+                beta container binauthz attestations create \
+                --artifact-url="<<parameters.image-path>>@$<<parameters.image-digest>>" \
+                --attestor="projects/$<<parameters.google-project-id>>/attestors/<<parameters.attestor>>" \
+                --signature-file=/tmp/generated_signature.pgp \
+                --pgp-key-fingerprint="${FINGERPRINT}"
