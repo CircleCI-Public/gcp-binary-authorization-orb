@@ -5,6 +5,35 @@ description: >
   https://cloud.google.com/binary-authorization/docs/making-attestations
 
 parameters:
+  google-project-id:
+    type: env_var_name
+    default: GOOGLE_PROJECT_ID
+    description: >
+      Envirnment variable name storing Google Project ID. Not Required if
+      using a multi-project setup.
+
+  multi-project-setup:
+    type: boolean
+    default: false
+    description: >
+      Set to `true` if a multi-GCP project Binary Authorization setup is
+      being used. See the following for details:
+      https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
+
+  attestor-project-id:
+    type: env_var_name
+    default: ATTESTOR_PROJECT_ID
+    description: >
+      Google Project ID for the Attestor project. Only required if using
+      a multi-project setup.
+
+  attestation-project-id:
+    type: env_var_name
+    default: ATTESTATION_PROJECT_ID
+    description: >
+      Google Project ID for the Attestation project. Only required if using
+      a multi-project setup.
+
   image-path:
     type: string
     description: >
@@ -22,37 +51,45 @@ parameters:
     default: /tmp/generated_payload.json
     description: Path at which to generate an attestation payload
 
+  signature-filepath:
+    type: string
+    default: /tmp/generated_signature.pgp
+    description: Path at which to output an attestation signature file
+
+  use-existing-keypair:
+    type: boolean
+    default: true
+    description: >
+      Use an existing PGP keypair? Only select `false` if a keypair was
+      generated on-the-fly in the `create-attestor` command.
+
   public-key:
     type: env_var_name
     default: BIN_AUTHZ_PUBLIC_KEY
     description: >
       Name of environment variable storing the public portion of the keypair
-      with which to sign the attestation. Store the public key in Contexts
-      or as a project-level environment variable, as a single-line string,
-      with newlines replaced with the newline string literal `\n`. Use an
-      RSA-2048-type key. See Google's documentation for further details:
+      with which to sign the attestation. Not required if
+      `use-existing-keypair` is set to `false`. Store the public key in
+      Contexts or as a project-level environment variable, as a single-line
+      string, with newlines replaced with the newline string literal `\n`.
+      Use an RSA-2048-type key. See Google's documentation for details:
       https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
-
-  public-key-fingerprint:
-    type: env_var_name
-    default: BIN_AUTHZ_PUBLIC_KEY_FINGERPRINT
-    description: >
-      Name of environment variable storing the Version 4, full 160-bit
-      fingerprint of the public portion of the keypair with which to sign
-      the attestation, expressed as a 40-character hexidecimal string. For
-      details, see the OpenPGP RFC:
-      https://tools.ietf.org/html/rfc4880#section-12.2
 
   private-key:
     type: env_var_name
     default: BIN_AUTHZ_PRIVATE_KEY
     description: >
       Name of environment variable storing the private portion of the
-      keypair with which to sign the attestation. Store the private key in
+      keypair with which to sign the attestation. Not required if
+      `use-existing-keypair` is set to `false`. Store the private key in
       Contexts or as a project-level environment variable, as a single-line
       string, with newlines replaced with the newline string literal `\n`.
       Use an RSA-2048-type key. See Google's documentation for details:
       https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
+
+  keypair-email:
+    type: string
+    description: Email address attached to PGP keypair
 
 steps:
   - run:
@@ -65,8 +102,6 @@ steps:
   - run:
       name: Set up attestation signing
       command: |
-
-
         echo -e $<<parameters.public-key>> > public.key
         echo -e $<<parameters.private-key>> > private.key
 
@@ -91,3 +126,22 @@ steps:
         expect -c "spawn gpg --edit-key \
           $FINGERPRINT \
           trust quit; send \"5\ry\r\"; expect eof"
+
+  - run:
+      name: Sign attestation payload
+      command: |
+        gpg \
+          --local-user <<parameters.keypair-email>> \
+          --armor \
+          --output <<parameters.signature-filepath>> \
+          --sign <<parameters.payload-filepath>>
+
+  - run:
+      name: Create attestation
+      command: |
+        gcloud --project=${ATTESTATION_PROJECT_ID} \
+            beta container binauthz attestations create \
+            --artifact-url="${IMAGE_PATH}@${IMAGE_DIGEST}" \
+            --attestor="projects/${ATTESTOR_PROJECT_ID}/attestors/${ATTESTOR}" \
+            --signature-file=/tmp/generated_signature.pgp \
+            --pgp-key-fingerprint="${FINGERPRINT}"

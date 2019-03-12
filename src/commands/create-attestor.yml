@@ -17,11 +17,36 @@ parameters:
     default: ATTESTOR_PROJECT_ID
     description: Google Project ID for the Attestor project
 
+  use-existing-keypair:
+    type: boolean
+    default: true
+    description: >
+      Use an existing PGP keypair? If `false`, a keypair will be created
+      on-the-fly.
+
+  keypair-email:
+    type: string
+    description: >
+      Email address to attach to PGP keypair. Only required if
+      `use-existing-keypair` is set to `false`.
+
+  keypair-name:
+    type: string
+    description: >
+      Name to attach to PGP keypair. Only required if `use-existing-keypair`
+      is set to `false`.
+
   bin-authz-public-key:
     type: env_var_name
     default: BIN_AUTHZ_PUBLIC_KEY
     description: >
-      Environment variable storing the full public portion of the key pair to use with this attestation, with newlines replaced by `\n`
+      Name of environment variable storing the public portion of the keypair
+      with which to sign the attestation. Not required if
+      `use-existing-keypair` is set to `false`. Store the public key in
+      Contexts or as a project-level environment variable, as a single-line
+      string, with newlines replaced with the newline string literal `\n`.
+      Use an RSA-2048-type key. See Google's documentation for details:
+      https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
 
   note-id:
     type: string
@@ -55,10 +80,41 @@ steps:
             --attestation-authority-note=<<parameters.note-id>> \
             --attestation-authority-note-project=$<<parameters.attestor-project-id>>
 
+  - unless:
+      condition: <<parameters.use-existing-keypair>>
+      steps:
+        - run:
+            name: Generate PGP keypair
+            command: |
+              gpg --batch --gen-key <(
+                cat \<<- EOF
+                  Key-Type: RSA
+                  Key-Length: 2048
+                  Name-Real: <<parameters.keypair-name>>
+                  Name-Email: <<parameters.keypair-email>>
+                  %commit
+              EOF
+              )
+
   - run:
       name: Add PGP public key to attestor
       command: |
-        echo -e $<<parameters.bin-authz-public-key>> > /tmp/generated-key.pgp
+        if <<parameters.use-existing-keypair>>; then
+          echo -e $<<parameters.bin-authz-public-key>> > /tmp/generated-key.pgp
+        else
+          # extract fingerprint from key
+          FINGERPRINT_STRING=$(gpg \
+            --list-keys --with-fingerprint --with-colons \
+            <<parameters.keypair-email>> | \
+            grep fpr)
+
+          # use colon delimiters to separate fingerprint
+          arrFINGERPRINT=(${FINGERPRINT_STRING//:/ })
+
+          FINGERPRINT=${arrFINGERPRINT[-1]}
+
+          gpg --armor --export ${FINGERPRINT} > /tmp/generated-key.pgp
+        fi
 
         gcloud beta container binauthz attestors public-keys add \
           --attestor=<<parameters.attestor>> \

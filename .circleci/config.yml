@@ -18,12 +18,15 @@ commands:
           gke-cluster-name: test-cluster
 
       - bin-authz/create-note:
-          # attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           attestor-project-id: GOOGLE_PROJECT_ID
 
-      # - bin-authz/create-attestor:
-      #     # attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-      #     attestor-project-id: GOOGLE_PROJECT_ID
+      - bin-authz/create-attestor:
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          attestor-project-id: GOOGLE_PROJECT_ID
+          use-existing-keypair: false
+          keypair-email: rose@circleci.com
+          keypair-name: iynere
 
       - bin-authz/configure-policy:
           admission-whitelist-patterns: gcr.io/google_containers/*
