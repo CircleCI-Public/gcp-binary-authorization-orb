@@ -151,17 +151,19 @@ steps:
                       evaluationMode: <<parameters.default-evaluation-mode>>
                       enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
                       requireAttestationsBy:
-                      DEFAULT_REQUIRED_ATTESTORS<<#parameters.cluster-specific-rules>>
+                    DEFAULT_REQUIRED_ATTESTORS<<#parameters.cluster-specific-rules>>
 
                     clusterAdmissionRules:
                       <CLUSTER_SPECIFIER>:
                         evaluationMode: EVAL_MODE
                         enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
                         requireAttestationsBy:
-                        CLUSTER_SPECIFIC_REQUIRED_ATTESTORS<</parameters.cluster-specific-rules>>
+                    CLUSTER_SPECIFIC_REQUIRED_ATTESTORS<</parameters.cluster-specific-rules>>
 
                     EOM
 
+        # lmao got it, almost https://387-171730601-gh.circle-artifacts.com/0/tmp/policy.yaml
+        # just gotta figure out how to insert the right number of spaces now
         - run:
             name: Insert required attestor values
             command: |
