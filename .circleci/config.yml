@@ -26,6 +26,7 @@ commands:
           attestor-project-id: GOOGLE_PROJECT_ID
 
       - bin-authz/configure-policy:
+          admission-whitelist-patterns: gcr.io/google_containers/*
           default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           cluster-specific-rules: true
           cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
