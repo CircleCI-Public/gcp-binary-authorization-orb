@@ -175,10 +175,10 @@ steps:
                 let END=${#arrREQUIRED_ATTESTORS[@]}-1
 
                 for ((i=0;i<END;i++)); do
-                  echo "- ${arrREQUIRED_ATTESTORS[i]}\\" \>> REQUIRED_ATTESTORS.txt
+                  echo "$3- ${arrREQUIRED_ATTESTORS[i]}\\" \>> REQUIRED_ATTESTORS.txt
                 done
 
-                echo "- ${arrREQUIRED_ATTESTORS[-1]}" \>> REQUIRED_ATTESTORS.txt
+                echo "$3- ${arrREQUIRED_ATTESTORS[-1]}" \>> REQUIRED_ATTESTORS.txt
 
                 READY_TO_REPLACE=$(cat REQUIRED_ATTESTORS.txt)
 
@@ -194,12 +194,14 @@ steps:
 
               insert_attestors \
                 <<parameters.default-required-attestors>> \
-                DEFAULT_REQUIRED_ATTESTORS
+                DEFAULT_REQUIRED_ATTESTORS \
+                "  "
 
               if <<parameters.cluster-specific-rules>>; then
                 insert_attestors \
                   <<parameters.cluster-specific-required-attestors>> \
-                  CLUSTER_SPECIFIC_REQUIRED_ATTESTORS
+                  CLUSTER_SPECIFIC_REQUIRED_ATTESTORS \
+                  "    "
               fi
 
   - when:
