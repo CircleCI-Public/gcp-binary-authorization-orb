@@ -92,6 +92,11 @@ steps:
       condition: <<parameters.use-existing-keypair>>
       steps:
         - run:
+            name: Create background entropy for key generation
+            background: true
+            command: find / > /dev/null
+
+        - run:
             name: Generate PGP keypair
             command: |
               gpg --batch --gen-key <(
