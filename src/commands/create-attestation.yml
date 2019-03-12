@@ -152,7 +152,11 @@ steps:
   - run:
       name: Sign attestation payload
       command: |
+        GPG_TTY=$(tty)
+        export GPG_TTY
+
         echo $<<parameters.keypair-passphrase>> | gpg \
+          --batch --yes --passphrase-fd 0 \
           --local-user <<parameters.keypair-email>> \
           --armor \
           --output /tmp/generated_signature.pgp \
