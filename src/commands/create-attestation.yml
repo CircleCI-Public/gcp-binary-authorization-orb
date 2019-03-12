@@ -75,4 +75,7 @@ steps:
         if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
         $SUDO apt-get -y install expect
 
-        expect -c "spawn gpg --edit-key $BIN_AUTHZ_KEY_ID trust quit; send \"5\ry\r\"; expect eof"
+        # $SUDO chmod 600 private.key
+        # expect -c "spawn yes | ssh-add private.key"
+
+        expect -c "spawn gpg --edit-key $BIN_AUTHZ_PUBLIC_KEY_FINGERPRINT trust quit; send \"5\ry\r\"; expect eof"
