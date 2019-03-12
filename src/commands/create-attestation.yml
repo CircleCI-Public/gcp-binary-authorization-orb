@@ -1,0 +1,76 @@
+description: >
+  Create a Binary Authorization attestation authorizing a container
+  image for deployment. See Google's BinAuthz documentation for details:
+  https://cloud.google.com/binary-authorization/docs/key-concepts#attestations
+  https://cloud.google.com/binary-authorization/docs/making-attestations
+
+parameters:
+  image-path:
+    type: string
+    description: >
+      Path in Google's, or any other, container registry to the image
+      being deployed (e.g., `gcr.io/example-project/quickstart-image`)
+
+  image-digest:
+    type: string
+    description: >
+      SHA-256 digest of the specific version of the image being deployed,
+      including the string `sha256:` (i.e., `sha256:64CHARSALPHANUMERIC`)
+
+  payload-filepath:
+    type: string
+    default: /tmp/generated_payload.json
+    description: Path at which to generate an attestation payload
+
+  public-key:
+    type: env_var_name
+    default: BIN_AUTHZ_PUBLIC_KEY
+    description: >
+      Name of environment variable storing the public portion of the keypair
+      with which to sign the attestation. Store the public key in Contexts
+      or as a project-level environment variable, as a single-line string,
+      with newlines replaced with the newline string literal `\n`. Use an
+      RSA-2048-type key. See Google's documentation for further details:
+      https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
+
+  public-key-fingerprint:
+    type: env_var_name
+    default: BIN_AUTHZ_PUBLIC_KEY_FINGERPRINT
+    description: >
+      Name of environment variable storing the Version 4, full 160-bit
+      fingerprint of the public portion of the keypair with which to sign
+      the attestation, expressed as a 40-character hexidecimal string. For
+      details, see the OpenPGP RFC:
+      https://tools.ietf.org/html/rfc4880#section-12.2
+
+  private-key:
+    type: env_var_name
+    default: BIN_AUTHZ_PRIVATE_KEY
+    description: >
+      Name of environment variable storing the private portion of the
+      keypair with which to sign the attestation. Store the private key in
+      Contexts or as a project-level environment variable, as a single-line
+      string, with newlines replaced with the newline string literal `\n`.
+      Use an RSA-2048-type key. See Google's documentation for details:
+      https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
+
+steps:
+  - run:
+      name: Create attestation payload
+      command: |
+        gcloud beta container binauthz create-signature-payload \
+          --artifact-url=<<parameters.image-path>>@<<parameters.image-digest>> \
+          > <<parameters.payload-filepath>>
+
+  - run:
+      name: Set up attestation signing
+      command: |
+        echo -e $<<parameters.public-key>> > public.key
+        echo -e $<<parameters.private-key>> > private.key
+
+        gpg --import public.key
+        gpg --import private.key
+
+        sudo apt-get -y install expect
+
+        expect -c "spawn gpg --edit-key $BIN_AUTHZ_KEY_ID trust quit; send \"5\ry\r\"; expect eof"

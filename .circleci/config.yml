@@ -18,11 +18,11 @@ commands:
           gke-cluster-name: test-cluster
 
       - bin-authz/create-note:
-          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          # attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           attestor-project-id: GOOGLE_PROJECT_ID
 
       - bin-authz/create-attestor:
-          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          # attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           attestor-project-id: GOOGLE_PROJECT_ID
 
       - bin-authz/configure-policy:
@@ -30,6 +30,10 @@ commands:
           default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           cluster-specific-rules: true
           cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+
+      - bin-authz/create-attestation:
+          image-path: gcr.io/google-samples/hello-app
+          image-digest: sha256:c62ead5b8c15c231f9e786250b07909daf6c266d0fcddd93fea882eb722c3be4
 
       - store_artifacts:
           path: /tmp/note_payload.json
