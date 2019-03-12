@@ -49,6 +49,16 @@ parameters:
       existing file if `use-file` is `true`; otherwise, a policy file
       will be created at this path.
 
+  admission-whitelist-patterns:
+    type: string
+    default: gcr.io/google_containers/*,k8s.gcr.io/*,gcr.io/stackdriver-agents/*
+    description: >
+      Whitelist of container images that are exempt from the attestation
+      requirements in the policy. Supply a comma-separated string list
+      (e.g., see default value) of paths to images in Google's, or any
+      other, container registry. For details, see the following:
+      https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#admissionwhitelistpatterns
+
   default-evaluation-mode:
     type: enum
     enum: [ALWAYS_ALLOW, ALWAYS_DENY, REQUIRE_ATTESTATION]
@@ -118,7 +128,7 @@ steps:
                     name: projects/$<<parameters.deployer-project-id>>/policy
 
                     admissionWhitelistPatterns:
-                    - namePattern: <MATCHING_PATTERN>
+                    ADMISSION_WHITELIST_PATTERNS
 
                     defaultAdmissionRule:
                       evaluationMode: <<parameters.default-evaluation-mode>>
@@ -145,7 +155,7 @@ steps:
                     name: projects/$<<parameters.google-project-id>>/policy
 
                     admissionWhitelistPatterns:
-                    - namePattern: <MATCHING_PATTERN>
+                    ADMISSION_WHITELIST_PATTERNS
 
                     defaultAdmissionRule:
                       evaluationMode: <<parameters.default-evaluation-mode>>
@@ -161,6 +171,38 @@ steps:
                     CLUSTER_SPECIFIC_REQUIRED_ATTESTORS<</parameters.cluster-specific-rules>>
 
                     EOM
+        - run:
+            name: Insert admission whitelist patterns
+            command: |
+              insert_whitelist () {
+                WHITELIST_PATTERNS=$1
+
+                # use comma delimiters to create array
+                arrWHITELIST_PATTERNS=(${WHITELIST_PATTERNS//,/ })
+
+                let END=${#arrWHITELIST_PATTERNS[@]}-1
+
+                # iterate over array to echo admission whitelist patterns into a file
+                # \\ is required for sed
+                for ((i=0;i<END;i++)); do
+                  echo "  - namePattern: ${arrWHITELIST_PATTERNS[i]}\\" \>> WHITELIST_PATTERNS.txt
+                done
+
+                # need to handle iteration for the last item separately
+                # sed does not require it to have \ at line end
+                echo "  - namePattern: ${arrWHITELIST_PATTERNS[-1]}" \>> WHITELIST_PATTERNS.txt
+
+                READY_TO_REPLACE=$(cat WHITELIST_PATTERNS.txt)
+
+                sed -i.bak "s@$2@$READY_TO_REPLACE@g" \
+                  <<parameters.policy-filepath>>
+
+                rm -rf WHITELIST_PATTERNS.txt
+              }
+
+              insert_whitelist \
+                <<parameters.admission-whitelist-patterns>> \
+                ADMISSION_WHITELIST_PATTERNS
 
         - run:
             name: Insert required attestor values
