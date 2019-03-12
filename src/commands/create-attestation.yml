@@ -180,3 +180,5 @@ steps:
                 --attestor="projects/$<<parameters.google-project-id>>/attestors/<<parameters.attestor>>" \
                 --signature-file=/tmp/generated_signature.pgp \
                 --pgp-key-fingerprint="$FINGERPRINT"
+
+              rm -rf FINGERPRINT.txt
