@@ -149,6 +149,7 @@ steps:
               $FINGERPRINT \
               trust quit; send \"5\ry\r\"; expect eof"
 
+  # why isn't this signing ??? i verified while SSH'd in...
   - run:
       name: Sign attestation payload
       command: |
@@ -158,6 +159,7 @@ steps:
         echo $<<parameters.keypair-passphrase>> | gpg \
           --batch --yes --passphrase-fd 0 \
           --local-user <<parameters.keypair-email>> \
+          --passphrase $<<parameters.keypair-passphrase>> \
           --armor \
           --output /tmp/generated_signature.pgp \
           --sign <<parameters.payload-filepath>>
