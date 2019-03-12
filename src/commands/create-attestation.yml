@@ -164,7 +164,7 @@ steps:
                 --artifact-url="<<parameters.image-path>>@$<<parameters.image-digest>>" \
                 --attestor="projects/$<<parameters.attestor-project-id>>/attestors/<<parameters.attestor>>" \
                 --signature-file=/tmp/generated_signature.pgp \
-                --pgp-key-fingerprint="${FINGERPRINT}"
+                --pgp-key-fingerprint="$FINGERPRINT"
 
   - unless:
       condition: <<parameters.multi-project-setup>>
@@ -179,4 +179,4 @@ steps:
                 --artifact-url="<<parameters.image-path>>@$<<parameters.image-digest>>" \
                 --attestor="projects/$<<parameters.google-project-id>>/attestors/<<parameters.attestor>>" \
                 --signature-file=/tmp/generated_signature.pgp \
-                --pgp-key-fingerprint="${FINGERPRINT}"
+                --pgp-key-fingerprint="$FINGERPRINT"
