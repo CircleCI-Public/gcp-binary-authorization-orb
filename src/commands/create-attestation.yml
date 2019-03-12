@@ -107,7 +107,7 @@ steps:
       name: Create attestation payload
       command: |
         gcloud beta container binauthz create-signature-payload \
-          --artifact-url=<<parameters.image-path>>@<<parameters.image-digest>> \
+          --artifact-url="<<parameters.image-path>>@<<parameters.image-digest>>" \
           > <<parameters.payload-filepath>>
 
   - run:
