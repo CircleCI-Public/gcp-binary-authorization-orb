@@ -177,18 +177,18 @@ steps:
               insert_whitelist () {
                 WHITELIST_PATTERNS=$1
 
-                echo # use comma delimiters to create array
+                echo "# use comma delimiters to create array"
                 arrWHITELIST_PATTERNS=(${WHITELIST_PATTERNS//,/ })
 
                 let END=${#arrWHITELIST_PATTERNS[@]}-1
 
-                echo # iterate over array to echo admission whitelist patterns into a file
+                echo "# iterate over array to echo admission whitelist patterns into a file"
                 # \\ is required for sed
                 for ((i=0;i<END;i++)); do
                   echo "  - namePattern: ${arrWHITELIST_PATTERNS[i]}\\" \>> WHITELIST_PATTERNS.txt
                 done
 
-                echo # need to handle iteration for the last item separately
+                echo "# need to handle iteration for the last item separately"
                 # sed does not require it to have \ at line end
                 echo "  - namePattern: ${arrWHITELIST_PATTERNS[-1]}" \>> WHITELIST_PATTERNS.txt
 
@@ -212,19 +212,19 @@ steps:
               insert_attestors () {
                 REQUIRED_ATTESTORS=$1
 
-                echo # use comma delimiters to create array
+                echo "# use comma delimiters to create array"
                 arrREQUIRED_ATTESTORS=(${REQUIRED_ATTESTORS//,/ })
 
                 let END=${#arrREQUIRED_ATTESTORS[@]}-1
 
-                echo # iterate over array to echo required attestors into a file
+                echo "# iterate over array to echo required attestors into a file"
                 # $3 is offset, to ensure we create valid yaml
                 # \\ is required for sed
                 for ((i=0;i<END;i++)); do
                   echo "$3- ${arrREQUIRED_ATTESTORS[i]}\\" \>> REQUIRED_ATTESTORS.txt
                 done
 
-                echo # need to handle iteration for the last item separately
+                echo "# need to handle iteration for the last item separately"
                 # sed does not require it to have \ at line end
                 echo "$3- ${arrREQUIRED_ATTESTORS[-1]}" \>> REQUIRED_ATTESTORS.txt
 
