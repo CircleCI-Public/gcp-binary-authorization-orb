@@ -137,7 +137,7 @@ steps:
                     DEFAULT_REQUIRED_ATTESTORS<<#parameters.cluster-specific-rules>>
 
                     clusterAdmissionRules:
-                      <CLUSTER_SPECIFIER>:
+                      $<<parameters.cluster-specific-specifier>>:
                         evaluationMode: <<parameters.cluster-specific-eval-mode>>
                         enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
                         requireAttestationsBy:
@@ -164,7 +164,7 @@ steps:
                     DEFAULT_REQUIRED_ATTESTORS<<#parameters.cluster-specific-rules>>
 
                     clusterAdmissionRules:
-                      <<parameters.cluster-specific-specifier>>:
+                      $<<parameters.cluster-specific-specifier>>:
                         evaluationMode: <<parameters.cluster-specific-eval-mode>>
                         enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
                         requireAttestationsBy:
