@@ -36,6 +36,14 @@ parameters:
       Name to attach to PGP keypair. Only required if `use-existing-keypair`
       is set to `false`.
 
+  keypair-passphrase:
+    type: env_var_name
+    default: BIN_AUTHZ_KEYPAIR_PASSPHRASE
+    description: >
+      Name of environment variable storing a passphrase to use when
+      generating a PGP keypair. Only required if `use-existing-keypair`
+      is set to `false`.
+
   bin-authz-public-key:
     type: env_var_name
     default: BIN_AUTHZ_PUBLIC_KEY
@@ -92,6 +100,7 @@ steps:
                   Key-Length: 2048
                   Name-Real: <<parameters.keypair-name>>
                   Name-Email: <<parameters.keypair-email>>
+                  Passphrase: $<<parameters.keypair-passphrase>>
                   %commit
               EOF
               )
