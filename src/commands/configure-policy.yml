@@ -115,7 +115,7 @@ steps:
                   name: Create policy YAML file
                   command: |
                     cat > <<parameters.policy-filepath>> \<< EOM
-                    name: projects/<<parameters.deployer-project-id>>/policy
+                    name: projects/$<<parameters.deployer-project-id>>/policy
 
                     admissionWhitelistPatterns:
                     - namePattern: <MATCHING_PATTERN>
@@ -142,7 +142,7 @@ steps:
                   name: Create policy YAML file
                   command: |
                     cat > <<parameters.policy-filepath>> \<< EOM
-                    name: projects/<<parameters.google-project-id>>/policy
+                    name: projects/$<<parameters.google-project-id>>/policy
 
                     admissionWhitelistPatterns:
                     - namePattern: <MATCHING_PATTERN>
@@ -195,13 +195,13 @@ steps:
               insert_attestors \
                 <<parameters.default-required-attestors>> \
                 DEFAULT_REQUIRED_ATTESTORS \
-                "  "
+                "    "
 
               if <<parameters.cluster-specific-rules>>; then
                 insert_attestors \
                   <<parameters.cluster-specific-required-attestors>> \
                   CLUSTER_SPECIFIC_REQUIRED_ATTESTORS \
-                  "    "
+                  "      "
               fi
 
   - when:
