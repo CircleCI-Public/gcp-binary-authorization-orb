@@ -124,14 +124,14 @@ steps:
                       evaluationMode: <<parameters.default-evaluation-mode>>
                       enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
                       requireAttestationsBy:
-                      DEFAULT_REQUIRED_ATTESTORS<<#parameters.cluster-specific-rules>>
+                    DEFAULT_REQUIRED_ATTESTORS<<#parameters.cluster-specific-rules>>
 
                     clusterAdmissionRules:
                       <CLUSTER_SPECIFIER>:
-                        evaluationMode: EVAL_MODE
+                        evaluationMode: <<parameters.cluster-specific-eval-mode>>
                         enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
                         requireAttestationsBy:
-                        CLUSTER_SPECIFIC_REQUIRED_ATTESTORS<</parameters.cluster-specific-rules>>
+                    CLUSTER_SPECIFIC_REQUIRED_ATTESTORS<</parameters.cluster-specific-rules>>
 
                     EOM
 
@@ -155,39 +155,39 @@ steps:
 
                     clusterAdmissionRules:
                       <CLUSTER_SPECIFIER>:
-                        evaluationMode: EVAL_MODE
+                        evaluationMode: <<parameters.cluster-specific-eval-mode>>
                         enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
                         requireAttestationsBy:
                     CLUSTER_SPECIFIC_REQUIRED_ATTESTORS<</parameters.cluster-specific-rules>>
 
                     EOM
 
-        # lmao got it, almost https://387-171730601-gh.circle-artifacts.com/0/tmp/policy.yaml
-        # just gotta figure out how to insert the right number of spaces now
         - run:
             name: Insert required attestor values
             command: |
               insert_attestors () {
                 REQUIRED_ATTESTORS=$1
 
+                # use comma delimiters to create array
                 arrREQUIRED_ATTESTORS=(${REQUIRED_ATTESTORS//,/ })
 
                 let END=${#arrREQUIRED_ATTESTORS[@]}-1
 
+                # iterate over array to echo required attestors into a file
+                # $3 is offset, to ensure we create valid yaml
+                # \\ is required for sed
                 for ((i=0;i<END;i++)); do
                   echo "$3- ${arrREQUIRED_ATTESTORS[i]}\\" \>> REQUIRED_ATTESTORS.txt
                 done
 
+                # need to handle iteration for the last item separately
+                # sed does not require it to have \ at line end
                 echo "$3- ${arrREQUIRED_ATTESTORS[-1]}" \>> REQUIRED_ATTESTORS.txt
 
                 READY_TO_REPLACE=$(cat REQUIRED_ATTESTORS.txt)
 
-                echo "ready to replace: $READY_TO_REPLACE"
-
                 sed -i.bak "s@$2@$READY_TO_REPLACE@g" \
                   <<parameters.policy-filepath>>
-
-                echo "sed completed"
 
                 rm -rf REQUIRED_ATTESTORS.txt
               }
