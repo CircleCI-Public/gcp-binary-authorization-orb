@@ -9,7 +9,7 @@ parameters:
     type: env_var_name
     default: GOOGLE_PROJECT_ID
     description: >
-      Envirnment variable name storing Google Project ID. Not Required if
+      Environment variable name storing Google Project ID. Not Required if
       using a multi-project setup.
 
   multi-project-setup:

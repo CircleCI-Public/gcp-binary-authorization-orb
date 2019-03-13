@@ -14,14 +14,45 @@ parameters:
 
   attestor-hint:
     type: string
-    default: $CIRCLE_USERNAME
+    default: CircleCI username
     description: >
       A human-readable name for this attestation authority (e.g., QA)
+
+  multi-project-setup:
+    type: boolean
+    default: false
+    description: >
+      Set to `true` if a muliti-GCP project Binary Authorization setup is
+      being used. See the following for details:
+      https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
+
+  google-project-id:
+    type: env_var_name
+    default: GOOGLE_PROJECT_ID
+    description: >
+      Environment variable name storing Google Project ID. Not Required if
+      using a multi-project setup.
+
+  google-service-account:
+    type: env_var_name
+    default: GOOGLE_SERVICE_ACCOUNT
+    description: >
+      Service account address for the Google Project. Not Required if
+      using a multi-project setup.
 
   attestor-project-id:
     type: env_var_name
     default: ATTESTOR_PROJECT_ID
-    description: Google Project ID for the Attestor project
+    description: >
+      Google Project ID for the Attestor project. Only required if using
+      a multi-project setup.
+
+  attestor-service-account:
+    type: env_var_name
+    default: ATTESTOR_SERVICE_ACCOUNT
+    description: >
+      Service account address for the Attestor project. Only required if
+      using a multi-project setup.
 
   note-id:
     type: string
@@ -72,21 +103,6 @@ parameters:
     description: >
       Path to your container analysis note file. Should be an existing file
       if `use-file` is `true`; otherwise, note will be created at this path.
-
-  multi-project-setup:
-    type: boolean
-    default: false
-    description: >
-      Set to `true` if a muliti-GCP project Binary Authorization setup is
-      being used. See the following for details:
-      https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
-
-  attestor-service-account:
-    type: env_var_name
-    default: ATTESTOR_SERVICE_ACCOUNT
-    description: >
-      Service account address for the Attestor project, necessary for
-      multi-GCP project Binary Authorization configurations
 
 steps:
   - unless:
@@ -163,3 +179,34 @@ steps:
                 -H "Authorization: Bearer $(gcloud auth print-access-token)" \
                 --data-binary @/tmp/iam_request.json \
                 "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>:setIamPolicy"
+
+  - unless:
+      condition: <<parameters.multi-project-setup>>
+      steps:
+        - run:
+            name: Create Container Analysis note IAM request
+            command: |
+              cat > /tmp/iam_request.json \<< EOM
+              {
+                'resource': 'projects/$<<parameters.google-project-id>>/notes/<<parameters.note-id>>',
+                'policy': {
+                  'bindings': [
+                    {
+                      'role': 'roles/containeranalysis.notes.occurrences.viewer',
+                      'members': [
+                        'serviceAccount:$<<parameters.google-service-account>>'
+                      ]
+                    }
+                  ]
+                }
+              }
+              EOM
+
+        - run:
+            name: Set permissions on Container Analysis note
+            command: |
+              curl -X POST  \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+                --data-binary @/tmp/iam_request.json \
+                "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.google-project-id>>/notes/<<parameters.note-id>>:setIamPolicy"

@@ -12,6 +12,21 @@ parameters:
       the value of the `$CIRCLE_USERNAME` environment variable (VCS user who
       triggered the CircleCI job).
 
+  multi-project-setup:
+    type: boolean
+    default: false
+    description: >
+      Set to `true` if a muliti-GCP project Binary Authorization setup is
+      being used. See the following for details:
+      https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
+
+  google-project-id:
+    type: env_var_name
+    default: GOOGLE_PROJECT_ID
+    description: >
+      Environment variable name storing Google Project ID. Not Required if
+      using a multi-project setup.
+
   attestor-project-id:
     type: env_var_name
     default: ATTESTOR_PROJECT_ID
@@ -44,7 +59,7 @@ parameters:
       generating a PGP keypair. Only required if `use-existing-keypair`
       is set to `false`.
 
-  bin-authz-public-key:
+  public-key:
     type: env_var_name
     default: BIN_AUTHZ_PUBLIC_KEY
     description: >
@@ -64,14 +79,6 @@ parameters:
       values from the attestor parameter, and CircleCI job name and number
       environment variables.
 
-  multi-project-setup:
-    type: boolean
-    default: false
-    description: >
-      Set to `true` if a muliti-GCP project Binary Authorization setup is
-      being used. See the following for details:
-      https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
-
   deployer-service-account:
     type: env_var_name
     default: DEPLOYER_SERVICE_ACCOUNT
@@ -80,13 +87,27 @@ parameters:
       multi-GCP project Binary Authorization configurations
 
 steps:
-  - run:
-      name: Create attestor
-      command: |
-        gcloud --project=$<<parameters.attestor-project-id>> \
-            beta container binauthz attestors create <<parameters.attestor>> \
-            --attestation-authority-note=<<parameters.note-id>> \
-            --attestation-authority-note-project=$<<parameters.attestor-project-id>>
+  - when:
+      condition: <<parameters.multi-project-setup>>
+      steps:
+        - run:
+            name: Create attestor
+            command: |
+              gcloud --project=$<<parameters.attestor-project-id>> \
+                  beta container binauthz attestors create <<parameters.attestor>> \
+                  --attestation-authority-note=<<parameters.note-id>> \
+                  --attestation-authority-note-project=$<<parameters.attestor-project-id>>
+
+  - unless:
+      condition: <<parameters.multi-project-setup>>
+      steps:
+        - run:
+            name: Create attestor
+            command: |
+              gcloud --project=$<<parameters.google-project-id>> \
+                  beta container binauthz attestors create <<parameters.attestor>> \
+                  --attestation-authority-note=<<parameters.note-id>> \
+                  --attestation-authority-note-project=$<<parameters.google-project-id>>
 
   - unless:
       condition: <<parameters.use-existing-keypair>>
@@ -117,7 +138,7 @@ steps:
       name: Add PGP public key to attestor
       command: |
         if <<parameters.use-existing-keypair>>; then
-          echo -e $<<parameters.bin-authz-public-key>> > /tmp/generated-key.pgp
+          echo -e $<<parameters.public-key>> > /tmp/generated-key.pgp
         else
           # extract fingerprint from key
           FINGERPRINT_STRING=$(gpg \

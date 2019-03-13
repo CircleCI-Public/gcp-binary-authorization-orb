@@ -9,7 +9,7 @@ parameters:
     type: env_var_name
     default: GOOGLE_PROJECT_ID
     description: >
-      Envirnment variable name storing Google Project ID. Not Required if
+      Environment variable name storing Google Project ID. Not Required if
       using a multi-project setup.
 
   multi-project-setup:
@@ -161,9 +161,6 @@ steps:
               $FINGERPRINT \
               trust quit; send \"5\ry\r\"; expect eof"
 
-  # why isn't this signing ??? i verified while SSH'd in...
-  # apparently it signs on `machine` exec but not docker exec ?
-  # must be something w/ diff versions of gpg
   - run:
       name: Sign attestation payload
       command: |

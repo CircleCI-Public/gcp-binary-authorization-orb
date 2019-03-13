@@ -12,7 +12,7 @@ parameters:
     default: GOOGLE_COMPUTE_ZONE
     description: >
       Environment variable storing the name of the Google compute zone to
-      use when running commands with the gcloud CLI
+      use by default when running commands with the gcloud CLI
 
   create-new-gke-cluster:
     type: boolean
@@ -36,7 +36,7 @@ parameters:
     default: true
     description: >
       Set this to `false` to instead pass a string literal to specify the
-      GKE cluster for which to enable BinAuthz (defaults to `true`).
+      GKE cluster for which to enable BinAuthz (default is `true`)
 
   gke-cluster-name:
     type: string
