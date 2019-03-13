@@ -124,7 +124,7 @@ workflows:
 
       - bin-authz/create-attestation:
           context: orb-publishing
-          binauthz_attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           # use-existing-keypair: false
           keypair-email: rose@circleci.com
           # keypair-passphrase: testing
