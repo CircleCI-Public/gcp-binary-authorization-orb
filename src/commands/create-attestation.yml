@@ -155,16 +155,30 @@ steps:
   - run:
       name: Sign attestation payload
       command: |
-        GPG_TTY=$(tty)
-        export GPG_TTY
+        # GPG_TTY=$(tty)
+        # export GPG_TTY
 
-        echo $<<parameters.keypair-passphrase>> | gpg \
-          --batch --yes --passphrase-fd 0 \
-          --local-user <<parameters.keypair-email>> \
-          --passphrase $<<parameters.keypair-passphrase>> \
-          --armor \
-          --output /tmp/generated_signature.pgp \
-          --sign <<parameters.payload-filepath>>
+        # have to sign like this on gpg v1.x
+        if [[ gpg --version | grep "(GnuPG) 1." ]]; then
+          echo $<<parameters.keypair-passphrase>> | gpg \
+            --batch --yes --passphrase-fd 0 \
+            --local-user <<parameters.keypair-email>> \
+            --passphrase $<<parameters.keypair-passphrase>> \
+            --armor \
+            --output /tmp/generated_signature.pgp \
+            --sign <<parameters.payload-filepath>>
+
+        # & sign like this on gpg v2.x
+        elif [[ gpg --version | grep "(GnuPG) 2." ]]; then
+          echo $<<parameters.keypair-passphrase>> | gpg \
+            --pinentry-mode loopback \
+            --local-user <<parameters.keypair-email>> \
+            --passphrase $<<parameters.keypair-passphrase>> \
+            --armor \
+            --output /tmp/generated_signature.pgp \
+            --sign <<parameters.payload-filepath>>
+
+        fi
 
   - when:
       condition: <<parameters.multi-project-setup>>
