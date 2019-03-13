@@ -51,6 +51,13 @@ parameters:
       Name to attach to PGP keypair. Only required if `use-existing-keypair`
       is set to `false`.
 
+  use-passphrase:
+    type: boolean
+    default: false
+    description: >
+      Generate a PGP keypair with a passphrase? Only required if
+      `use-existing-keypair` is set to `false`.
+
   keypair-passphrase:
     type: env_var_name
     default: BIN_AUTHZ_KEYPAIR_PASSPHRASE
@@ -128,8 +135,8 @@ steps:
                   Key-Type: RSA
                   Key-Length: 2048
                   Name-Real: <<parameters.keypair-name>>
-                  Name-Email: <<parameters.keypair-email>>
-                  Passphrase: $<<parameters.keypair-passphrase>>
+                  Name-Email: <<parameters.keypair-email>><<#parameters.use-passphrase>>
+                  Passphrase: $<<parameters.keypair-passphrase>><</parameters.use-passphrase>>
                   %commit
               EOF
               )

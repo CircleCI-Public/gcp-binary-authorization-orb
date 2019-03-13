@@ -141,7 +141,7 @@ parameters:
     default: true
     description: >
       Use an existing PGP keypair? If `false`, a keypair will be created
-      on-the-fly.
+      on-the-fly
 
   keypair-name:
     type: string
@@ -155,14 +155,20 @@ parameters:
       Email address to attach to PGP keypair. Only required if
       `use-existing-keypair` is set to `false`.
 
+  use-passphrase:
+    type: boolean
+    default: false
+    description: >
+      If `use-existing-keypair` is set to `false`: does the existing PGP
+      keypair have a passphrase? If `use-existing-keypair` is set to
+      `true`: generate a PGP keypair with a passphrase?
+
   keypair-passphrase:
     type: env_var_name
     default: BIN_AUTHZ_KEYPAIR_PASSPHRASE
     description: >
       Name of environment variable storing the passphrase used to
-      generate PGP keypair. If key was previously generated without a
-      passphrase, or if generating a passphrase-less key at runtime,
-      leave this environment variable unset, or set it to a blank string.
+      generate PGP keypair
 
   public-key:
     type: env_var_name
@@ -405,6 +411,7 @@ steps:
       use-existing-keypair: <<parameters.use-existing-keypair>>
       keypair-email: <<parameters.keypair-email>>
       keypair-name: <<parameters.keypair-name>>
+      use-passphrase: <<parameters.use-passphrase>>
       keypair-passphrase: <<parameters.keypair-passphrase>>
       public-key: <<parameters.public-key>>
       note-id: <<parameters.note-id>>
@@ -437,6 +444,7 @@ steps:
       public-key: <<parameters.public-key>>
       private-key: <<parameters.private-key>>
       keypair-email: <<parameters.keypair-email>>
+      use-passphrase: <<parameters.use-passphrase>>
       keypair-passphrase: <<parameters.keypair-passphrase>>
       attestor: <<parameters.attestor>>
 

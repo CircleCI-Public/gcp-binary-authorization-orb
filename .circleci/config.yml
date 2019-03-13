@@ -20,6 +20,7 @@ commands:
 
       - bin-authz/create-attestor:
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          use-passphrase: false
           keypair-email: rose@circleci.com
           keypair-name: iynere
 
@@ -127,6 +128,7 @@ workflows:
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           use-existing-keypair: false
+          use-passphrase: false
           keypair-email: rose@circleci.com
           keypair-name: iynere
           use-gke-env-var: false
