@@ -75,7 +75,7 @@ integration-master_filters: &integration-master_filters
     only: /master-.*/
 
 prod-deploy_requires: &prod-deploy_requires
-  [install_initialize-default-master, install_initialize-google-master, install_initialize-machine-master]
+  [test-job-docker-master, test-job-machine-master, test-job-google-master, test-docker-master, test-google-master, test-machine-master]
 
 delete-attestor: &delete-attestor
   [run: {when: "always", name: "Clean up attestor", command: "gcloud alpha container binauthz attestors delete $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM"}]
@@ -138,7 +138,7 @@ workflows:
           post-steps: *delete-attestor
 
       - bin-authz/create-attestation:
-          name: test-job-dev
+          name: test-job-google-dev
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           use-existing-keypair: false
@@ -157,9 +157,9 @@ workflows:
           post-steps: *delete-attestor
 
       - bin-authz/create-attestation:
-          name: test-job-dev
+          name: test-job-machine-dev
           context: orb-publishing
-          executor: machine
+          executor: bin-authz/machine
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           use-existing-keypair: false
           use-passphrase: false
@@ -177,7 +177,7 @@ workflows:
           post-steps: *delete-attestor
 
       - bin-authz/create-attestation:
-          name: test-job-dev
+          name: test-job-docker-dev
           context: orb-publishing
           executor: gcp-cli/default
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
@@ -216,7 +216,47 @@ workflows:
           post-steps: *delete-attestor
 
       - bin-authz/create-attestation:
-          name: test-job-master
+          name: test-job-google-master
+          context: orb-publishing
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          use-existing-keypair: false
+          use-passphrase: false
+          keypair-email: rose@circleci.com
+          keypair-name: iynere
+          use-gke-env-var: false
+          gke-cluster-name: test-cluster
+          admission-whitelist-patterns: gcr.io/google_containers/*
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          cluster-specific-rules: true
+          cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          filters: *integration-master_filters
+          post-steps: *delete-attestor
+
+      - bin-authz/create-attestation:
+          name: test-job-machine-master
+          executor: bin-authz/machine
+          context: orb-publishing
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          use-existing-keypair: false
+          use-passphrase: false
+          keypair-email: rose@circleci.com
+          keypair-name: iynere
+          use-gke-env-var: false
+          gke-cluster-name: test-cluster
+          admission-whitelist-patterns: gcr.io/google_containers/*
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          cluster-specific-rules: true
+          cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          filters: *integration-master_filters
+          post-steps: *delete-attestor
+
+      - bin-authz/create-attestation:
+          name: test-job-docker-master
+          executor: gcp-cli/default
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           use-existing-keypair: false
