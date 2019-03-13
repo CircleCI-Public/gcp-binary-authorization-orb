@@ -8,7 +8,7 @@ orbs:
 commands:
   test-commands:
     steps:
-      - checkout
+      # - checkout
 
       - gcp-cli/install
       - gcp-cli/initialize
