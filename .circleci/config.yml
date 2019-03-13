@@ -141,7 +141,6 @@ workflows:
           name: test-job-google-dev
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          use-existing-keypair: false
           use-passphrase: false
           keypair-email: rose@circleci.com
           keypair-name: iynere
@@ -161,7 +160,6 @@ workflows:
           context: orb-publishing
           executor: bin-authz/machine
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          use-existing-keypair: false
           use-passphrase: false
           keypair-email: rose@circleci.com
           keypair-name: iynere
@@ -181,7 +179,6 @@ workflows:
           context: orb-publishing
           executor: gcp-cli/default
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          use-existing-keypair: false
           use-passphrase: false
           keypair-email: rose@circleci.com
           keypair-name: iynere
@@ -219,7 +216,6 @@ workflows:
           name: test-job-google-master
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          use-existing-keypair: false
           use-passphrase: false
           keypair-email: rose@circleci.com
           keypair-name: iynere
@@ -239,7 +235,6 @@ workflows:
           executor: bin-authz/machine
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          use-existing-keypair: false
           use-passphrase: false
           keypair-email: rose@circleci.com
           keypair-name: iynere
@@ -259,7 +254,6 @@ workflows:
           executor: gcp-cli/default
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          use-existing-keypair: false
           use-passphrase: false
           keypair-email: rose@circleci.com
           keypair-name: iynere
