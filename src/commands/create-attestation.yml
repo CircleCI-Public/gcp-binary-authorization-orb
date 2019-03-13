@@ -214,7 +214,8 @@ steps:
               gcloud --project=$<<parameters.attestation-project-id>> \
                 beta container binauthz attestations list \
                 --attestor=<<parameters.attestor>> \
-                --attestor-project=$<<parameters.attestor-project-id>>
+                --attestor-project=$<<parameters.attestor-project-id>> | \
+                grep -v "Listed 0 items"
 
   - unless:
       condition: <<parameters.multi-project-setup>>
