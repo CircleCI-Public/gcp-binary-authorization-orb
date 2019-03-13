@@ -132,7 +132,6 @@ workflows:
           # keypair-passphrase: NEEDS_TO_BE_AN_ENV_VAR
           use-gke-env-var: false
           gke-cluster-name: test-cluster
-          keypair-name: iynere
           admission-whitelist-patterns: gcr.io/google_containers/*
           default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
           cluster-specific-rules: true
