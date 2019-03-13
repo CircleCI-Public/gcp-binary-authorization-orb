@@ -37,7 +37,7 @@ commands:
       - bin-authz/create-attestation:
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           image-path: gcr.io/google-containers/google-containers-test-image
-          image-digest: sha256:817a12c32a39bbe394944ba49de563e085f1d3c5266eb8e9723256bc4448680e
+          image-tag: "2017-01-23"
           use-existing-keypair: false
           keypair-email: rose@circleci.com
 

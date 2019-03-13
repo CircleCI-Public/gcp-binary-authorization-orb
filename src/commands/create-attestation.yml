@@ -40,11 +40,12 @@ parameters:
       Path in Google's, or any other, container registry to the image
       being deployed (e.g., `gcr.io/example-project/quickstart-image`)
 
-  image-digest:
+  image-tag:
     type: string
+    default: latest
     description: >
-      SHA-256 digest of the specific version of the image being deployed,
-      including the string `sha256:` (i.e., `sha256:64CHARSALPHANUMERIC`)
+      Specific tag of image that will be deployed, used to generate a full
+      SHA-256 for attestation.
 
   payload-filepath:
     type: string
@@ -104,10 +105,21 @@ parameters:
 
 steps:
   - run:
+      name: Store image digest
+      command: |
+        DIGEST=$(gcloud container images describe \
+          <<parameters.image-path>>:<<parameters.image-tag>> \
+          --format='get(image_summary.digest)')
+
+        echo $DIGEST > DIGEST.txt
+
+  - run:
       name: Create attestation payload
       command: |
+        DIGEST=$(cat DIGEST.txt)
+
         gcloud beta container binauthz create-signature-payload \
-          --artifact-url="<<parameters.image-path>>@<<parameters.image-digest>>" \
+          --artifact-url="<<parameters.image-path>>@$DIGEST" \
           > <<parameters.payload-filepath>>
 
   - run:
@@ -187,15 +199,17 @@ steps:
             name: Create attestation
             command: |
               FINGERPRINT=$(cat FINGERPRINT.txt)
+              DIGEST=$(cat DIGEST.txt)
 
               gcloud --project=$<<parameters.attestation-project-id>> \
                 beta container binauthz attestations create \
-                --artifact-url="<<parameters.image-path>>@$<<parameters.image-digest>>" \
+                --artifact-url="<<parameters.image-path>>@$DIGEST" \
                 --attestor="projects/$<<parameters.attestor-project-id>>/attestors/<<parameters.attestor>>" \
                 --signature-file=/tmp/generated_signature.pgp \
                 --pgp-key-fingerprint="$FINGERPRINT"
 
                 rm -rf FINGERPRINT.txt
+                rm -rf DIGEST.txt
 
         - run:
             name: Verify attestation creation
@@ -212,15 +226,17 @@ steps:
             name: Create attestation
             command: |
               FINGERPRINT=$(cat FINGERPRINT.txt)
+              DIGEST=$(cat DIGEST.txt)
 
               gcloud --project=$<<parameters.google-project-id>> \
                 beta container binauthz attestations create \
-                --artifact-url="<<parameters.image-path>>@$<<parameters.image-digest>>" \
+                --artifact-url="<<parameters.image-path>>@$DIGEST" \
                 --attestor="projects/$<<parameters.google-project-id>>/attestors/<<parameters.attestor>>" \
                 --signature-file=/tmp/generated_signature.pgp \
                 --pgp-key-fingerprint="$FINGERPRINT"
 
               rm -rf FINGERPRINT.txt
+              rm -rf DIGEST.txt
 
         - run:
             name: Verify attestation creation
