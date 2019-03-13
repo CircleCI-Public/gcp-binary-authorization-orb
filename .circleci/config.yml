@@ -8,8 +8,6 @@ orbs:
 commands:
   test-commands:
     steps:
-      - checkout
-
       - gcp-cli/install
       - gcp-cli/initialize
 
@@ -119,14 +117,17 @@ workflows:
       - test-google:
           context: orb-publishing
           filters: *integration-dev_filters
+          requires:
+            - test-docker
 
       - test-machine:
           context: orb-publishing
           filters: *integration-dev_filters
+          requires:
+            - test-google
 
       - bin-authz/create-attestation:
           context: orb-publishing
-          job_checkout: true
           binauthz_attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           binauthz_use-existing-keypair: false
           binauthz_keypair-email: rose@circleci.com
@@ -141,3 +142,5 @@ workflows:
           attestation_image-path: gcr.io/google-containers/google-containers-test-image
           attestation_image-tag: "2017-01-23"
           filters: *integration-dev_filters
+          requires:
+            - test-machine
