@@ -149,8 +149,9 @@ steps:
             command: |
               curl \
                 -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
-                "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.google-project-id>>/notes/<<parameters.note-id>>" | \
-                grep "<<parameters.note-description-short>>"
+                "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.google-project-id>>/notes/<<parameters.note-id>>"
+                # | \
+                #grep "<<parameters.note-description-short>>"
 
   - when:
       condition: <<parameters.multi-project-setup>>
@@ -196,8 +197,9 @@ steps:
             command: |
               curl \
                 -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
-                "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>" | \
-                grep "<<parameters.note-description-short>>"
+                "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>"
+                # | \
+                #grep "<<parameters.note-description-short>>"
 
         - run:
             name: Create Container Analysis note IAM request
