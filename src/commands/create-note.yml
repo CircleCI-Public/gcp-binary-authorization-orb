@@ -72,12 +72,12 @@ parameters:
     default: ""
     description: Longer, more detailed description of this note
 
-  related-url:
+  note-related-url:
     type: string
     default: $CIRCLE_BUILD_URL
     description: Any URL related to the note
 
-  expiration-time:
+  note-expiration-time:
     type: string
     default: ""
     description: >
@@ -90,7 +90,7 @@ parameters:
     default: ""
     description: Names of any notes relevant or related to this note
 
-  use-file:
+  use-note-file:
     type: boolean
     default: false
     description: >
@@ -102,14 +102,14 @@ parameters:
     default: /tmp/note_payload.json
     description: >
       Path to your container analysis note file. Should be an existing file
-      if `use-file` is `true`; otherwise, note will be created at this path.
+      if `use-note-file` is `true`; otherwise, note will be created at this path.
 
 steps:
   - unless:
       condition: <<parameters.multi-project-setup>>
       steps:
         - unless:
-            condition: <<parameters.use-file>>
+            condition: <<parameters.use-note-file>>
             steps:
               - run:
                   name: Create Container Analysis note
@@ -126,11 +126,11 @@ steps:
                       },
                       "relatedUrl": [
                         {
-                          "url": "<<parameters.related-url>>",
+                          "url": "<<parameters.note-related-url>>",
                           "label": "related URL"
                         }
-                      ],<<#parameters.expiration-time>>
-                      "expirationTime": "<<parameters.expiration-time>>",<</parameters.expiration-time>><<#parameters.related-note-names>>
+                      ],<<#parameters.note-expiration-time>>
+                      "expirationTime": "<<parameters.note-expiration-time>>",<</parameters.note-expiration-time>><<#parameters.related-note-names>>
                       "relatedNoteNames": "<<parameters.related-note-names>>",<</parameters.related-note-names>>
                     }
                     EOM
@@ -156,7 +156,7 @@ steps:
       condition: <<parameters.multi-project-setup>>
       steps:
         - unless:
-            condition: <<parameters.use-file>>
+            condition: <<parameters.use-note-file>>
             steps:
               - run:
                   name: Create Container Analysis note
@@ -173,11 +173,11 @@ steps:
                       },
                       "relatedUrl": [
                         {
-                          "url": "<<parameters.related-url>>",
+                          "url": "<<parameters.note-related-url>>",
                           "label": "related URL"
                         }
-                      ],<<#parameters.expiration-time>>
-                      "expirationTime": "<<parameters.expiration-time>>",<</parameters.expiration-time>><<#parameters.related-note-names>>
+                      ],<<#parameters.note-expiration-time>>
+                      "expirationTime": "<<parameters.note-expiration-time>>",<</parameters.note-expiration-time>><<#parameters.related-note-names>>
                       "relatedNoteNames": "<<parameters.related-note-names>>",<</parameters.related-note-names>>
                     }
                     EOM

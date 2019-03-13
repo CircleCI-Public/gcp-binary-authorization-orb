@@ -21,22 +21,13 @@ parameters:
       Create a new GKE cluster to use with Binary Authorization? Defaults
       to `false`
 
-  gke-cluster-env-var:
-    type: env_var_name
-    default: GKE_CLUSTER_NAME
-    description: >
-      Environment variable storing the name of the GKE cluster for which
-      to enable BinAuthz. To pass a string literal instead of a reference
-      to a stored environmnent variable, set the `use-gke-env-var` parameter
-      to `false` and pass the GKE cluster name to the `gke-cluster-name`
-      environment variable instead.
-
   use-gke-env-var:
     type: boolean
-    default: true
+    default: false
     description: >
-      Set this to `false` to instead pass a string literal to specify the
-      GKE cluster for which to enable BinAuthz (default is `true`)
+      Set this to `true` to instead pass an environment variable storing
+      the name of the GKE cluster for which to enable BinAuthz (default
+      is `false`)
 
   gke-cluster-name:
     type: string
@@ -47,6 +38,16 @@ parameters:
       string literal, make sure the `use-gke-env-var` parameter is set to
       `true` and pass the name of the environment variable to the
       `gke-cluster-env-var` parameter.
+
+  gke-cluster-env-var:
+    type: env_var_name
+    default: GKE_CLUSTER_NAME
+    description: >
+      Environment variable storing the name of the GKE cluster for which
+      to enable BinAuthz. To pass a string literal instead of a reference
+      to a stored environmnent variable, set the `use-gke-env-var` parameter
+      to `false` and pass the GKE cluster name to the `gke-cluster-name`
+      environment variable instead.
 
 steps:
   - run:

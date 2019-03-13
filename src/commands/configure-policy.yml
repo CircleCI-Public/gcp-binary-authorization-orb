@@ -34,7 +34,7 @@ parameters:
       Google Project ID for the Deployer project. Only required if using
       a multi-project setup.
 
-  use-file:
+  use-policy-file:
     type: boolean
     default: false
     description: >
@@ -46,7 +46,7 @@ parameters:
     default: /tmp/policy.yaml
     description: >
       Path to a Binary Authorization policy YAML file. Should be an
-      existing file if `use-file` is `true`; otherwise, a policy file
+      existing file if `use-policy-file` is `true`; otherwise, a policy file
       will be created at this path.
 
   admission-whitelist-patterns:
@@ -116,7 +116,7 @@ parameters:
 
 steps:
   - unless:
-      condition: <<parameters.use-file>>
+      condition: <<parameters.use-policy-file>>
       steps:
         - when:
             condition: <<parameters.multi-project-setup>>

@@ -110,31 +110,31 @@ workflows:
 
   integration-tests_prod-release:
     jobs:
-      - test-docker:
-          context: orb-publishing
-          filters: *integration-dev_filters
+      # - test-docker:
+      #     context: orb-publishing
+      #     filters: *integration-dev_filters
 
-      - test-google:
-          context: orb-publishing
-          filters: *integration-dev_filters
+      # - test-google:
+      #     context: orb-publishing
+      #     filters: *integration-dev_filters
 
-      - test-machine:
-          context: orb-publishing
-          filters: *integration-dev_filters
+      # - test-machine:
+      #     context: orb-publishing
+      #     filters: *integration-dev_filters
 
       - bin-authz/create-attestation:
           context: orb-publishing
           binauthz_attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          binauthz_use-existing-keypair: false
-          binauthz_keypair-email: rose@circleci.com
-          binauthz_keypair-passphrase: testing
-          setup_use-gke-env-var: false
-          setup_gke-cluster-name: test-cluster
-          attestor_keypair-name: iynere
-          policy_admission-whitelist-patterns: gcr.io/google_containers/*
-          policy_default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
-          policy_cluster-specific-rules: true
-          policy_cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
-          attestation_image-path: gcr.io/google-containers/google-containers-test-image
-          attestation_image-tag: "2017-01-23"
+          # use-existing-keypair: false
+          # keypair-email: rose@circleci.com
+          # keypair-passphrase: testing
+          use-gke-env-var: false
+          gke-cluster-name: test-cluster
+          keypair-name: iynere
+          admission-whitelist-patterns: gcr.io/google_containers/*
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          cluster-specific-rules: true
+          cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
           filters: *integration-dev_filters
