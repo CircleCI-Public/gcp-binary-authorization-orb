@@ -8,7 +8,7 @@ orbs:
 commands:
   test-commands:
     steps:
-      # - checkout
+      - checkout
 
       - gcp-cli/install
       - gcp-cli/initialize
@@ -126,6 +126,7 @@ workflows:
 
       - bin-authz/create-attestation:
           context: orb-publishing
+          job_checkout: true
           binauthz_attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           binauthz_use-existing-keypair: false
           binauthz_keypair-email: rose@circleci.com
