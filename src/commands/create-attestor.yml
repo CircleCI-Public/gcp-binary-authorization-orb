@@ -16,7 +16,7 @@ parameters:
     type: boolean
     default: false
     description: >
-      Set to `true` if a muliti-GCP project Binary Authorization setup is
+      Set to `true` if a multi-GCP project Binary Authorization setup is
       being used. See the following for details:
       https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
 

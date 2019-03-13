@@ -126,10 +126,9 @@ workflows:
       - bin-authz/create-attestation:
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          # use-existing-keypair: false
+          use-existing-keypair: false
           keypair-email: rose@circleci.com
           keypair-name: iynere
-          # keypair-passphrase: NEEDS_TO_BE_AN_ENV_VAR
           use-gke-env-var: false
           gke-cluster-name: test-cluster
           admission-whitelist-patterns: gcr.io/google_containers/*

@@ -34,12 +34,19 @@ parameters:
       Workspace root path that is either an absolute path or a path relative
       to the working directory.
 
-  # shared
+  # google env
+  google-compute-zone:
+    type: env_var_name
+    default: GOOGLE_COMPUTE_ZONE
+    description: >
+      Environment variable storing the name of the Google compute zone to
+      use by default when running commands with the gcloud CLI
+
   multi-project-setup:
     type: boolean
     default: false
     description: >
-      Set to `true` if a muliti-GCP project Binary Authorization setup is
+      Set to `true` if a multi-GCP project Binary Authorization setup is
       being used. See the following for details:
       https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
 
@@ -57,77 +64,42 @@ parameters:
       Google Project ID for the Attestor project. Only required if using
       a multi-project setup.
 
-  attestor:
-    type: string
-    default: $CIRCLE_USERNAME
-    description: >
-      Name of the attestation authority for the container analysis note.
-      If the attestor does not yet exist, it will be created. Defaults to
-      the value of the `$CIRCLE_USERNAME` environment variable (VCS user who
-      triggered the CircleCI job).
-
-  note-id:
-    type: string
-    default: $CIRCLE_USERNAME-note-$CIRCLE_JOB-$CIRCLE_BUILD_NUM
-    description: >
-      Name of the container analysis note. Defaults to a combination of
-      values from the attestor parameter, and CircleCI job name and number
-      environment variables.
-
-  use-existing-keypair:
-    type: boolean
-    default: true
-    description: >
-      Use an existing PGP keypair? If `false`, a keypair will be created
-      on-the-fly.
-
-  keypair-email:
-    type: string
-    description: >
-      Email address to attach to PGP keypair. Only required if
-      `use-existing-keypair` is set to `false`.
-
-  keypair-passphrase:
+  deployer-project-id:
     type: env_var_name
-    default: BIN_AUTHZ_KEYPAIR_PASSPHRASE
+    default: DEPLOYER_PROJECT_ID
     description: >
-      Name of environment variable storing the passphrase used to
-      generate PGP keypair. Leave the environment variable unset, or set
-      to a blank string, if key was previously generated without a
-      passphrase, or if generating a passphrase-less key at runtime.
+      Google Project ID for the Deployer project. Only required if using
+      a multi-project setup.
 
-  public-key:
+  attestation-project-id:
     type: env_var_name
-    default: BIN_AUTHZ_PUBLIC_KEY
+    default: ATTESTATION_PROJECT_ID
     description: >
-      Name of environment variable storing the public portion of the keypair
-      with which to sign the attestation. Not required if
-      `binauth_use-existing-keypair` is set to `false`. Store the public key
-      in Contexts or as a project-level environment variable, as a single-
-      line string, with newlines replaced with the newline string literal
-      `\n`. Use an RSA-2048-type key. For details, see the following:
-      https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
+      Google Project ID for the Attestation project. Only required if using
+      a multi-project setup.
 
-  private-key:
+  google-service-account:
     type: env_var_name
-    default: BIN_AUTHZ_PRIVATE_KEY
+    default: GOOGLE_SERVICE_ACCOUNT
     description: >
-      Name of environment variable storing the private portion of the
-      keypair with which to sign the attestation. Not required if
-      `use-existing-keypair` is set to `false`. Store the private
-      key in Contexts or as a project-level environment variable, as a
-      single-line string, with newlines replaced with the newline string
-      literal `\n`. Use an RSA-2048-type key. Details available here:
-      https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
+      Service account address for the Google Project. Not Required if
+      using a multi-project setup.
+
+  attestor-service-account:
+    type: env_var_name
+    default: ATTESTOR_SERVICE_ACCOUNT
+    description: >
+      Service account address for the Attestor project. Only required if
+      using a multi-project setup.
+
+  deployer-service-account:
+    type: env_var_name
+    default: DEPLOYER_SERVICE_ACCOUNT
+    description: >
+      Service account address for the Deployer project. Only required if
+      using a multi-project setup.
 
   # setup
-  google-compute-zone:
-    type: env_var_name
-    default: GOOGLE_COMPUTE_ZONE
-    description: >
-      Environment variable storing the name of the Google compute zone to
-      use by default when running commands with the gcloud CLI
-
   create-new-gke-cluster:
     type: boolean
     default: false
@@ -163,26 +135,90 @@ parameters:
       to `true` and pass the name of the environment variable to the
       `gke-cluster-env-var` parameter.
 
-  # create-note
+  # keypair
+  use-existing-keypair:
+    type: boolean
+    default: true
+    description: >
+      Use an existing PGP keypair? If `false`, a keypair will be created
+      on-the-fly.
+
+  keypair-name:
+    type: string
+    description: >
+      Name to attach to PGP keypair. Only required if `use-existing-keypair`
+      is set to `false`.
+
+  keypair-email:
+    type: string
+    description: >
+      Email address to attach to PGP keypair. Only required if
+      `use-existing-keypair` is set to `false`.
+
+  keypair-passphrase:
+    type: env_var_name
+    default: BIN_AUTHZ_KEYPAIR_PASSPHRASE
+    description: >
+      Name of environment variable storing the passphrase used to
+      generate PGP keypair. If key was previously generated without a
+      passphrase, or if generating a passphrase-less key at runtime,
+      leave this environment variable unset, or set it to a blank string.
+
+  public-key:
+    type: env_var_name
+    default: BIN_AUTHZ_PUBLIC_KEY
+    description: >
+      Name of environment variable storing the public portion of the keypair
+      with which to sign the attestation. Not required if
+      `binauth_use-existing-keypair` is set to `false`. Store the public key
+      in Contexts or as a project-level environment variable, as a single-
+      line string, with newlines replaced with the newline string literal
+      `\n`. Use an RSA-2048-type key. For details, see the following:
+      https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
+
+  private-key:
+    type: env_var_name
+    default: BIN_AUTHZ_PRIVATE_KEY
+    description: >
+      Name of environment variable storing the private portion of the
+      keypair with which to sign the attestation. Not required if
+      `use-existing-keypair` is set to `false`. Store the private
+      key in Contexts or as a project-level environment variable, as a
+      single-line string, with newlines replaced with the newline string
+      literal `\n`. Use an RSA-2048-type key. Details available here:
+      https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
+
+  # attestor
+  attestor:
+    type: string
+    default: $CIRCLE_USERNAME
+    description: >
+      Name of the attestation authority for the container analysis note.
+      If the attestor does not yet exist, it will be created. Defaults to
+      the value of the `$CIRCLE_USERNAME` environment variable (VCS user who
+      triggered the CircleCI job).
+
   attestor-hint:
     type: string
     default: CircleCI username
     description: >
       A human-readable name for this attestation authority (e.g., QA)
 
-  google-service-account:
-    type: env_var_name
-    default: GOOGLE_SERVICE_ACCOUNT
+  # note
+  note-id:
+    type: string
+    default: $CIRCLE_USERNAME-note-$CIRCLE_JOB-$CIRCLE_BUILD_NUM
     description: >
-      Service account address for the Google Project. Not Required if
-      using a multi-project setup.
+      Name of the container analysis note. Defaults to a combination of
+      values from the attestor parameter, and CircleCI job name and number
+      environment variables.
 
-  attestor-service-account:
-    type: env_var_name
-    default: ATTESTOR_SERVICE_ACCOUNT
+  use-note-file:
+    type: boolean
+    default: false
     description: >
-      Service account address for the Attestor project. Only required if
-      using a multi-project setup.
+      Upload an existing container analysis note file instead of creating
+      one via this command's paramaters?
 
   note-description-short:
     type: string
@@ -213,13 +249,6 @@ parameters:
     default: ""
     description: Names of any notes relevant or related to this note
 
-  use-note-file:
-    type: boolean
-    default: false
-    description: >
-      Upload an existing container analysis note file instead of creating
-      one via this command's paramaters?
-
   note-filepath:
     type: string
     default: /tmp/note_payload.json
@@ -228,28 +257,7 @@ parameters:
       if `use-note-file` is `true`; otherwise, note will be created at this
       path.
 
-  # create-attestor
-  keypair-name:
-    type: string
-    description: >
-      Name to attach to PGP keypair. Only required if `use-existing-keypair`
-      is set to `false`.
-
-  deployer-service-account:
-    type: env_var_name
-    default: DEPLOYER_SERVICE_ACCOUNT
-    description: >
-      Service account address for the Deployer project, necessary for
-      multi-GCP project Binary Authorization configurations
-
-  # configure-policy
-  deployer-project-id:
-    type: env_var_name
-    default: DEPLOYER_PROJECT_ID
-    description: >
-      Google Project ID for the Deployer project. Only required if using
-      a multi-project setup.
-
+  # policy
   use-policy-file:
     type: boolean
     default: false
@@ -330,14 +338,7 @@ parameters:
       https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#admission_rule
       To specify multiple attestors, use a comma-separated string.
 
-  # create-attestation
-  attestation-project-id:
-    type: env_var_name
-    default: ATTESTATION_PROJECT_ID
-    description: >
-      Google Project ID for the Attestation project. Only required if using
-      a multi-project setup.
-
+  # image/attestation
   image-path:
     type: string
     description: >

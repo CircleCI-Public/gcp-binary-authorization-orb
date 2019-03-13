@@ -92,7 +92,9 @@ parameters:
     default: BIN_AUTHZ_KEYPAIR_PASSPHRASE
     description: >
       Name of environment variable storing the passphrase used to
-      generate PGP keypair
+      generate PGP keypair. If key was previously generated without a
+      passphrase, or if generating a passphrase-less key at runtime,
+      leave this environment variable unset, or set it to a blank string.
 
   attestor:
     type: string
