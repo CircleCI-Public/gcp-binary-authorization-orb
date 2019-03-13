@@ -117,14 +117,10 @@ workflows:
       - test-google:
           context: orb-publishing
           filters: *integration-dev_filters
-          requires:
-            - test-docker
 
       - test-machine:
           context: orb-publishing
           filters: *integration-dev_filters
-          requires:
-            - test-google
 
       - bin-authz/create-attestation:
           context: orb-publishing
@@ -142,5 +138,3 @@ workflows:
           attestation_image-path: gcr.io/google-containers/google-containers-test-image
           attestation_image-tag: "2017-01-23"
           filters: *integration-dev_filters
-          requires:
-            - test-machine
