@@ -150,6 +150,8 @@ steps:
               trust quit; send \"5\ry\r\"; expect eof"
 
   # why isn't this signing ??? i verified while SSH'd in...
+  # apparently it signs on `machine` exec but not docker exec ?
+  # must be something w/ diff versions of gpg
   - run:
       name: Sign attestation payload
       command: |
