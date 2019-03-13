@@ -242,4 +242,5 @@ steps:
               gcloud --project=$<<parameters.google-project-id>> \
                 beta container binauthz attestations list \
                 --attestor=<<parameters.attestor>> \
-                --attestor-project=$<<parameters.google-project-id>>
+                --attestor-project=$<<parameters.google-project-id>> | \
+                grep -v "Listed 0 items"
