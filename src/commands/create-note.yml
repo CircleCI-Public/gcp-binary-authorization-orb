@@ -56,7 +56,7 @@ parameters:
 
   note-id:
     type: string
-    default: $CIRCLE_USERNAME-note-CircleCI-job-#$CIRCLE_BUILD_NUM
+    default: $CIRCLE_USERNAME-note-CircleCI-$CIRCLE_BUILD_NUM
     description: >
       Name of the container analysis note. Defaults to a combination of
       values from the attestor parameter, and CircleCI job name and number
