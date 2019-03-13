@@ -187,12 +187,12 @@ steps:
                 # iterate over array to echo admission whitelist patterns into a file
                 # \\ is required for sed
                 for ((i=0;i<END;i++)); do
-                  echo "  - namePattern: ${arrWHITELIST_PATTERNS[i]}\\" \>> WHITELIST_PATTERNS.txt
+                  echo "- namePattern: ${arrWHITELIST_PATTERNS[i]}\\" \>> WHITELIST_PATTERNS.txt
                 done
 
                 # need to handle iteration for the last item separately
                 # sed does not require it to have \ at line end
-                echo "  - namePattern: ${arrWHITELIST_PATTERNS[-1]}" \>> WHITELIST_PATTERNS.txt
+                echo "- namePattern: ${arrWHITELIST_PATTERNS[-1]}" \>> WHITELIST_PATTERNS.txt
 
                 READY_TO_REPLACE=$(cat WHITELIST_PATTERNS.txt)
 
@@ -241,13 +241,13 @@ steps:
               insert_attestors \
                 <<parameters.default-required-attestors>> \
                 DEFAULT_REQUIRED_ATTESTORS \
-                "    "
+                "  "
 
               if <<parameters.cluster-specific-rules>>; then
                 insert_attestors \
                   <<parameters.cluster-specific-required-attestors>> \
                   CLUSTER_SPECIFIC_REQUIRED_ATTESTORS \
-                  "      "
+                  "    "
               fi
 
   - when:
