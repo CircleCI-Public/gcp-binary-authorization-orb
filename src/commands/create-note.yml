@@ -112,21 +112,26 @@ steps:
             condition: <<parameters.use-file>>
             steps:
               - run:
-                  name: Create Container Analysis note IAM request
+                  name: Create Container Analysis note
                   command: |
-                    cat > /tmp/iam_request.json \<< EOM
+                    cat > <<parameters.note-filepath>> \<< EOM
                     {
-                      'resource': 'projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>',
-                      'policy': {
-                        'bindings': [
-                          {
-                            'role': 'roles/containeranalysis.notes.occurrences.viewer',
-                            'members': [
-                              'serviceAccount:$<<parameters.attestor-service-account>>'
-                            ]
-                          }
-                        ]
-                      }
+                      "name": "projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>",
+                      "shortDescription": "<<parameters.note-description-short>>",<<#parameters.note-description-long>>
+                      "longDescription": "<<parameters.note-description-long>>",<</parameters.note-description-long>>
+                      "attestation_authority": {
+                        "hint": {
+                          "human_readable_name": "<<parameters.attestor-hint>>"
+                        }
+                      },
+                      "relatedUrl": [
+                        {
+                          "url": "<<parameters.related-url>>",
+                          "label": "related URL"
+                        }
+                      ],<<#parameters.expiration-time>>
+                      "expirationTime": "<<parameters.expiration-time>>",<</parameters.expiration-time>><<#parameters.related-note-names>>
+                      "relatedNoteNames": "<<parameters.related-note-names>>",<</parameters.related-note-names>>
                     }
                     EOM
 
@@ -148,6 +153,25 @@ steps:
                 grep "<<parameters.note-description-short>>"
 
         - run:
+            name: Create Container Analysis note IAM request
+            command: |
+              cat > /tmp/iam_request.json \<< EOM
+              {
+                'resource': 'projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>',
+                'policy': {
+                  'bindings': [
+                    {
+                      'role': 'roles/containeranalysis.notes.occurrences.viewer',
+                      'members': [
+                        'serviceAccount:$<<parameters.attestor-service-account>>'
+                      ]
+                    }
+                  ]
+                }
+              }
+              EOM
+
+        - run:
             name: Set permissions on Container Analysis note
             command: |
               curl -X POST  \
@@ -163,21 +187,26 @@ steps:
             condition: <<parameters.use-file>>
             steps:
               - run:
-                  name: Create Container Analysis note IAM request
+                  name: Create Container Analysis note
                   command: |
-                    cat > /tmp/iam_request.json \<< EOM
+                    cat > <<parameters.note-filepath>> \<< EOM
                     {
-                      'resource': 'projects/$<<parameters.google-project-id>>/notes/<<parameters.note-id>>',
-                      'policy': {
-                        'bindings': [
-                          {
-                            'role': 'roles/containeranalysis.notes.occurrences.viewer',
-                            'members': [
-                              'serviceAccount:$<<parameters.google-service-account>>'
-                            ]
-                          }
-                        ]
-                      }
+                      "name": "projects/$<<parameters.google-project-id>>/notes/<<parameters.note-id>>",
+                      "shortDescription": "<<parameters.note-description-short>>",<<#parameters.note-description-long>>
+                      "longDescription": "<<parameters.note-description-long>>",<</parameters.note-description-long>>
+                      "attestation_authority": {
+                        "hint": {
+                          "human_readable_name": "<<parameters.attestor-hint>>"
+                        }
+                      },
+                      "relatedUrl": [
+                        {
+                          "url": "<<parameters.related-url>>",
+                          "label": "related URL"
+                        }
+                      ],<<#parameters.expiration-time>>
+                      "expirationTime": "<<parameters.expiration-time>>",<</parameters.expiration-time>><<#parameters.related-note-names>>
+                      "relatedNoteNames": "<<parameters.related-note-names>>",<</parameters.related-note-names>>
                     }
                     EOM
 
@@ -197,3 +226,22 @@ steps:
                 -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
                 "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.google-project-id>>/notes/<<parameters.note-id>>" | \
                 grep "<<parameters.note-description-short>>"
+
+        - run:
+            name: Create Container Analysis note IAM request
+            command: |
+              cat > /tmp/iam_request.json \<< EOM
+              {
+                'resource': 'projects/$<<parameters.google-project-id>>/notes/<<parameters.note-id>>',
+                'policy': {
+                  'bindings': [
+                    {
+                      'role': 'roles/containeranalysis.notes.occurrences.viewer',
+                      'members': [
+                        'serviceAccount:$<<parameters.google-service-account>>'
+                      ]
+                    }
+                  ]
+                }
+              }
+              EOM
