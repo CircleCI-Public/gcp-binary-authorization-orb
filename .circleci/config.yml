@@ -20,7 +20,6 @@ commands:
 
       - bin-authz/create-attestor:
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          use-existing-keypair: false
           keypair-email: rose@circleci.com
           keypair-name: iynere
 
@@ -34,7 +33,6 @@ commands:
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
-          use-existing-keypair: false
           keypair-email: rose@circleci.com
 
       - store_artifacts:
@@ -42,6 +40,9 @@ commands:
 
       - store_artifacts:
           path: /tmp/policy.yaml
+
+      - store_artifacts:
+          path: /tmp/generated_payload.json
 
 jobs:
   test-google:
@@ -110,24 +111,25 @@ workflows:
 
   integration-tests_prod-release:
     jobs:
-      # - test-docker:
-      #     context: orb-publishing
-      #     filters: *integration-dev_filters
+      - test-docker:
+          context: orb-publishing
+          filters: *integration-dev_filters
 
-      # - test-google:
-      #     context: orb-publishing
-      #     filters: *integration-dev_filters
+      - test-google:
+          context: orb-publishing
+          filters: *integration-dev_filters
 
-      # - test-machine:
-      #     context: orb-publishing
-      #     filters: *integration-dev_filters
+      - test-machine:
+          context: orb-publishing
+          filters: *integration-dev_filters
 
       - bin-authz/create-attestation:
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           # use-existing-keypair: false
           keypair-email: rose@circleci.com
-          # keypair-passphrase: testing
+          keypair-name: iynere
+          # keypair-passphrase: NEEDS_TO_BE_AN_ENV_VAR
           use-gke-env-var: false
           gke-cluster-name: test-cluster
           keypair-name: iynere
