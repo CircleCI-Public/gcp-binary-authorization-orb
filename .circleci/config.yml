@@ -126,7 +126,7 @@ workflows:
           context: orb-publishing
           binauthz_attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           # use-existing-keypair: false
-          # keypair-email: rose@circleci.com
+          keypair-email: rose@circleci.com
           # keypair-passphrase: testing
           use-gke-env-var: false
           gke-cluster-name: test-cluster
