@@ -158,16 +158,26 @@ steps:
           --attestor=<<parameters.attestor>> \
           --public-key-file=/tmp/generated-key.pgp
 
-  - run:
-      name: Verify attestor creation with key
-      command: |
-        gcloud --project=$<<parameters.attestor-project-id>> \
-          beta container binauthz attestors list | \
-          grep "<<parameters.attestor>>"
+  - unless:
+      condition: <<parameters.multi-project-setup>>
+      steps:
+        - run:
+            name: Verify attestor creation with key
+            command: |
+              gcloud --project=$<<parameters.google-project-id>> \
+                beta container binauthz attestors list | \
+                grep "<<parameters.attestor>>"
 
   - when:
       condition: <<parameters.multi-project-setup>>
       steps:
+        - run:
+            name: Verify attestor creation with key
+            command: |
+              gcloud --project=$<<parameters.attestor-project-id>> \
+                beta container binauthz attestors list | \
+                grep "<<parameters.attestor>>"
+
         - run:
             name: Add deployer project IAM role binding
             command: |
