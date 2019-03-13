@@ -122,6 +122,18 @@ steps:
           --artifact-url="<<parameters.image-path>>@$DIGEST" \
           > <<parameters.payload-filepath>>
 
+  - when:
+      condition: <<parameters.use-existing-keypair>>
+      steps:
+      - run:
+          name: Set up public/private keys
+          command: |
+            echo -e $<<parameters.public-key>> > public.key
+            echo -e $<<parameters.private-key>> > private.key
+
+            gpg --import public.key
+            gpg --import private.key
+
   - run:
       name: Extract keypair fingerprint
       command: |
@@ -144,12 +156,6 @@ steps:
       - run:
           name: Set up attestation signing
           command: |
-            echo -e $<<parameters.public-key>> > public.key
-            echo -e $<<parameters.private-key>> > private.key
-
-            gpg --import public.key
-            gpg --import private.key
-
             # set sudo to work whether logged in as root user or non-root user
             if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
 
