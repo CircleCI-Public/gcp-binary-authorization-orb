@@ -106,99 +106,52 @@ parameters:
 
 steps:
   - unless:
-      condition: <<parameters.multi-project-setup>>
+      condition: <<parameters.use-note-file>>
       steps:
-        - unless:
-            condition: <<parameters.use-note-file>>
-            steps:
-              - run:
-                  name: Create Container Analysis note
-                  command: |
-                    cat > <<parameters.note-filepath>> \<< EOM
-                    {
-                      "name": "projects/$<<parameters.google-project-id>>/notes/<<parameters.note-id>>",
-                      "shortDescription": "<<parameters.note-description-short>>",<<#parameters.note-description-long>>
-                      "longDescription": "<<parameters.note-description-long>>",<</parameters.note-description-long>>
-                      "attestation_authority": {
-                        "hint": {
-                          "human_readable_name": "<<parameters.attestor-hint>>"
-                        }
-                      },
-                      "relatedUrl": [
-                        {
-                          "url": "<<parameters.note-related-url>>",
-                          "label": "related URL"
-                        }
-                      ],<<#parameters.note-expiration-time>>
-                      "expirationTime": "<<parameters.note-expiration-time>>",<</parameters.note-expiration-time>><<#parameters.related-note-names>>
-                      "relatedNoteNames": "<<parameters.related-note-names>>",<</parameters.related-note-names>>
-                    }
-                    EOM
-
         - run:
-            name: Store Container Analysis note
+            name: Create Container Analysis note
             command: |
-              curl -X POST \
-                -H "Content-Type: application/json" \
-                -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
-                --data-binary @<<parameters.note-filepath>>  \
-                "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.google-project-id>>/notes/?noteId=<<parameters.note-id>>"
+              cat > <<parameters.note-filepath>> \<< EOM
+              {
+                "name": "projects/$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>>/notes/<<parameters.note-id>>",
+                "shortDescription": "<<parameters.note-description-short>>",<<#parameters.note-description-long>>
+                "longDescription": "<<parameters.note-description-long>>",<</parameters.note-description-long>>
+                "attestation_authority": {
+                  "hint": {
+                    "human_readable_name": "<<parameters.attestor-hint>>"
+                  }
+                },
+                "relatedUrl": [
+                  {
+                    "url": "<<parameters.note-related-url>>",
+                    "label": "related URL"
+                  }
+                ],<<#parameters.note-expiration-time>>
+                "expirationTime": "<<parameters.note-expiration-time>>",<</parameters.note-expiration-time>><<#parameters.related-note-names>>
+                "relatedNoteNames": "<<parameters.related-note-names>>",<</parameters.related-note-names>>
+              }
+              EOM
 
-        - run:
-            name: Verify Container Analysis note upload
-            command: |
-              curl \
-                -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
-                "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.google-project-id>>/notes/<<parameters.note-id>>" | \
-                grep "<<parameters.note-description-short>>"
+  - run:
+      name: Store Container Analysis note
+      command: |
+        curl -X POST \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
+          --data-binary @<<parameters.note-filepath>>  \
+          "https://containeranalysis.googleapis.com/v1beta1/projects/$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>>/notes/?noteId=<<parameters.note-id>>"
+
+  - run:
+      name: Verify Container Analysis note upload
+      command: |
+        curl \
+          -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
+          "https://containeranalysis.googleapis.com/v1beta1/projects/$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>>/notes/<<parameters.note-id>>" | \
+          grep "<<parameters.note-description-short>>"
 
   - when:
       condition: <<parameters.multi-project-setup>>
       steps:
-        - unless:
-            condition: <<parameters.use-note-file>>
-            steps:
-              - run:
-                  name: Create Container Analysis note
-                  command: |
-                    cat > <<parameters.note-filepath>> \<< EOM
-                    {
-                      "name": "projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>",
-                      "shortDescription": "<<parameters.note-description-short>>",<<#parameters.note-description-long>>
-                      "longDescription": "<<parameters.note-description-long>>",<</parameters.note-description-long>>
-                      "attestation_authority": {
-                        "hint": {
-                          "human_readable_name": "<<parameters.attestor-hint>>"
-                        }
-                      },
-                      "relatedUrl": [
-                        {
-                          "url": "<<parameters.note-related-url>>",
-                          "label": "related URL"
-                        }
-                      ],<<#parameters.note-expiration-time>>
-                      "expirationTime": "<<parameters.note-expiration-time>>",<</parameters.note-expiration-time>><<#parameters.related-note-names>>
-                      "relatedNoteNames": "<<parameters.related-note-names>>",<</parameters.related-note-names>>
-                    }
-                    EOM
-
-        - run:
-            name: Store Container Analysis note
-            command: |
-              curl -X POST \
-                -H "Content-Type: application/json" \
-                -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
-                --data-binary @<<parameters.note-filepath>>  \
-                "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/?noteId=<<parameters.note-id>>"
-
-        - run:
-            name: Verify Container Analysis note upload
-            command: |
-              curl \
-                -H "Authorization: Bearer $(gcloud auth print-access-token)"  \
-                "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>" | \
-                grep "<<parameters.note-description-short>>"
-
         - run:
             name: Create Container Analysis note IAM request
             command: |
