@@ -88,7 +88,7 @@ workflows:
             - orb-tools/lint
 
       - orb-tools/publish-dev:
-          orb-name: circleci/gcp-bin-authz
+          orb-name: circleci/gcp-binary-authorization
           context: orb-publishing
           requires:
             - orb-tools/pack
@@ -258,7 +258,7 @@ workflows:
       - orb-tools/dev-promote-prod:
           name: dev-promote-patch
           context: orb-publishing
-          orb-name: circleci/gcp-bin-authz
+          orb-name: circleci/gcp-binary-authorization
           requires: *prod-deploy_requires
           filters:
             branches:
@@ -269,7 +269,7 @@ workflows:
       - orb-tools/dev-promote-prod:
           name: dev-promote-minor
           context: orb-publishing
-          orb-name: circleci/gcp-bin-authz
+          orb-name: circleci/gcp-binary-authorization
           release: minor
           requires: *prod-deploy_requires
           filters:
@@ -281,7 +281,7 @@ workflows:
       - orb-tools/dev-promote-prod:
           name: dev-promote-major
           context: orb-publishing
-          orb-name: circleci/gcp-bin-authz
+          orb-name: circleci/gcp-binary-authorization
           release: major
           requires: *prod-deploy_requires
           filters:
