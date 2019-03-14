@@ -237,7 +237,7 @@ steps:
         - run:
             name: Verify attestation creation
             command: |
-              sleep 5 && gcloud --project=$<<parameters.attestation-project-id>> \
+              sleep 10 && gcloud --project=$<<parameters.attestation-project-id>> \
                 beta container binauthz attestations list \
                 --attestor=<<parameters.attestor>> \
                 --attestor-project=$<<parameters.attestor-project-id>>
@@ -266,7 +266,7 @@ steps:
         - run:
             name: Verify attestation creation
             command: |
-              sleep 5 && gcloud --project=$<<parameters.google-project-id>> \
+              sleep 10 && gcloud --project=$<<parameters.google-project-id>> \
                 beta container binauthz attestations list \
                 --attestor=<<parameters.attestor>> \
                 --attestor-project=$<<parameters.google-project-id>>
