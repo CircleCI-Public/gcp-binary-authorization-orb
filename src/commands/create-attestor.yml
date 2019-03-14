@@ -37,7 +37,7 @@ parameters:
     default: true
     description: >
       Use an existing PGP keypair? If `false`, a keypair will be created
-      on-the-fly.
+      on-the-fly
 
   keypair-email:
     type: string
@@ -57,7 +57,7 @@ parameters:
     default: false
     description: >
       Generate a PGP keypair with a passphrase? Only required if
-      `use-existing-keypair` is set to `false`.
+      `use-existing-keypair` is set to `false`
 
   keypair-passphrase:
     type: env_var_name

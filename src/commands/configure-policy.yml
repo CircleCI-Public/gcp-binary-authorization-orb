@@ -93,7 +93,7 @@ parameters:
     description: >
       If specifying a set of cluster-specific rules, what is the name of
       the GKE cluster to which these rules will apply? Supply a name in
-      the `location.name` format (e.g., `us-east1-a.prod-cluster`).
+      the `location.name` format (e.g., `us-east1-a.prod-cluster`)
 
   cluster-specific-eval-mode:
     type: enum

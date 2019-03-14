@@ -57,7 +57,7 @@ parameters:
     default: true
     description: >
       Use an existing PGP keypair? Only select `false` if a keypair was
-      generated on-the-fly in the `create-attestor` command.
+      generated on-the-fly in the `create-attestor` command
 
   public-key:
     type: env_var_name
