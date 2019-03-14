@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  bin-authz: circleci/gcp-bin-authz@dev:alpha
+  bin-authz: circleci/gcp-binary-authorization@dev:alpha
   gcp-cli: circleci/gcp-cli@1.1.0
   orb-tools: circleci/orb-tools@8.3.0
 
