@@ -130,14 +130,14 @@ steps:
   - when:
       condition: <<parameters.use-existing-keypair>>
       steps:
-      - run:
-          name: Set up public/private keys
-          command: |
-            echo -e $<<parameters.public-key>> > public.key
-            echo -e $<<parameters.private-key>> > private.key
+        - run:
+            name: Set up public/private keys
+            command: |
+              echo -e $<<parameters.public-key>> > public.key
+              echo -e $<<parameters.private-key>> > private.key
 
-            gpg --import public.key
-            gpg --import private.key
+              gpg --import public.key
+              gpg --import private.key
 
   - run:
       name: Extract keypair fingerprint
@@ -158,19 +158,19 @@ steps:
   - when:
       condition: <<parameters.use-existing-keypair>>
       steps:
-      - run:
-          name: Set up attestation signing
-          command: |
-            # set sudo to work whether logged in as root user or non-root user
-            if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
+        - run:
+            name: Set up attestation signing
+            command: |
+              # set sudo to work whether logged in as root user or non-root user
+              if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
 
-            $SUDO apt-get -y install expect
+              $SUDO apt-get -y install expect
 
-            FINGERPRINT=$(cat FINGERPRINT.txt)
+              FINGERPRINT=$(cat FINGERPRINT.txt)
 
-            expect -c "spawn gpg --edit-key \
-              $FINGERPRINT \
-              trust quit; send \"5\ry\r\"; expect eof"
+              expect -c "spawn gpg --edit-key \
+                $FINGERPRINT \
+                trust quit; send \"5\ry\r\"; expect eof"
 
   - when:
       condition: <<parameters.use-passphrase>>

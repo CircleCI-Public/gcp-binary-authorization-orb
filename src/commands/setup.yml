@@ -77,5 +77,3 @@ steps:
         gcloud container clusters get-credentials \
           --zone $<<parameters.google-compute-zone>> \
           test-cluster
-
-
