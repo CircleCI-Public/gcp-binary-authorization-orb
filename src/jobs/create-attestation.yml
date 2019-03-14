@@ -39,8 +39,8 @@ parameters:
     type: env_var_name
     default: GOOGLE_COMPUTE_ZONE
     description: >
-      Environment variable storing the name of the Google compute zone to
-      use by default when running commands with the gcloud CLI
+      Name of environment variable storing the Google compute zone to use
+      by default when running commands with the gcloud CLI
 
   multi-project-setup:
     type: boolean
@@ -54,50 +54,52 @@ parameters:
     type: env_var_name
     default: GOOGLE_PROJECT_ID
     description: >
-      Environment variable name storing Google Project ID. Not Required if
-      using a multi-project setup.
+      Name of environment variable storing the Google project ID. Not
+      required if using a multi-project setup.
 
   attestor-project-id:
     type: env_var_name
     default: ATTESTOR_PROJECT_ID
     description: >
-      Google Project ID for the Attestor project. Only required if using
-      a multi-project setup.
+      Name of environment variable storing the Google project ID for the
+      attestor project. Only required if using a multi-project setup.
 
   deployer-project-id:
     type: env_var_name
     default: DEPLOYER_PROJECT_ID
     description: >
-      Google Project ID for the Deployer project. Only required if using
-      a multi-project setup.
+      Name of environment variable storing the Google project ID for the
+      deployer project. Only required if using a multi-project setup.
 
   attestation-project-id:
     type: env_var_name
     default: ATTESTATION_PROJECT_ID
     description: >
-      Google Project ID for the Attestation project. Only required if using
-      a multi-project setup.
+      Name of environment variable storing the Google project ID for the
+      attestor project. Only required if using a multi-project setup.
 
   google-service-account:
     type: env_var_name
     default: GOOGLE_SERVICE_ACCOUNT
     description: >
-      Service account address for the Google Project. Not Required if
-      using a multi-project setup.
+      Name of environment variable storing the service account address for
+      the Google project. Not required if using a multi-project setup.
 
   attestor-service-account:
     type: env_var_name
     default: ATTESTOR_SERVICE_ACCOUNT
     description: >
-      Service account address for the Attestor project. Only required if
-      using a multi-project setup.
+      Name of environment variable storing the service account address for
+      the attestor Google project. Only required if using a multi-project
+      setup.
 
   deployer-service-account:
     type: env_var_name
     default: DEPLOYER_SERVICE_ACCOUNT
     description: >
-      Service account address for the Deployer project. Only required if
-      using a multi-project setup.
+      Name of environment variable storing the service account address for
+      the deployer Google project. Only required if using a multi-project
+      setup.
 
   # setup
   create-new-gke-cluster:
@@ -107,33 +109,11 @@ parameters:
       Create a new GKE cluster to use with Binary Authorization? Default
       is `false`
 
-  use-gke-env-var:
-    type: boolean
-    default: true
-    description: >
-      Set this to `true` to instead pass an environment variable storing
-      the name of the GKE cluster for which to enable BinAuthz (default
-      is `false`)
-
-  gke-cluster-env-var:
-    type: env_var_name
-    default: GKE_CLUSTER_NAME
-    description: >
-      Environment variable storing the name of the GKE cluster for which
-      to enable BinAuthz. To pass a string literal instead of a reference
-      to a stored environmnent variable, set the `use-gke-env-var`
-      parameter to `false` and pass the GKE cluster name to the
-      `gke-cluster-name` environment variable instead.
-
   gke-cluster-name:
     type: string
     default: ""
     description: >
-      Name of the GKE cluster for which to enable BinAuthz. To store this
-      parameter value as an environment variable and avoid passing it as a
-      string literal, make sure the `use-gke-env-var` parameter is set
-      to `true` and pass the name of the environment variable to the
-      `gke-cluster-env-var` parameter.
+      Name of the GKE cluster for which to enable Binary Authorization
 
   # keypair
   use-existing-keypair:
@@ -323,8 +303,9 @@ parameters:
     default: CLUSTER_SPECIFIER_LOCATION_NAME
     description: >
       If specifying a set of cluster-specific rules, what is the name of
-      the GKE cluster to which these rules will apply? Supply a name in
-      the `location.name` format (e.g., `us-east1-a.prod-cluster`)
+      the GKE cluster to which these rules will apply? Supply an environment
+      variable storing a GKE cluster name in the `location.name` format
+      (e.g., `us-east1-a.prod-cluster`)
 
   cluster-specific-eval-mode:
     type: enum
@@ -390,10 +371,7 @@ steps:
   - setup:
       google-compute-zone: <<parameters.google-compute-zone>>
       create-new-gke-cluster: <<parameters.create-new-gke-cluster>>
-      use-gke-env-var: <<parameters.use-gke-env-var>>
-      gke-cluster-env-var: <<parameters.gke-cluster-env-var>>
       gke-cluster-name: <<parameters.gke-cluster-name>>
-
 
   - create-note:
       attestor: <<parameters.attestor>>

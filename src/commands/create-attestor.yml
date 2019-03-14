@@ -24,13 +24,15 @@ parameters:
     type: env_var_name
     default: GOOGLE_PROJECT_ID
     description: >
-      Environment variable name storing Google Project ID. Not Required if
-      using a multi-project setup.
+      Name of environment variable storing the Google project ID. Not
+      required if using a multi-project setup.
 
   attestor-project-id:
     type: env_var_name
     default: ATTESTOR_PROJECT_ID
-    description: Google Project ID for the Attestor project
+    description: >
+      Name of environment variable storing the Google project ID for the
+      attestor project. Only required if using a multi-project setup.
 
   use-existing-keypair:
     type: boolean
@@ -91,8 +93,9 @@ parameters:
     type: env_var_name
     default: DEPLOYER_SERVICE_ACCOUNT
     description: >
-      Service account address for the Deployer project, necessary for
-      multi-GCP project Binary Authorization configurations
+      Name of environment variable storing the service account address for
+      the deployer Google project. Only required if using a multi-project
+      setup.
 
 steps:
   - run:

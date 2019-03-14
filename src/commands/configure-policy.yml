@@ -9,8 +9,8 @@ parameters:
     type: env_var_name
     default: GOOGLE_PROJECT_ID
     description: >
-      Environment variable name storing Google Project ID. Not Required if
-      using a multi-project setup.
+      Name of environment variable storing the Google project ID. Not
+      required if using a multi-project setup.
 
   multi-project-setup:
     type: boolean
@@ -24,15 +24,15 @@ parameters:
     type: env_var_name
     default: ATTESTOR_PROJECT_ID
     description: >
-      Google Project ID for the Attestor project. Only required if using
-      a multi-project setup.
+      Name of environment variable storing the Google project ID for the
+      attestor project. Only required if using a multi-project setup.
 
   deployer-project-id:
     type: env_var_name
     default: DEPLOYER_PROJECT_ID
     description: >
-      Google Project ID for the Deployer project. Only required if using
-      a multi-project setup.
+      Name of environment variable storing the Google project ID for the
+      deployer project. Only required if using a multi-project setup.
 
   use-policy-file:
     type: boolean
@@ -92,8 +92,9 @@ parameters:
     default: CLUSTER_SPECIFIER_LOCATION_NAME
     description: >
       If specifying a set of cluster-specific rules, what is the name of
-      the GKE cluster to which these rules will apply? Supply a name in
-      the `location.name` format (e.g., `us-east1-a.prod-cluster`)
+      the GKE cluster to which these rules will apply? Supply an environment
+      variable storing a GKE cluster name in the `location.name` format
+      (e.g., `us-east1-a.prod-cluster`)
 
   cluster-specific-eval-mode:
     type: enum

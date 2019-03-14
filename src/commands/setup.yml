@@ -11,8 +11,30 @@ parameters:
     type: env_var_name
     default: GOOGLE_COMPUTE_ZONE
     description: >
-      Environment variable storing the name of the Google compute zone to
-      use by default when running commands with the gcloud CLI
+      Name of environment variable storing the Google compute zone to use
+      by default when running commands with the gcloud CLI
+
+  multi-project-setup:
+    type: boolean
+    default: false
+    description: >
+      Set to `true` if a multi-GCP project Binary Authorization setup is
+      being used. See the following for details:
+      https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
+
+  google-project-id:
+    type: env_var_name
+    default: GOOGLE_PROJECT_ID
+    description: >
+      Name of environment variable storing the Google project ID. Not
+      required if using a multi-project setup.
+
+  deployer-project-id:
+    type: env_var_name
+    default: DEPLOYER_PROJECT_ID
+    description: >
+      Name of environment variable storing the Google project ID for the
+      deployer project. Only required if using a multi-project setup.
 
   create-new-gke-cluster:
     type: boolean
@@ -21,33 +43,11 @@ parameters:
       Create a new GKE cluster to use with Binary Authorization? Defaults
       to `false`
 
-  use-gke-env-var:
-    type: boolean
-    default: false
-    description: >
-      Set this to `true` to instead pass an environment variable storing
-      the name of the GKE cluster for which to enable BinAuthz (default
-      is `false`)
-
   gke-cluster-name:
     type: string
     default: ""
     description: >
-      Name of the GKE cluster for which to enable BinAuthz. To store this
-      parameter value as an environment variable and avoid passing it as a
-      string literal, make sure the `use-gke-env-var` parameter is set to
-      `true` and pass the name of the environment variable to the
-      `gke-cluster-env-var` parameter.
-
-  gke-cluster-env-var:
-    type: env_var_name
-    default: GKE_CLUSTER_NAME
-    description: >
-      Environment variable storing the name of the GKE cluster for which
-      to enable BinAuthz. To pass a string literal instead of a reference
-      to a stored environmnent variable, set the `use-gke-env-var` parameter
-      to `false` and pass the GKE cluster name to the `gke-cluster-name`
-      environment variable instead.
+      Name of the GKE cluster for which to enable Binary Authorization
 
 steps:
   - run:
@@ -59,31 +59,23 @@ steps:
           containeranalysis.googleapis.com \
           binaryauthorization.googleapis.com
 
-  - when:
-      condition: <<parameters.use-gke-env-var>>
-      steps:
-        - run:
-            name: Enable Binary Authorization
-            command: |
-              gcloud beta container clusters update \
-                $<<parameters.gke-cluster-env-var>> \
-                --enable-binauthz \
-                --zone $<<parameters.google-compute-zone>>
-
-  - unless:
-      condition: <<parameters.use-gke-env-var>>
-      steps:
-        - run:
-            name: Enable Binary Authorization
-            command: |
-              gcloud beta container clusters update \
-                <<parameters.gke-cluster-name>> \
-                --enable-binauthz \
-                --zone $<<parameters.google-compute-zone>>
+  - run:
+      name: Enable Binary Authorization
+      command: |
+        gcloud beta container clusters update \
+          <<parameters.gke-cluster-name>> \
+          --enable-binauthz \
+          --zone $<<parameters.google-compute-zone>>
 
   - run:
       name: Configure kubectl
       command: |
+        gcloud --project=${DEPLOYER_PROJECT_ID} \
+            container clusters get-credentials \
+            --zone us-central1-a \
+            test-cluster
         gcloud container clusters get-credentials \
           --zone $<<parameters.google-compute-zone>> \
           test-cluster
+
+

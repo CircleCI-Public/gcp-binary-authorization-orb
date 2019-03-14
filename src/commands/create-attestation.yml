@@ -1,6 +1,6 @@
 description: >
   Create a Binary Authorization attestation authorizing a container
-  image for deployment. See Google's BinAuthz documentation for details:
+  image for deployment. See Google's Binary Authorization documentation:
   https://cloud.google.com/binary-authorization/docs/key-concepts#attestations
   https://cloud.google.com/binary-authorization/docs/making-attestations
 
@@ -9,8 +9,8 @@ parameters:
     type: env_var_name
     default: GOOGLE_PROJECT_ID
     description: >
-      Environment variable name storing Google Project ID. Not Required if
-      using a multi-project setup.
+      Name of environment variable storing the Google project ID. Not
+      required if using a multi-project setup.
 
   multi-project-setup:
     type: boolean
@@ -24,15 +24,15 @@ parameters:
     type: env_var_name
     default: ATTESTOR_PROJECT_ID
     description: >
-      Google Project ID for the Attestor project. Only required if using
-      a multi-project setup.
+      Name of environment variable storing the Google project ID for the
+      attestor project. Only required if using a multi-project setup.
 
   attestation-project-id:
     type: env_var_name
     default: ATTESTATION_PROJECT_ID
     description: >
-      Google Project ID for the Attestation project. Only required if using
-      a multi-project setup.
+      Name of environment variable storing the Google project ID for the
+      attestor project. Only required if using a multi-project setup.
 
   image-path:
     type: string
