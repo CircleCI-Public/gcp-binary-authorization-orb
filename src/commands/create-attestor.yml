@@ -47,6 +47,7 @@ parameters:
 
   keypair-name:
     type: string
+    default: ""
     description: >
       Name to attach to PGP keypair. Only required if `use-existing-keypair`
       is set to `false`.
