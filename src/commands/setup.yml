@@ -36,6 +36,20 @@ parameters:
       Name of environment variable storing the Google project ID for the
       deployer project. Only required if using a multi-project setup.
 
+  attestor-project-id:
+    type: env_var_name
+    default: ATTESTOR_PROJECT_ID
+    description: >
+      Name of environment variable storing the Google project ID for the
+      attestor project. Only required if using a multi-project setup.
+
+  attestation-project-id:
+    type: env_var_name
+    default: ATTESTATION_PROJECT_ID
+    description: >
+      Name of environment variable storing the Google project ID for the
+      attestor project. Only required if using a multi-project setup.
+
   create-new-gke-cluster:
     type: boolean
     default: false
@@ -53,11 +67,24 @@ steps:
   - run:
       name: Enable GCP APIs
       command: |
-        gcloud services enable \
-          serviceusage.googleapis.com \
+        gcloud services \
+          --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+          enable \
           container.googleapis.com \
-          containeranalysis.googleapis.com \
           binaryauthorization.googleapis.com
+
+        gcloud services \
+          --project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+          containeranalysis.googleapis.com \
+          binaryauthorization.googleapis.com \
+
+        gcloud services \
+          --project=$<<#parameters.multi-project-setup>><<parameters.attestation-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+          containeranalysis.googleapis.com \
+          binaryauthorization.googleapis.com \
+
+        # what about this ?
+        # serviceusage.googleapis.com \
 
   - run:
       name: Enable Binary Authorization
@@ -67,10 +94,24 @@ steps:
           --enable-binauthz \
           --zone $<<parameters.google-compute-zone>>
 
+  - when:
+      condition: <<parameters.create-new-gke-cluster>>
+      steps:
+        - run:
+            name: Create GKE cluster
+            command: |
+              gcloud \
+                --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+                beta container clusters create \
+                --enable-binauthz \
+                --zone $<<parameters.google-compute-zone>> \
+                <<parameters.gke-cluster-name>>
+
   - run:
       name: Configure kubectl
       command: |
-        gcloud --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+        gcloud \
+          --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
           container clusters get-credentials \
           --zone $<<parameters.google-compute-zone>> \
           <<parameters.gke-cluster-name>>
