@@ -215,58 +215,27 @@ steps:
                 --output /tmp/generated_signature.pgp \
                 --sign <<parameters.payload-filepath>>
 
-  - when:
-      condition: <<parameters.multi-project-setup>>
-      steps:
-        - run:
-            name: Create attestation
-            command: |
-              FINGERPRINT=$(cat FINGERPRINT.txt)
-              DIGEST=$(cat DIGEST.txt)
+  - run:
+      name: Create attestation
+      command: |
+        FINGERPRINT=$(cat FINGERPRINT.txt)
+        DIGEST=$(cat DIGEST.txt)
 
-              gcloud --project=$<<parameters.attestation-project-id>> \
-                beta container binauthz attestations create \
-                --artifact-url="<<parameters.image-path>>@$DIGEST" \
-                --attestor="projects/$<<parameters.attestor-project-id>>/attestors/<<parameters.attestor>>" \
-                --signature-file=/tmp/generated_signature.pgp \
-                --pgp-key-fingerprint="$FINGERPRINT"
+        gcloud --project=$<<#parameters.multi-project-setup>><<parameters.attestation-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+          beta container binauthz attestations create \
+          --artifact-url="<<parameters.image-path>>@$DIGEST" \
+          --attestor="projects/$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>>/attestors/<<parameters.attestor>>" \
+          --signature-file=/tmp/generated_signature.pgp \
+          --pgp-key-fingerprint="$FINGERPRINT"
 
-                rm -rf FINGERPRINT.txt
-                rm -rf DIGEST.txt
+          rm -rf FINGERPRINT.txt
+          rm -rf DIGEST.txt
 
-        - run:
-            name: Verify attestation creation
-            command: |
-              sleep 10 && gcloud --project=$<<parameters.attestation-project-id>> \
-                beta container binauthz attestations list \
-                --attestor=<<parameters.attestor>> \
-                --attestor-project=$<<parameters.attestor-project-id>> | \
-                grep -v "Listed 0 items"
-
-  - unless:
-      condition: <<parameters.multi-project-setup>>
-      steps:
-        - run:
-            name: Create attestation
-            command: |
-              FINGERPRINT=$(cat FINGERPRINT.txt)
-              DIGEST=$(cat DIGEST.txt)
-
-              gcloud --project=$<<parameters.google-project-id>> \
-                beta container binauthz attestations create \
-                --artifact-url="<<parameters.image-path>>@$DIGEST" \
-                --attestor="projects/$<<parameters.google-project-id>>/attestors/<<parameters.attestor>>" \
-                --signature-file=/tmp/generated_signature.pgp \
-                --pgp-key-fingerprint="$FINGERPRINT"
-
-              rm -rf FINGERPRINT.txt
-              rm -rf DIGEST.txt
-
-        - run:
-            name: Verify attestation creation
-            command: |
-              sleep 10 && gcloud --project=$<<parameters.google-project-id>> \
-                beta container binauthz attestations list \
-                --attestor=<<parameters.attestor>> \
-                --attestor-project=$<<parameters.google-project-id>> | \
-                grep -v "Listed 0 items"
+  - run:
+      name: Verify attestation creation
+      command: |
+        sleep 10 && gcloud --project=$<<#parameters.multi-project-setup>><<parameters.attestation-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+          beta container binauthz attestations list \
+          --attestor=<<parameters.attestor>> \
+          --attestor-project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> | \
+          grep -v "Listed 0 items"

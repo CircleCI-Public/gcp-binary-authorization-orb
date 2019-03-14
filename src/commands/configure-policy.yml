@@ -118,59 +118,30 @@ steps:
   - unless:
       condition: <<parameters.use-policy-file>>
       steps:
-        - when:
-            condition: <<parameters.multi-project-setup>>
-            steps:
-              - run:
-                  name: Create policy YAML file
-                  command: |
-                    cat > <<parameters.policy-filepath>> \<< EOM
-                    name: projects/$<<parameters.deployer-project-id>>/policy
+        - run:
+            name: Create policy YAML file
+            command: |
+              cat > <<parameters.policy-filepath>> \<< EOM
+              name: projects/$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>>/policy
 
-                    admissionWhitelistPatterns:
-                    ADMISSION_WHITELIST_PATTERNS
+              admissionWhitelistPatterns:
+              ADMISSION_WHITELIST_PATTERNS
 
-                    defaultAdmissionRule:
-                      evaluationMode: <<parameters.default-evaluation-mode>>
-                      enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
-                      requireAttestationsBy:
-                    DEFAULT_REQUIRED_ATTESTORS<<#parameters.cluster-specific-rules>>
+              defaultAdmissionRule:
+                evaluationMode: <<parameters.default-evaluation-mode>>
+                enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
+                requireAttestationsBy:
+              DEFAULT_REQUIRED_ATTESTORS<<#parameters.cluster-specific-rules>>
 
-                    clusterAdmissionRules:
-                      $<<parameters.cluster-specific-specifier>>:
-                        evaluationMode: <<parameters.cluster-specific-eval-mode>>
-                        enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
-                        requireAttestationsBy:
-                    CLUSTER_SPECIFIC_REQUIRED_ATTESTORS<</parameters.cluster-specific-rules>>
+              clusterAdmissionRules:
+                $<<parameters.cluster-specific-specifier>>:
+                  evaluationMode: <<parameters.cluster-specific-eval-mode>>
+                  enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
+                  requireAttestationsBy:
+              CLUSTER_SPECIFIC_REQUIRED_ATTESTORS<</parameters.cluster-specific-rules>>
 
-                    EOM
+              EOM
 
-        - unless:
-            condition: <<parameters.multi-project-setup>>
-            steps:
-              - run:
-                  name: Create policy YAML file
-                  command: |
-                    cat > <<parameters.policy-filepath>> \<< EOM
-                    name: projects/$<<parameters.google-project-id>>/policy
-
-                    admissionWhitelistPatterns:
-                    ADMISSION_WHITELIST_PATTERNS
-
-                    defaultAdmissionRule:
-                      evaluationMode: <<parameters.default-evaluation-mode>>
-                      enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
-                      requireAttestationsBy:
-                    DEFAULT_REQUIRED_ATTESTORS<<#parameters.cluster-specific-rules>>
-
-                    clusterAdmissionRules:
-                      $<<parameters.cluster-specific-specifier>>:
-                        evaluationMode: <<parameters.cluster-specific-eval-mode>>
-                        enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
-                        requireAttestationsBy:
-                    CLUSTER_SPECIFIC_REQUIRED_ATTESTORS<</parameters.cluster-specific-rules>>
-
-                    EOM
         - run:
             name: Insert admission whitelist patterns
             command: |
@@ -250,22 +221,9 @@ steps:
                   "    "
               fi
 
-  - when:
-      condition: <<parameters.multi-project-setup>>
-      steps:
-        - run:
-            name: Import policy YAML into Binary Authorization
-            command: |
-              gcloud --project=$<<parameters.deployer-project-id>> \
-                beta container binauthz policy import \
-                <<parameters.policy-filepath>>
-
-  - unless:
-      condition: <<parameters.multi-project-setup>>
-      steps:
-        - run:
-            name: Import policy YAML into Binary Authorization
-            command: |
-              gcloud --project=$<<parameters.google-project-id>> \
-                beta container binauthz policy import \
-                <<parameters.policy-filepath>>
+  - run:
+      name: Import policy YAML into Binary Authorization
+      command: |
+        gcloud --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+          beta container binauthz policy import \
+          <<parameters.policy-filepath>>
