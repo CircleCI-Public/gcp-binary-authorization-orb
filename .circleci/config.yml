@@ -12,7 +12,6 @@ commands:
       - gcp-cli/initialize
 
       - bin-authz/setup:
-          use-gke-env-var: false
           gke-cluster-name: test-cluster
 
       - bin-authz/create-note:
@@ -140,7 +139,6 @@ workflows:
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
-          use-gke-env-var: false
           gke-cluster-name: test-cluster
           admission-whitelist-patterns: gcr.io/google_containers/*
           default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
@@ -157,7 +155,6 @@ workflows:
           executor: bin-authz/machine
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
-          use-gke-env-var: false
           gke-cluster-name: test-cluster
           admission-whitelist-patterns: gcr.io/google_containers/*
           default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
@@ -174,7 +171,6 @@ workflows:
           executor: gcp-cli/default
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
-          use-gke-env-var: false
           gke-cluster-name: test-cluster
           admission-whitelist-patterns: gcr.io/google_containers/*
           default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
@@ -209,7 +205,6 @@ workflows:
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
-          use-gke-env-var: false
           gke-cluster-name: test-cluster
           admission-whitelist-patterns: gcr.io/google_containers/*
           default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
@@ -226,7 +221,6 @@ workflows:
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
-          use-gke-env-var: false
           gke-cluster-name: test-cluster
           admission-whitelist-patterns: gcr.io/google_containers/*
           default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
@@ -243,7 +237,6 @@ workflows:
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
-          use-gke-env-var: false
           gke-cluster-name: test-cluster
           admission-whitelist-patterns: gcr.io/google_containers/*
           default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
