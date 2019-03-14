@@ -75,11 +75,13 @@ steps:
 
         gcloud services \
           --project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+          enable \
           containeranalysis.googleapis.com \
           binaryauthorization.googleapis.com \
 
         gcloud services \
           --project=$<<#parameters.multi-project-setup>><<parameters.attestation-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+          enable \
           containeranalysis.googleapis.com \
           binaryauthorization.googleapis.com \
 
