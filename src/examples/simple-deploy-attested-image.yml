@@ -9,7 +9,7 @@ usage:
 
   orbs:
     gcp-gcr: circleci/gcp-gcr@1.0.0
-    bin-authz: circleci/bin-authz@1.0.0
+    bin-authz: circleci/gcp-binary-authorization@1.0.0
 
   workflows:
     push_sign_deploy:
