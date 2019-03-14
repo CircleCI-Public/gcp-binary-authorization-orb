@@ -372,6 +372,9 @@ steps:
       google-compute-zone: <<parameters.google-compute-zone>>
       create-new-gke-cluster: <<parameters.create-new-gke-cluster>>
       gke-cluster-name: <<parameters.gke-cluster-name>>
+      multi-project-setup: <<parameters.multi-project-setup>>
+      google-project-id: <<parameters.google-project-id>>
+      deployer-project-id: <<parameters.deployer-project-id>>
 
   - create-note:
       attestor: <<parameters.attestor>>

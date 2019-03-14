@@ -70,10 +70,7 @@ steps:
   - run:
       name: Configure kubectl
       command: |
-        gcloud --project=${DEPLOYER_PROJECT_ID} \
-            container clusters get-credentials \
-            --zone us-central1-a \
-            test-cluster
-        gcloud container clusters get-credentials \
+        gcloud --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+          container clusters get-credentials \
           --zone $<<parameters.google-compute-zone>> \
-          test-cluster
+          <<parameters.gke-cluster-name>>
