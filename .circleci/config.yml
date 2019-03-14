@@ -1,0 +1,291 @@
+version: 2.1
+
+orbs:
+  bin-authz: circleci/gcp-bin-authz@dev:alpha
+  gcp-cli: circleci/gcp-cli@1.1.0
+  orb-tools: circleci/orb-tools@8.3.0
+
+commands:
+  test-commands:
+    steps:
+      - gcp-cli/install
+      - gcp-cli/initialize
+
+      - bin-authz/setup:
+          use-gke-env-var: false
+          gke-cluster-name: test-cluster
+
+      - bin-authz/create-note:
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+
+      - bin-authz/create-attestor:
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          keypair-email: rose@circleci.com
+
+      - bin-authz/configure-policy:
+          admission-whitelist-patterns: gcr.io/google_containers/*
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          cluster-specific-rules: true
+          cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+
+      - bin-authz/create-attestation:
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          keypair-email: rose@circleci.com
+
+      - store_artifacts:
+          path: /tmp/note_payload.json
+
+      - store_artifacts:
+          path: /tmp/policy.yaml
+
+      - store_artifacts:
+          path: /tmp/generated_payload.json
+
+jobs:
+  test-google:
+    executor: bin-authz/google
+    steps:
+      - test-commands
+
+  test-machine:
+    executor: bin-authz/machine
+    steps:
+      - test-commands
+
+  test-docker:
+    executor: gcp-cli/default
+    steps:
+      - test-commands
+
+# yaml anchor filters
+integration-dev_filters: &integration-dev_filters
+  branches:
+    ignore: /.*/
+  tags:
+    only: /integration-.*/
+
+integration-master_filters: &integration-master_filters
+  branches:
+    ignore: /.*/
+  tags:
+    only: /master-.*/
+
+prod-deploy_requires: &prod-deploy_requires
+  [test-google-master, test-docker-master, test-machine-master, test-job-google-master, test-job-docker-master, test-job-machine-master]
+
+delete-attestor: &delete-attestor
+  [run: {when: "always", name: "Clean up attestor", command: "gcloud alpha container binauthz attestors delete $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM"}]
+
+workflows:
+  lint_pack-validate_publish-dev:
+    jobs:
+      - orb-tools/lint
+
+      - orb-tools/pack:
+          requires:
+            - orb-tools/lint
+
+      - orb-tools/publish-dev:
+          orb-name: circleci/gcp-bin-authz
+          context: orb-publishing
+          requires:
+            - orb-tools/pack
+
+      - orb-tools/trigger-integration-workflow:
+          name: trigger-integration-dev
+          context: orb-publishing
+          ssh-fingerprints: 30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
+          requires:
+            - orb-tools/publish-dev
+          filters:
+            branches:
+              ignore: master
+
+      - orb-tools/trigger-integration-workflow:
+          name: trigger-integration-master
+          context: orb-publishing
+          ssh-fingerprints: 30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
+          tag: master
+          requires:
+            - orb-tools/publish-dev
+          filters:
+            branches:
+              only: master
+
+  integration-tests_prod-release:
+    jobs:
+      # triggered by non-master branch commits
+      - test-docker:
+          name: test-docker-dev
+          context: orb-publishing
+          filters: *integration-dev_filters
+          post-steps: *delete-attestor
+
+      - test-google:
+          name: test-google-dev
+          context: orb-publishing
+          filters: *integration-dev_filters
+          post-steps: *delete-attestor
+
+      - test-machine:
+          name: test-machine-dev
+          context: orb-publishing
+          filters: *integration-dev_filters
+          post-steps: *delete-attestor
+
+      - bin-authz/create-attestation:
+          name: test-job-google-dev
+          context: orb-publishing
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          keypair-email: rose@circleci.com
+          use-gke-env-var: false
+          gke-cluster-name: test-cluster
+          admission-whitelist-patterns: gcr.io/google_containers/*
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          cluster-specific-rules: true
+          cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          filters: *integration-dev_filters
+          post-steps: *delete-attestor
+
+      - bin-authz/create-attestation:
+          name: test-job-machine-dev
+          context: orb-publishing
+          executor: bin-authz/machine
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          keypair-email: rose@circleci.com
+          use-gke-env-var: false
+          gke-cluster-name: test-cluster
+          admission-whitelist-patterns: gcr.io/google_containers/*
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          cluster-specific-rules: true
+          cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          filters: *integration-dev_filters
+          post-steps: *delete-attestor
+
+      - bin-authz/create-attestation:
+          name: test-job-docker-dev
+          context: orb-publishing
+          executor: gcp-cli/default
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          keypair-email: rose@circleci.com
+          use-gke-env-var: false
+          gke-cluster-name: test-cluster
+          admission-whitelist-patterns: gcr.io/google_containers/*
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          cluster-specific-rules: true
+          cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          filters: *integration-dev_filters
+          post-steps: *delete-attestor
+
+      # triggered by master branch commits
+      - test-docker:
+          name: test-docker-master
+          context: orb-publishing
+          filters: *integration-master_filters
+          post-steps: *delete-attestor
+
+      - test-google:
+          name: test-google-master
+          context: orb-publishing
+          filters: *integration-master_filters
+          post-steps: *delete-attestor
+
+      - test-machine:
+          name: test-machine-master
+          context: orb-publishing
+          filters: *integration-master_filters
+          post-steps: *delete-attestor
+
+      - bin-authz/create-attestation:
+          name: test-job-google-master
+          context: orb-publishing
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          keypair-email: rose@circleci.com
+          use-gke-env-var: false
+          gke-cluster-name: test-cluster
+          admission-whitelist-patterns: gcr.io/google_containers/*
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          cluster-specific-rules: true
+          cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          filters: *integration-master_filters
+          post-steps: *delete-attestor
+
+      - bin-authz/create-attestation:
+          name: test-job-machine-master
+          executor: bin-authz/machine
+          context: orb-publishing
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          keypair-email: rose@circleci.com
+          use-gke-env-var: false
+          gke-cluster-name: test-cluster
+          admission-whitelist-patterns: gcr.io/google_containers/*
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          cluster-specific-rules: true
+          cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          filters: *integration-master_filters
+          post-steps: *delete-attestor
+
+      - bin-authz/create-attestation:
+          name: test-job-docker-master
+          executor: gcp-cli/default
+          context: orb-publishing
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          keypair-email: rose@circleci.com
+          use-gke-env-var: false
+          gke-cluster-name: test-cluster
+          admission-whitelist-patterns: gcr.io/google_containers/*
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          cluster-specific-rules: true
+          cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          filters: *integration-master_filters
+          post-steps: *delete-attestor
+
+      # patch, minor, or major publishing
+      - orb-tools/dev-promote-prod:
+          name: dev-promote-patch
+          context: orb-publishing
+          orb-name: circleci/gcp-bin-authz
+          requires: *prod-deploy_requires
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /master-patch.*/
+
+      - orb-tools/dev-promote-prod:
+          name: dev-promote-minor
+          context: orb-publishing
+          orb-name: circleci/gcp-bin-authz
+          release: minor
+          requires: *prod-deploy_requires
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /master-minor.*/
+
+      - orb-tools/dev-promote-prod:
+          name: dev-promote-major
+          context: orb-publishing
+          orb-name: circleci/gcp-bin-authz
+          release: major
+          requires: *prod-deploy_requires
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /master-major.*/

@@ -1,0 +1,469 @@
+description: >
+  Sign/authorize a specific tag of a container image stored in a Google
+  container registry for deployment to Google Kubernetes Engine. For
+  details, see Google's Binary Authorization documentation:
+  https://cloud.google.com/binary-authorization/docs
+
+executor: <<parameters.executor>>
+
+parameters:
+  # job-level
+  executor:
+    type: executor
+    default: google
+    description: >
+      Executor to use for this job, defaults to Google's official
+      Docker image with the gcloud CLI preinstalled
+
+  checkout:
+    type: boolean
+    default: false
+    description: >
+      Checkout as a first step? Default is `false`
+
+  attach-workspace:
+    type: boolean
+    default: false
+    description: >
+      Attach to an existing workspace? Default is `false`
+
+  workspace-root:
+    type: string
+    default: workspace
+    description: >
+      Workspace root path that is either an absolute path or a path relative
+      to the working directory.
+
+  # google env
+  google-compute-zone:
+    type: env_var_name
+    default: GOOGLE_COMPUTE_ZONE
+    description: >
+      Environment variable storing the name of the Google compute zone to
+      use by default when running commands with the gcloud CLI
+
+  multi-project-setup:
+    type: boolean
+    default: false
+    description: >
+      Set to `true` if a multi-GCP project Binary Authorization setup is
+      being used. See the following for details:
+      https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
+
+  google-project-id:
+    type: env_var_name
+    default: GOOGLE_PROJECT_ID
+    description: >
+      Environment variable name storing Google Project ID. Not Required if
+      using a multi-project setup.
+
+  attestor-project-id:
+    type: env_var_name
+    default: ATTESTOR_PROJECT_ID
+    description: >
+      Google Project ID for the Attestor project. Only required if using
+      a multi-project setup.
+
+  deployer-project-id:
+    type: env_var_name
+    default: DEPLOYER_PROJECT_ID
+    description: >
+      Google Project ID for the Deployer project. Only required if using
+      a multi-project setup.
+
+  attestation-project-id:
+    type: env_var_name
+    default: ATTESTATION_PROJECT_ID
+    description: >
+      Google Project ID for the Attestation project. Only required if using
+      a multi-project setup.
+
+  google-service-account:
+    type: env_var_name
+    default: GOOGLE_SERVICE_ACCOUNT
+    description: >
+      Service account address for the Google Project. Not Required if
+      using a multi-project setup.
+
+  attestor-service-account:
+    type: env_var_name
+    default: ATTESTOR_SERVICE_ACCOUNT
+    description: >
+      Service account address for the Attestor project. Only required if
+      using a multi-project setup.
+
+  deployer-service-account:
+    type: env_var_name
+    default: DEPLOYER_SERVICE_ACCOUNT
+    description: >
+      Service account address for the Deployer project. Only required if
+      using a multi-project setup.
+
+  # setup
+  create-new-gke-cluster:
+    type: boolean
+    default: false
+    description: >
+      Create a new GKE cluster to use with Binary Authorization? Default
+      is `false`
+
+  use-gke-env-var:
+    type: boolean
+    default: true
+    description: >
+      Set this to `true` to instead pass an environment variable storing
+      the name of the GKE cluster for which to enable BinAuthz (default
+      is `false`)
+
+  gke-cluster-env-var:
+    type: env_var_name
+    default: GKE_CLUSTER_NAME
+    description: >
+      Environment variable storing the name of the GKE cluster for which
+      to enable BinAuthz. To pass a string literal instead of a reference
+      to a stored environmnent variable, set the `use-gke-env-var`
+      parameter to `false` and pass the GKE cluster name to the
+      `gke-cluster-name` environment variable instead.
+
+  gke-cluster-name:
+    type: string
+    default: ""
+    description: >
+      Name of the GKE cluster for which to enable BinAuthz. To store this
+      parameter value as an environment variable and avoid passing it as a
+      string literal, make sure the `use-gke-env-var` parameter is set
+      to `true` and pass the name of the environment variable to the
+      `gke-cluster-env-var` parameter.
+
+  # keypair
+  use-existing-keypair:
+    type: boolean
+    default: true
+    description: >
+      Use an existing PGP keypair? If `false`, a keypair will be created
+      on-the-fly
+
+  keypair-name:
+    type: string
+    default: ""
+    description: >
+      Name to attach to PGP keypair. Only required if `use-existing-keypair`
+      is set to `false`.
+
+  keypair-email:
+    type: string
+    description: >
+      Email address attached to existing PGP keypair, or to attach to
+      newly created keypair.
+
+  use-passphrase:
+    type: boolean
+    default: false
+    description: >
+      If `use-existing-keypair` is set to `false`: does the existing PGP
+      keypair have a passphrase? If `use-existing-keypair` is set to
+      `true`: generate a PGP keypair with a passphrase?
+
+  keypair-passphrase:
+    type: env_var_name
+    default: BIN_AUTHZ_KEYPAIR_PASSPHRASE
+    description: >
+      Name of environment variable storing the passphrase used to
+      generate PGP keypair
+
+  public-key:
+    type: env_var_name
+    default: BIN_AUTHZ_PUBLIC_KEY
+    description: >
+      Name of environment variable storing the public portion of the keypair
+      with which to sign the attestation. Not required if
+      `binauth_use-existing-keypair` is set to `false`. Store the public key
+      in Contexts or as a project-level environment variable, as a single-
+      line string, with newlines replaced with the newline string literal
+      `\n`. Use an RSA-2048-type key. For details, see the following:
+      https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
+
+  private-key:
+    type: env_var_name
+    default: BIN_AUTHZ_PRIVATE_KEY
+    description: >
+      Name of environment variable storing the private portion of the
+      keypair with which to sign the attestation. Not required if
+      `use-existing-keypair` is set to `false`. Store the private
+      key in Contexts or as a project-level environment variable, as a
+      single-line string, with newlines replaced with the newline string
+      literal `\n`. Use an RSA-2048-type key. Details available here:
+      https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
+
+  # attestor
+  attestor:
+    type: string
+    default: $CIRCLE_USERNAME
+    description: >
+      Name of the attestation authority for the container analysis note.
+      If the attestor does not yet exist, it will be created. Defaults to
+      the value of the `$CIRCLE_USERNAME` environment variable (VCS user who
+      triggered the CircleCI job).
+
+  attestor-hint:
+    type: string
+    default: CircleCI username
+    description: >
+      A human-readable name for this attestation authority (e.g., QA)
+
+  # note
+  note-id:
+    type: string
+    default: $CIRCLE_USERNAME-note-$CIRCLE_JOB-$CIRCLE_BUILD_NUM
+    description: >
+      Name of the container analysis note. Defaults to a combination of
+      values from the attestor parameter, and CircleCI job name and number
+      environment variables.
+
+  use-note-file:
+    type: boolean
+    default: false
+    description: >
+      Upload an existing container analysis note file instead of creating
+      one via this command's paramaters?
+
+  note-description-short:
+    type: string
+    default: Container analysis note from CircleCI job $CIRCLE_JOB, number $CIRCLE_BUILD_NUM, triggered by $CIRCLE_USERNAME
+    description: One-sentence description of this note
+
+  note-description-long:
+    type: string
+    default: ""
+    description: >
+      Longer, more detailed description of container analysis note
+
+  note-related-url:
+    type: string
+    default: $CIRCLE_BUILD_URL
+    description: Any URL related to the container analysis note
+
+  note-expiration-time:
+    type: string
+    default: ""
+    description: >
+      Timestamp-formatted expiration time for this note (empty if the
+      note does not expire). For details, see the following:
+      https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.Timestamp
+
+  related-note-names:
+    type: string
+    default: ""
+    description: Names of any notes relevant or related to this note
+
+  note-filepath:
+    type: string
+    default: /tmp/note_payload.json
+    description: >
+      Path to your container analysis note file. Should be an existing file
+      if `use-note-file` is `true`; otherwise, note will be created at this
+      path.
+
+  # policy
+  use-policy-file:
+    type: boolean
+    default: false
+    description: >
+      Use an existing Binary Authorization policy YAML file instead of
+      creating one via this command's paramaters?
+
+  policy-filepath:
+    type: string
+    default: /tmp/policy.yaml
+    description: >
+      Path to a Binary Authorization policy YAML file. Should be an
+      existing file if `use-file` is `true`; otherwise, a policy file
+      will be created at this path.
+
+  admission-whitelist-patterns:
+    type: string
+    default: gcr.io/google_containers/*,k8s.gcr.io/*,gcr.io/stackdriver-agents/*
+    description: >
+      Whitelist of container images that are exempt from the attestation
+      requirements in the policy. Supply a comma-separated string list
+      (e.g., see default value) of paths to images in Google's, or any
+      other, container registry. For details, see the following:
+      https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#admissionwhitelistpatterns
+
+  default-evaluation-mode:
+    type: enum
+    enum: [ALWAYS_ALLOW, ALWAYS_DENY, REQUIRE_ATTESTATION]
+    default: REQUIRE_ATTESTATION
+    description: >
+      By default, how should Binary Authorization evaluate deployment
+      requests? For details on these options, see the following:
+      https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#evaluationmode
+
+  default-required-attestors:
+    type: string
+    default: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+    description: >
+      What attestors will be required to sign releases, by default? Specify
+      attestors in the form `project/PROJECT_ID/attestors/ATTESTOR_NAME`:
+      https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#admission_rule
+      To specify multiple attestors, use a comma-separated string.
+
+  cluster-specific-rules:
+    type: boolean
+    default: false
+    description: >
+      Specify distinict sets of deployment rules for individual GKE
+      clusters? If so, pass the requisite values to any additional
+      cluster-specific parameters. Currently, only a single set of cluster-
+      specific rules can be specified. For details, see the following:
+      https://cloud.google.com/binary-authorization/docs/key-concepts#cluster-specific_rules
+
+  cluster-specific-specifier:
+    type: env_var_name
+    default: CLUSTER_SPECIFIER_LOCATION_NAME
+    description: >
+      If specifying a set of cluster-specific rules, what is the name of
+      the GKE cluster to which these rules will apply? Supply a name in
+      the `location.name` format (e.g., `us-east1-a.prod-cluster`)
+
+  cluster-specific-eval-mode:
+    type: enum
+    enum: [ALWAYS_ALLOW, ALWAYS_DENY, REQUIRE_ATTESTATION]
+    default: REQUIRE_ATTESTATION
+    description: >
+      For the specified cluster, how should Binary Authorization evaluate
+      deployment requests? For details on these options, see the following:
+      https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#evaluationmode
+
+  cluster-specific-required-attestors:
+    type: string
+    default: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+    description: >
+      What attestors will be required to sign releases, for cluster-
+      specific rulesets? Specify attestors in the form
+      `project/PROJECT_ID/attestors/ATTESTOR_NAME`, as described here:
+      https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#admission_rule
+      To specify multiple attestors, use a comma-separated string.
+
+  # image/attestation
+  image-path:
+    type: string
+    description: >
+      Path in Google's, or any other, container registry to the image
+      being deployed (e.g., `gcr.io/example-project/quickstart-image`)
+
+  image-tag:
+    type: string
+    default: latest
+    description: >
+      Specific tag of image that will be deployed, used to generate a full
+      SHA-256 for attestation.
+
+  payload-filepath:
+    type: string
+    default: /tmp/generated_payload.json
+    description: Path at which to generate an attestation payload
+
+  deployment-steps:
+    type: steps
+    default: []
+    description: >
+      Optional deployment steps to run after signing an image for release.
+      See the `deploy-attested-image` usage example for one possible
+      implementation.
+
+steps:
+  - when:
+      condition: <<parameters.checkout>>
+      steps:
+        - checkout
+
+  - when:
+      condition: <<parameters.attach-workspace>>
+      steps:
+        - attach_workspace:
+            at: <<parameters.workspace-root>>
+
+  - gcp-cli/install
+  - gcp-cli/initialize
+
+  - setup:
+      google-compute-zone: <<parameters.google-compute-zone>>
+      create-new-gke-cluster: <<parameters.create-new-gke-cluster>>
+      use-gke-env-var: <<parameters.use-gke-env-var>>
+      gke-cluster-env-var: <<parameters.gke-cluster-env-var>>
+      gke-cluster-name: <<parameters.gke-cluster-name>>
+
+
+  - create-note:
+      attestor: <<parameters.attestor>>
+      attestor-hint: <<parameters.attestor-hint>>
+      multi-project-setup: <<parameters.multi-project-setup>>
+      google-project-id: <<parameters.google-project-id>>
+      google-service-account: <<parameters.google-service-account>>
+      attestor-project-id: <<parameters.attestor-project-id>>
+      attestor-service-account: <<parameters.attestor-service-account>>
+      note-id: <<parameters.note-id>>
+      note-description-short: <<parameters.note-description-short>>
+      note-description-long: <<parameters.note-description-long>>
+      note-related-url: <<parameters.note-related-url>>
+      note-expiration-time: <<parameters.note-expiration-time>>
+      related-note-names: <<parameters.related-note-names>>
+      use-note-file: <<parameters.use-note-file>>
+      note-filepath: <<parameters.note-filepath>>
+
+  - create-attestor:
+      attestor: <<parameters.attestor>>
+      multi-project-setup: <<parameters.multi-project-setup>>
+      google-project-id: <<parameters.google-project-id>>
+      attestor-project-id: <<parameters.attestor-project-id>>
+      use-existing-keypair: <<parameters.use-existing-keypair>>
+      keypair-email: <<parameters.keypair-email>>
+      keypair-name: <<parameters.keypair-name>>
+      use-passphrase: <<parameters.use-passphrase>>
+      keypair-passphrase: <<parameters.keypair-passphrase>>
+      public-key: <<parameters.public-key>>
+      note-id: <<parameters.note-id>>
+      deployer-service-account: <<parameters.deployer-service-account>>
+
+  - configure-policy:
+      multi-project-setup: <<parameters.multi-project-setup>>
+      google-project-id: <<parameters.google-project-id>>
+      attestor-project-id: <<parameters.attestor-project-id>>
+      deployer-project-id: <<parameters.deployer-project-id>>
+      use-policy-file: <<parameters.use-policy-file>>
+      policy-filepath: <<parameters.policy-filepath>>
+      admission-whitelist-patterns: <<parameters.admission-whitelist-patterns>>
+      default-evaluation-mode: <<parameters.default-evaluation-mode>>
+      default-required-attestors: <<parameters.default-required-attestors>>
+      cluster-specific-rules: <<parameters.cluster-specific-rules>>
+      cluster-specific-specifier: <<parameters.cluster-specific-specifier>>
+      cluster-specific-eval-mode: <<parameters.cluster-specific-eval-mode>>
+      cluster-specific-required-attestors: <<parameters.cluster-specific-required-attestors>>
+
+  - create-attestation:
+      multi-project-setup: <<parameters.multi-project-setup>>
+      google-project-id: <<parameters.google-project-id>>
+      attestor-project-id: <<parameters.attestor-project-id>>
+      attestation-project-id: <<parameters.attestation-project-id>>
+      image-path: <<parameters.image-path>>
+      image-tag: <<parameters.image-tag>>
+      payload-filepath: <<parameters.payload-filepath>>
+      use-existing-keypair: <<parameters.use-existing-keypair>>
+      public-key: <<parameters.public-key>>
+      private-key: <<parameters.private-key>>
+      keypair-email: <<parameters.keypair-email>>
+      use-passphrase: <<parameters.use-passphrase>>
+      keypair-passphrase: <<parameters.keypair-passphrase>>
+      attestor: <<parameters.attestor>>
+
+  - <<parameters.deployment-steps>>
+
+  - store_artifacts:
+      path: <<parameters.note-filepath>>
+
+  - store_artifacts:
+      path: <<parameters.policy-filepath>>
+
+  - store_artifacts:
+      path: <<parameters.payload-filepath>>

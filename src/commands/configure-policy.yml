@@ -1,0 +1,271 @@
+description: >
+  Configure a Binary Authorization deployment policy. See the following:
+  https://cloud.google.com/binary-authorization/docs/key-concepts#policies
+  https://cloud.google.com/binary-authorization/docs/configuring-policy-cli
+  https://cloud.google.com/binary-authorization/docs/policy-yaml-reference
+
+parameters:
+  google-project-id:
+    type: env_var_name
+    default: GOOGLE_PROJECT_ID
+    description: >
+      Environment variable name storing Google Project ID. Not Required if
+      using a multi-project setup.
+
+  multi-project-setup:
+    type: boolean
+    default: false
+    description: >
+      Set to `true` if a multi-GCP project Binary Authorization setup is
+      being used. See the following for details:
+      https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
+
+  attestor-project-id:
+    type: env_var_name
+    default: ATTESTOR_PROJECT_ID
+    description: >
+      Google Project ID for the Attestor project. Only required if using
+      a multi-project setup.
+
+  deployer-project-id:
+    type: env_var_name
+    default: DEPLOYER_PROJECT_ID
+    description: >
+      Google Project ID for the Deployer project. Only required if using
+      a multi-project setup.
+
+  use-policy-file:
+    type: boolean
+    default: false
+    description: >
+      Use an existing Binary Authorization policy YAML file instead of
+      creating one via this command's paramaters?
+
+  policy-filepath:
+    type: string
+    default: /tmp/policy.yaml
+    description: >
+      Path to a Binary Authorization policy YAML file. Should be an
+      existing file if `use-policy-file` is `true`; otherwise, a policy file
+      will be created at this path.
+
+  admission-whitelist-patterns:
+    type: string
+    default: gcr.io/google_containers/*,k8s.gcr.io/*,gcr.io/stackdriver-agents/*
+    description: >
+      Whitelist of container images that are exempt from the attestation
+      requirements in the policy. Supply a comma-separated string list
+      (e.g., see default value) of paths to images in Google's, or any
+      other, container registry. For details, see the following:
+      https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#admissionwhitelistpatterns
+
+  default-evaluation-mode:
+    type: enum
+    enum: [ALWAYS_ALLOW, ALWAYS_DENY, REQUIRE_ATTESTATION]
+    default: REQUIRE_ATTESTATION
+    description: >
+      By default, how should Binary Authorization evaluate deployment
+      requests? For details on these options, see the following:
+      https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#evaluationmode
+
+  default-required-attestors:
+    type: string
+    default: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+    description: >
+      What attestors will be required to sign releases, by default? Specify
+      attestors in the form `project/PROJECT_ID/attestors/ATTESTOR_NAME`:
+      https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#admission_rule
+      To specify multiple attestors, use a comma-separated string.
+
+  cluster-specific-rules:
+    type: boolean
+    default: false
+    description: >
+      Specify distinict sets of deployment rules for individual GKE
+      clusters? If so, pass the requisite values to any additional
+      cluster-specific parameters. Currently, only a single set of cluster-
+      specific rules can be specified. For details, see the following:
+      https://cloud.google.com/binary-authorization/docs/key-concepts#cluster-specific_rules
+
+  cluster-specific-specifier:
+    type: env_var_name
+    default: CLUSTER_SPECIFIER_LOCATION_NAME
+    description: >
+      If specifying a set of cluster-specific rules, what is the name of
+      the GKE cluster to which these rules will apply? Supply a name in
+      the `location.name` format (e.g., `us-east1-a.prod-cluster`)
+
+  cluster-specific-eval-mode:
+    type: enum
+    enum: [ALWAYS_ALLOW, ALWAYS_DENY, REQUIRE_ATTESTATION]
+    default: REQUIRE_ATTESTATION
+    description: >
+      For the specified cluster, how should Binary Authorization evaluate
+      deployment requests? For details on these options, see the following:
+      https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#evaluationmode
+
+  cluster-specific-required-attestors:
+    type: string
+    default: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+    description: >
+      What attestors will be required to sign releases, for cluster-
+      specific rulesets? Specify attestors in the form
+      `project/PROJECT_ID/attestors/ATTESTOR_NAME`, as described here:
+      https://cloud.google.com/binary-authorization/docs/policy-yaml-reference#admission_rule
+      To specify multiple attestors, use a comma-separated string.
+
+steps:
+  - unless:
+      condition: <<parameters.use-policy-file>>
+      steps:
+        - when:
+            condition: <<parameters.multi-project-setup>>
+            steps:
+              - run:
+                  name: Create policy YAML file
+                  command: |
+                    cat > <<parameters.policy-filepath>> \<< EOM
+                    name: projects/$<<parameters.deployer-project-id>>/policy
+
+                    admissionWhitelistPatterns:
+                    ADMISSION_WHITELIST_PATTERNS
+
+                    defaultAdmissionRule:
+                      evaluationMode: <<parameters.default-evaluation-mode>>
+                      enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
+                      requireAttestationsBy:
+                    DEFAULT_REQUIRED_ATTESTORS<<#parameters.cluster-specific-rules>>
+
+                    clusterAdmissionRules:
+                      $<<parameters.cluster-specific-specifier>>:
+                        evaluationMode: <<parameters.cluster-specific-eval-mode>>
+                        enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
+                        requireAttestationsBy:
+                    CLUSTER_SPECIFIC_REQUIRED_ATTESTORS<</parameters.cluster-specific-rules>>
+
+                    EOM
+
+        - unless:
+            condition: <<parameters.multi-project-setup>>
+            steps:
+              - run:
+                  name: Create policy YAML file
+                  command: |
+                    cat > <<parameters.policy-filepath>> \<< EOM
+                    name: projects/$<<parameters.google-project-id>>/policy
+
+                    admissionWhitelistPatterns:
+                    ADMISSION_WHITELIST_PATTERNS
+
+                    defaultAdmissionRule:
+                      evaluationMode: <<parameters.default-evaluation-mode>>
+                      enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
+                      requireAttestationsBy:
+                    DEFAULT_REQUIRED_ATTESTORS<<#parameters.cluster-specific-rules>>
+
+                    clusterAdmissionRules:
+                      $<<parameters.cluster-specific-specifier>>:
+                        evaluationMode: <<parameters.cluster-specific-eval-mode>>
+                        enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
+                        requireAttestationsBy:
+                    CLUSTER_SPECIFIC_REQUIRED_ATTESTORS<</parameters.cluster-specific-rules>>
+
+                    EOM
+        - run:
+            name: Insert admission whitelist patterns
+            command: |
+              insert_whitelist () {
+                WHITELIST_PATTERNS=$1
+
+                # use comma delimiters to create array
+                arrWHITELIST_PATTERNS=(${WHITELIST_PATTERNS//,/ })
+
+                # need || true in case array is length 1
+                # in which case, assigning END=0 will exit code 1
+                let END=${#arrWHITELIST_PATTERNS[@]}-1 || true
+
+                # iterate over array to echo admission whitelist patterns into a file
+                # \\ is required for sed
+                for ((i=0;i<END;i++)); do
+                  echo "- namePattern: ${arrWHITELIST_PATTERNS[i]}\\" \>> WHITELIST_PATTERNS.txt
+                done
+
+                # need to handle iteration for the last item separately
+                # sed does not require it to have \ at line end
+                echo "- namePattern: ${arrWHITELIST_PATTERNS[-1]}" \>> WHITELIST_PATTERNS.txt
+
+                READY_TO_REPLACE=$(cat WHITELIST_PATTERNS.txt)
+
+                sed -i.bak "s@$2@$READY_TO_REPLACE@g" \
+                  <<parameters.policy-filepath>>
+
+                rm -rf WHITELIST_PATTERNS.txt
+              }
+
+              insert_whitelist \
+                <<parameters.admission-whitelist-patterns>> \
+                ADMISSION_WHITELIST_PATTERNS
+
+        - run:
+            name: Insert required attestor values
+            command: |
+              insert_attestors () {
+                REQUIRED_ATTESTORS=$1
+
+                # use comma delimiters to create array
+                arrREQUIRED_ATTESTORS=(${REQUIRED_ATTESTORS//,/ })
+
+                # need || true in case array is length 1
+                # in which case, assigning END=0 will exit code 1
+                let END=${#arrREQUIRED_ATTESTORS[@]}-1 || true
+
+                # iterate over array to echo required attestors into a file
+                # $3 is offset, to ensure we create valid yaml
+                # \\ is required for sed
+                for ((i=0;i<END;i++)); do
+                  echo "$3- ${arrREQUIRED_ATTESTORS[i]}\\" \>> REQUIRED_ATTESTORS.txt
+                done
+
+                # need to handle iteration for the last item separately
+                # sed does not require it to have \ at line end
+                echo "$3- ${arrREQUIRED_ATTESTORS[-1]}" \>> REQUIRED_ATTESTORS.txt
+
+                READY_TO_REPLACE=$(cat REQUIRED_ATTESTORS.txt)
+
+                sed -i.bak "s@$2@$READY_TO_REPLACE@g" \
+                  <<parameters.policy-filepath>>
+
+                rm -rf REQUIRED_ATTESTORS.txt
+              }
+
+              insert_attestors \
+                <<parameters.default-required-attestors>> \
+                DEFAULT_REQUIRED_ATTESTORS \
+                "  "
+
+              if <<parameters.cluster-specific-rules>>; then
+                insert_attestors \
+                  <<parameters.cluster-specific-required-attestors>> \
+                  CLUSTER_SPECIFIC_REQUIRED_ATTESTORS \
+                  "    "
+              fi
+
+  - when:
+      condition: <<parameters.multi-project-setup>>
+      steps:
+        - run:
+            name: Import policy YAML into Binary Authorization
+            command: |
+              gcloud --project=$<<parameters.deployer-project-id>> \
+                beta container binauthz policy import \
+                <<parameters.policy-filepath>>
+
+  - unless:
+      condition: <<parameters.multi-project-setup>>
+      steps:
+        - run:
+            name: Import policy YAML into Binary Authorization
+            command: |
+              gcloud --project=$<<parameters.google-project-id>> \
+                beta container binauthz policy import \
+                <<parameters.policy-filepath>>

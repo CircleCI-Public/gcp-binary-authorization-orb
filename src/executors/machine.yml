@@ -1,0 +1,4 @@
+description: >
+  CircleCI's VM image, useful for working with Docker images
+
+machine: true
