@@ -20,9 +20,7 @@ commands:
 
       - bin-authz/create-attestor:
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          use-passphrase: false
           keypair-email: rose@circleci.com
-          keypair-name: iynere
 
       - bin-authz/configure-policy:
           admission-whitelist-patterns: gcr.io/google_containers/*
@@ -141,9 +139,7 @@ workflows:
           name: test-job-google-dev
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          use-passphrase: false
           keypair-email: rose@circleci.com
-          keypair-name: iynere
           use-gke-env-var: false
           gke-cluster-name: test-cluster
           admission-whitelist-patterns: gcr.io/google_containers/*
@@ -160,9 +156,7 @@ workflows:
           context: orb-publishing
           executor: bin-authz/machine
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          use-passphrase: false
           keypair-email: rose@circleci.com
-          keypair-name: iynere
           use-gke-env-var: false
           gke-cluster-name: test-cluster
           admission-whitelist-patterns: gcr.io/google_containers/*
@@ -179,9 +173,7 @@ workflows:
           context: orb-publishing
           executor: gcp-cli/default
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          use-passphrase: false
           keypair-email: rose@circleci.com
-          keypair-name: iynere
           use-gke-env-var: false
           gke-cluster-name: test-cluster
           admission-whitelist-patterns: gcr.io/google_containers/*
@@ -216,9 +208,7 @@ workflows:
           name: test-job-google-master
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          use-passphrase: false
           keypair-email: rose@circleci.com
-          keypair-name: iynere
           use-gke-env-var: false
           gke-cluster-name: test-cluster
           admission-whitelist-patterns: gcr.io/google_containers/*
@@ -235,9 +225,7 @@ workflows:
           executor: bin-authz/machine
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          use-passphrase: false
           keypair-email: rose@circleci.com
-          keypair-name: iynere
           use-gke-env-var: false
           gke-cluster-name: test-cluster
           admission-whitelist-patterns: gcr.io/google_containers/*
@@ -254,9 +242,7 @@ workflows:
           executor: gcp-cli/default
           context: orb-publishing
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          use-passphrase: false
           keypair-email: rose@circleci.com
-          keypair-name: iynere
           use-gke-env-var: false
           gke-cluster-name: test-cluster
           admission-whitelist-patterns: gcr.io/google_containers/*

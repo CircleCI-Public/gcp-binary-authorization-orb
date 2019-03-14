@@ -1,0 +1,36 @@
+description: >
+  In the first job, use the GCP GCR Orb to push an image to a Google
+  Container Registry. In the second job, use the Binary Authorization
+  Orb to sign the image for release, then deploy the image to Google
+  Kubernetes Engine.
+
+usage:
+  version: 2.1
+
+  orbs:
+    gcp-gcr: circleci/gcp-gcr@1.0.0
+    bin-authz: circleci/bin-authz@1.0.0
+
+  workflows:
+    push_sign_deploy:
+      jobs:
+        - gcp-gcr/build_and_push_image:
+            context: your-context # context containing any required env vars
+            image: your-image # your image name
+            registry-url: gcr.io # default value, here for clarity
+            tag: latest # default value
+
+        - bin-authz/create-attestation:
+            context: your-context
+            attestor: $CIRCLE_USERNAME # default value
+            keypair-email: your@email.com
+            gke-cluster-env-var: YOUR_GKE_CLUSTER_NAME_ENV_VAR
+            use-note-file: true
+            note-filepath: your-container-analysis-note.jason
+            use-policy-file: true
+            policy-filepath: your-binauthz-policy-file.yaml
+            image-path: gcr.io/$GOOGLE_PROJECT_ID/your-image
+            image-tag: latest
+            requires: [gcp-gcr/build_and_push_image]
+            deployment-steps:
+              - kubectl run your-server --image gcr.io/$GOOGLE_PROJECT_ID/your-image@$YOUR_IMAGE_DIGEST --port 8080

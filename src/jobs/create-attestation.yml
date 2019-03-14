@@ -152,8 +152,8 @@ parameters:
   keypair-email:
     type: string
     description: >
-      Email address to attach to PGP keypair. Only required if
-      `use-existing-keypair` is set to `false`.
+      Email address attached to existing PGP keypair, or to attach to
+      newly created keypair.
 
   use-passphrase:
     type: boolean
@@ -363,6 +363,14 @@ parameters:
     default: /tmp/generated_payload.json
     description: Path at which to generate an attestation payload
 
+  deployment-steps:
+    type: steps
+    default: []
+    description: >
+      Optional deployment steps to run after signing an image for release.
+      See the `deploy-attested-image` usage example for one possible
+      implementation.
+
 steps:
   - when:
       condition: <<parameters.checkout>>
@@ -447,6 +455,8 @@ steps:
       use-passphrase: <<parameters.use-passphrase>>
       keypair-passphrase: <<parameters.keypair-passphrase>>
       attestor: <<parameters.attestor>>
+
+  - <<parameters.deployment-steps>>
 
   - store_artifacts:
       path: <<parameters.note-filepath>>
