@@ -1,4 +1,4 @@
-# GCP Binary Authorization Orb [![CircleCI Build Status](https://circleci.com/gh/CircleCI-Public/gcp-binary-authorizationi-orb.svg?style=shield "CircleCI Build Status")](https://circleci.com/gh/CircleCI-Public/gcp-binary-authorization-orb) [![CircleCI Orb Version](https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/circleci/gcp-binary-authorization)](https://circleci.com/orbs/registry/orb/circleci/gcp-binary-authorizationi)
+# GCP Binary Authorization Orb [![CircleCI Build Status](https://circleci.com/gh/CircleCI-Public/gcp-binary-authorization-orb.svg?style=shield "CircleCI Build Status")](https://circleci.com/gh/CircleCI-Public/gcp-binary-authorization-orb) [![CircleCI Orb Version](https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/circleci/gcp-binary-authorization)](https://circleci.com/orbs/registry/orb/circleci/gcp-binary-authorizationi)
 
 Use Google's [Binary Authorization](https://cloud.google.com/binary-authorization) to sign/certify container images for deployment to Google Kubernetes Engine.
 
