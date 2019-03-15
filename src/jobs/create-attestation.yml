@@ -35,6 +35,14 @@ parameters:
       to the working directory.
 
   # google env
+  run-setup:
+    type: boolean
+    default: false
+    description: >
+      Run Binary Authorization setup steps? Setup steps are designed to
+      be run once to initialize Binary Authorization for a particular
+      CircleCI project.
+
   google-compute-zone:
     type: env_var_name
     default: GOOGLE_COMPUTE_ZONE
@@ -245,20 +253,30 @@ parameters:
       path.
 
   # policy
+  configure-policy:
+    type: boolean
+    default: false
+    description: >
+      Configure a new Binary Authorization policy for this attestation?
+      Choose `false` to use the existing policy stored in Binary
+      Authorization
+
   use-policy-file:
     type: boolean
     default: false
     description: >
-      Use an existing Binary Authorization policy YAML file instead of
-      creating one via this command's paramaters?
+      Use a locally stored Binary Authorization policy YAML file instead of
+      creating one via this command's paramaters (`configure-policy`) or
+      using an existing policy already stored in Binary Authorization?
 
   policy-filepath:
     type: string
     default: /tmp/policy.yaml
     description: >
       Path to a Binary Authorization policy YAML file. Should be an
-      existing file if `use-file` is `true`; otherwise, a policy file
-      will be created at this path.
+      existing file if `use-policy-file` is `true`; otherwise, a policy file
+      will be created (`configure-policy`) or imported (`import-existing-
+      policy`) at this path.
 
   admission-whitelist-patterns:
     type: string
@@ -368,59 +386,69 @@ steps:
   - gcp-cli/install
   - gcp-cli/initialize
 
-  - setup:
-      google-compute-zone: <<parameters.google-compute-zone>>
-      create-new-gke-cluster: <<parameters.create-new-gke-cluster>>
-      gke-cluster-name: <<parameters.gke-cluster-name>>
-      multi-project-setup: <<parameters.multi-project-setup>>
-      google-project-id: <<parameters.google-project-id>>
-      deployer-project-id: <<parameters.deployer-project-id>>
+  - when:
+      condition: <<parameters.run-setup>>
+      steps:
+        - setup:
+            google-compute-zone: <<parameters.google-compute-zone>>
+            multi-project-setup: <<parameters.multi-project-setup>>
+            google-project-id: <<parameters.google-project-id>>
+            google-service-account: <<parameters.google-service-account>>
+            deployer-project-id: <<parameters.deployer-project-id>>
+            deployer-service-account: <<parameters.deployer-service-account>>
+            attestor-project-id: <<parameters.attestor-project-id>>
+            attestor-service-account: <<parameters.attestor-service-account>>
+            attestation-project-id: <<parameters.attestation-project-id>>
+            create-new-gke-cluster: <<parameters.create-new-gke-cluster>>
+            gke-cluster-name: <<parameters.gke-cluster-name>>
+            attestor: <<parameters.attestor>>
+            attestor-hint: <<parameters.attestor-hint>>
+            note-id: <<parameters.note-id>>
+            note-description-short: <<parameters.note-description-short>>
+            note-description-long: <<parameters.note-description-long>>
+            note-related-url: <<parameters.note-related-url>>
+            note-expiration-time: <<parameters.note-expiration-time>>
+            related-note-names: <<parameters.related-note-names>>
+            use-note-file: <<parameters.use-note-file>>
+            note-filepath: <<parameters.note-filepath>>
+            use-existing-keypair: <<parameters.use-existing-keypair>>
+            keypair-email: <<parameters.keypair-email>>
+            keypair-name: <<parameters.keypair-name>>
+            use-passphrase: <<parameters.use-passphrase>>
+            keypair-passphrase: <<parameters.keypair-passphrase>>
+            public-key: <<parameters.public-key>>
+            configure-policy: <<parameters.configure-policy>>
+            use-policy-file: <<parameters.use-policy-file>>
+            policy-filepath: <<parameters.policy-filepath>>
+            admission-whitelist-patterns: <<parameters.admission-whitelist-patterns>>
+            default-evaluation-mode: <<parameters.default-evaluation-mode>>
+            default-required-attestors: <<parameters.default-required-attestors>>
+            cluster-specific-rules: <<parameters.cluster-specific-rules>>
+            cluster-specific-specifier: <<parameters.cluster-specific-specifier>>
+            cluster-specific-eval-mode: <<parameters.cluster-specific-eval-mode>>
+            cluster-specific-required-attestors: <<parameters.cluster-specific-required-attestors>>
 
-  - create-note:
-      attestor: <<parameters.attestor>>
-      attestor-hint: <<parameters.attestor-hint>>
-      multi-project-setup: <<parameters.multi-project-setup>>
-      google-project-id: <<parameters.google-project-id>>
-      google-service-account: <<parameters.google-service-account>>
-      attestor-project-id: <<parameters.attestor-project-id>>
-      attestor-service-account: <<parameters.attestor-service-account>>
-      note-id: <<parameters.note-id>>
-      note-description-short: <<parameters.note-description-short>>
-      note-description-long: <<parameters.note-description-long>>
-      note-related-url: <<parameters.note-related-url>>
-      note-expiration-time: <<parameters.note-expiration-time>>
-      related-note-names: <<parameters.related-note-names>>
-      use-note-file: <<parameters.use-note-file>>
-      note-filepath: <<parameters.note-filepath>>
-
-  - create-attestor:
-      attestor: <<parameters.attestor>>
-      multi-project-setup: <<parameters.multi-project-setup>>
-      google-project-id: <<parameters.google-project-id>>
-      attestor-project-id: <<parameters.attestor-project-id>>
-      use-existing-keypair: <<parameters.use-existing-keypair>>
-      keypair-email: <<parameters.keypair-email>>
-      keypair-name: <<parameters.keypair-name>>
-      use-passphrase: <<parameters.use-passphrase>>
-      keypair-passphrase: <<parameters.keypair-passphrase>>
-      public-key: <<parameters.public-key>>
-      note-id: <<parameters.note-id>>
-      deployer-service-account: <<parameters.deployer-service-account>>
-
-  - configure-policy:
-      multi-project-setup: <<parameters.multi-project-setup>>
-      google-project-id: <<parameters.google-project-id>>
-      attestor-project-id: <<parameters.attestor-project-id>>
-      deployer-project-id: <<parameters.deployer-project-id>>
-      use-policy-file: <<parameters.use-policy-file>>
-      policy-filepath: <<parameters.policy-filepath>>
-      admission-whitelist-patterns: <<parameters.admission-whitelist-patterns>>
-      default-evaluation-mode: <<parameters.default-evaluation-mode>>
-      default-required-attestors: <<parameters.default-required-attestors>>
-      cluster-specific-rules: <<parameters.cluster-specific-rules>>
-      cluster-specific-specifier: <<parameters.cluster-specific-specifier>>
-      cluster-specific-eval-mode: <<parameters.cluster-specific-eval-mode>>
-      cluster-specific-required-attestors: <<parameters.cluster-specific-required-attestors>>
+  - when:
+      condition: <<parameters.configure-policy>>
+      steps:
+        # don't need to configure a policy twice if one will already
+        # be configured within the `setup` command
+        - unless:
+          condition: <<parameters.run-setup>>
+            - configure-policy:
+                multi-project-setup: <<parameters.multi-project-setup>>
+                google-project-id: <<parameters.google-project-id>>
+                attestor-project-id: <<parameters.attestor-project-id>>
+                deployer-project-id: <<parameters.deployer-project-id>>
+                use-policy-file: <<parameters.use-policy-file>>
+                policy-filepath: <<parameters.policy-filepath>>
+                admission-whitelist-patterns: <<parameters.admission-whitelist-patterns>>
+                default-evaluation-mode: <<parameters.default-evaluation-mode>>
+                default-required-attestors: <<parameters.default-required-attestors>>
+                cluster-specific-rules: <<parameters.cluster-specific-rules>>
+                cluster-specific-specifier: <<parameters.cluster-specific-specifier>>
+                cluster-specific-eval-mode: <<parameters.cluster-specific-eval-mode>>
+                cluster-specific-required-attestors: <<parameters.cluster-specific-required-attestors>>
 
   - create-attestation:
       multi-project-setup: <<parameters.multi-project-setup>>
@@ -439,12 +467,3 @@ steps:
       attestor: <<parameters.attestor>>
 
   - <<parameters.deployment-steps>>
-
-  - store_artifacts:
-      path: <<parameters.note-filepath>>
-
-  - store_artifacts:
-      path: <<parameters.policy-filepath>>
-
-  - store_artifacts:
-      path: <<parameters.payload-filepath>>

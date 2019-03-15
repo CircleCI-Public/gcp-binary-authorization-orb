@@ -228,3 +228,6 @@ steps:
         gcloud --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
           beta container binauthz policy import \
           <<parameters.policy-filepath>>
+
+  - store_artifacts:
+      path: <<parameters.policy-filepath>>

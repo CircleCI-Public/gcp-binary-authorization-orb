@@ -180,3 +180,6 @@ steps:
                 -H "Authorization: Bearer $(gcloud auth print-access-token)" \
                 --data-binary @/tmp/iam_request.json \
                 "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>:setIamPolicy"
+
+  - store_artifacts:
+      path: <<parameters.note-filepath>>

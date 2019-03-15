@@ -239,3 +239,6 @@ steps:
           --attestor=<<parameters.attestor>> \
           --attestor-project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> | \
           grep -v "Listed 0 items"
+
+  - store_artifacts:
+      path: <<parameters.payload-filepath>>
