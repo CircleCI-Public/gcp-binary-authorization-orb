@@ -137,7 +137,7 @@ workflows:
       - bin-authz/create-attestation:
           name: test-job-google-dev
           context: orb-publishing
-          run-setup: true
+          # run-setup: true
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
           gke-cluster-name: test-cluster
@@ -153,7 +153,7 @@ workflows:
       - bin-authz/create-attestation:
           name: test-job-machine-dev
           context: orb-publishing
-          run-setup: true
+          # run-setup: true
           executor: bin-authz/machine
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
@@ -170,7 +170,7 @@ workflows:
       - bin-authz/create-attestation:
           name: test-job-docker-dev
           context: orb-publishing
-          run-setup: true
+          # run-setup: true
           executor: gcp-cli/default
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
