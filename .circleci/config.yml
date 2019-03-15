@@ -182,27 +182,28 @@ workflows:
           post-steps: *delete-attestor
 
       # triggered by master branch commits
-      - test-docker:
-          name: test-docker-master
-          context: orb-publishing
-          filters: *integration-master_filters
-          post-steps: *delete-attestor
+      # - test-docker:
+      #     name: test-docker-master
+      #     context: orb-publishing
+      #     filters: *integration-master_filters
+      #     post-steps: *delete-attestor
 
-      - test-google:
-          name: test-google-master
-          context: orb-publishing
-          filters: *integration-master_filters
-          post-steps: *delete-attestor
+      # - test-google:
+      #     name: test-google-master
+      #     context: orb-publishing
+      #     filters: *integration-master_filters
+      #     post-steps: *delete-attestor
 
-      - test-machine:
-          name: test-machine-master
-          context: orb-publishing
-          filters: *integration-master_filters
-          post-steps: *delete-attestor
+      # - test-machine:
+      #     name: test-machine-master
+      #     context: orb-publishing
+      #     filters: *integration-master_filters
+      #     post-steps: *delete-attestor
 
       - bin-authz/create-attestation:
           name: test-job-google-master
           context: orb-publishing
+          run-setup: true
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
           gke-cluster-name: test-cluster
@@ -219,6 +220,7 @@ workflows:
           name: test-job-machine-master
           executor: bin-authz/machine
           context: orb-publishing
+          run-setup: true
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
           gke-cluster-name: test-cluster
@@ -235,6 +237,7 @@ workflows:
           name: test-job-docker-master
           executor: gcp-cli/default
           context: orb-publishing
+          run-setup: true
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
           gke-cluster-name: test-cluster
