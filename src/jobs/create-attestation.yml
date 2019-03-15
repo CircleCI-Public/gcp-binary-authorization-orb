@@ -434,21 +434,22 @@ steps:
         # don't need to configure a policy twice if one will already
         # be configured within the `setup` command
         - unless:
-          condition: <<parameters.run-setup>>
-            - configure-policy:
-                multi-project-setup: <<parameters.multi-project-setup>>
-                google-project-id: <<parameters.google-project-id>>
-                attestor-project-id: <<parameters.attestor-project-id>>
-                deployer-project-id: <<parameters.deployer-project-id>>
-                use-policy-file: <<parameters.use-policy-file>>
-                policy-filepath: <<parameters.policy-filepath>>
-                admission-whitelist-patterns: <<parameters.admission-whitelist-patterns>>
-                default-evaluation-mode: <<parameters.default-evaluation-mode>>
-                default-required-attestors: <<parameters.default-required-attestors>>
-                cluster-specific-rules: <<parameters.cluster-specific-rules>>
-                cluster-specific-specifier: <<parameters.cluster-specific-specifier>>
-                cluster-specific-eval-mode: <<parameters.cluster-specific-eval-mode>>
-                cluster-specific-required-attestors: <<parameters.cluster-specific-required-attestors>>
+            condition: <<parameters.run-setup>>
+            steps:
+              - configure-policy:
+                  multi-project-setup: <<parameters.multi-project-setup>>
+                  google-project-id: <<parameters.google-project-id>>
+                  attestor-project-id: <<parameters.attestor-project-id>>
+                  deployer-project-id: <<parameters.deployer-project-id>>
+                  use-policy-file: <<parameters.use-policy-file>>
+                  policy-filepath: <<parameters.policy-filepath>>
+                  admission-whitelist-patterns: <<parameters.admission-whitelist-patterns>>
+                  default-evaluation-mode: <<parameters.default-evaluation-mode>>
+                  default-required-attestors: <<parameters.default-required-attestors>>
+                  cluster-specific-rules: <<parameters.cluster-specific-rules>>
+                  cluster-specific-specifier: <<parameters.cluster-specific-specifier>>
+                  cluster-specific-eval-mode: <<parameters.cluster-specific-eval-mode>>
+                  cluster-specific-required-attestors: <<parameters.cluster-specific-required-attestors>>
 
   - create-attestation:
       multi-project-setup: <<parameters.multi-project-setup>>
