@@ -143,6 +143,7 @@ workflows:
           # setup-only
           gke-cluster-name: test-cluster
           store-generated-keypair: true
+          use-existing-keypair: false
           public-key: PUBLIC_KEY_TEST
           private-key: PRIVATE_KEY_TEST
           #
