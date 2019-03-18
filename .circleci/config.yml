@@ -137,14 +137,14 @@ workflows:
       - bin-authz/create-attestation:
           name: test-job-google-dev
           context: orb-publishing
-          # run-setup: true
-          # attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          run-setup: true
+          attestor: $CIRCLE_USERNAME
           keypair-email: rose@circleci.com
-          # gke-cluster-name: test-cluster
-          # admission-whitelist-patterns: gcr.io/google_containers/*
-          # default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
-          # cluster-specific-rules: true
-          # cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          gke-cluster-name: test-cluster
+          admission-whitelist-patterns: gcr.io/google_containers/*
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          cluster-specific-rules: true
+          cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
           filters: *integration-dev_filters
