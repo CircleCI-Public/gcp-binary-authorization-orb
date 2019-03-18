@@ -146,6 +146,7 @@ workflows:
           use-existing-keypair: false
           public-key: PUBLIC_KEY_TEST
           private-key: PRIVATE_KEY_TEST
+          keypair-name: testing
           #
 
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
