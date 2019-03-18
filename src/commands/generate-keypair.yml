@@ -1,0 +1,118 @@
+description: >
+  Generate an RSA-2048-type PGP keypair to use with Google's Binary
+  Authorization and optionally store its public and private portions as
+  CircleCI environment variables.
+
+parameters:
+  keypair-name:
+    type: string
+    default: ""
+    description: >
+      Name to attach to PGP keypair
+
+  keypair-email:
+    type: string
+    description: >
+      Email address to attach to PGP keypair
+
+  use-passphrase:
+    type: boolean
+    default: false
+    description: >
+      Generate a PGP keypair with a passphrase?
+
+  keypair-passphrase:
+    type: env_var_name
+    default: BIN_AUTHZ_KEYPAIR_PASSPHRASE
+    description: >
+      Name of environment variable storing a passphrase to use when
+      generating a PGP keypair (only required if `use-passphrase` is set
+      to `true`)
+
+  store-generated-keypair:
+    type: boolean
+    default: true
+    description: >
+      Store public and private portions of generated keypair as CircleCI
+      environment variables?
+
+  public-key:
+    type: env_var_name
+    default: BIN_AUTHZ_PUBLIC_KEY
+    description: >
+      Name of environment variable under which to store the public portion
+      of the keypair generated to use with Binary Authorization
+
+  private-key:
+    type: env_var_name
+    default: BIN_AUTHZ_PRIVATE_KEY
+    description: >
+      Name of environment variable under which to store the private portion
+      of the keypair generated to use with Binary Authorization
+
+  circle-token:
+    type: env_var_name
+    default: CIRCLE_TOKEN
+    description: >
+      Name of environment variable storing a CircleCI API token, for
+      authenticating calls to store project environment variables
+
+steps:
+  - run:
+      name: Boost entropy for key generation
+      command: |
+        # set sudo to work whether logged in as root user or non-root user
+        if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
+
+        $SUDO apt-get install -y haveged
+
+  - run:
+      name: Generate PGP keypair
+      command: |
+        gpg --batch --gen-key <(
+          cat \<<- EOF
+            Key-Type: RSA
+            Key-Length: 2048
+            Name-Real: <<parameters.keypair-name>>
+            Name-Email: <<parameters.keypair-email>><<#parameters.use-passphrase>>
+            Passphrase: $<<parameters.keypair-passphrase>><</parameters.use-passphrase>>
+            %commit
+        EOF
+        )
+
+  - run:
+      name: Store keypair in CircleCI
+      command: |
+        # extract fingerprint from key
+        FINGERPRINT_STRING=$(gpg \
+          --list-keys --with-fingerprint --with-colons \
+          <<parameters.keypair-email>> | \
+          grep fpr)
+
+        # use colon delimiters to separate fingerprint
+        arrFINGERPRINT=(${FINGERPRINT_STRING//:/ })
+
+        FINGERPRINT=${arrFINGERPRINT[-1]}
+
+        gpg --armor --export ${FINGERPRINT} > /tmp/public-key.pgp
+        gpg --armor --export-secret-subkeys ${FINGERPRINT} > /tmp/private-key.pgp
+
+        PUBLIC_KEY_ENV_VAR=$(perl -p -e 's/\n/\\n/' /tmp/public-key.pgp)
+        PRIVATE_KEY_ENV_VAR=$(perl -p -e 's/\n/\\n/' /tmp/private-key.pgp)
+
+        # determine VCS type, so we don't worry about it later
+        if [[ $(echo $CIRCLE_REPOSITORY_URL | grep github.com:$CIRCLE_PROJECT_USERNAME) ]]; then
+          VCS_TYPE=github
+        else
+          VCS_TYPE=bitbucket
+        fi
+
+        curl -X POST --header "Content-Type: application/json" -d \
+          '{"name":"<<parameters.public-key>>", \
+          "value":"$PUBLIC_KEY_ENV_VAR"}' \
+          https://circleci.com/api/v1.1/project/$VCS_TYPE/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/envvar?circle-token=$<<parameters.circle-token>>
+
+        curl -X POST --header "Content-Type: application/json" -d \
+          '{"name":"<<parameters.private-key>>", \
+          "value":"$PRIVATE_KEY_ENV_VAR"}' \
+          https://circleci.com/api/v1.1/project/$VCS_TYPE/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/envvar?circle-token=$<<parameters.circle-token>>

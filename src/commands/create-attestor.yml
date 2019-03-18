@@ -41,18 +41,18 @@ parameters:
       Use an existing PGP keypair? If `false`, a keypair will be created
       on-the-fly
 
-  keypair-email:
-    type: string
-    description: >
-      Email address to attach to PGP keypair. Only required if
-      `use-existing-keypair` is set to `false`.
-
   keypair-name:
     type: string
     default: ""
     description: >
       Name to attach to PGP keypair. Only required if `use-existing-keypair`
       is set to `false`.
+
+  keypair-email:
+    type: string
+    description: >
+      Email address to attach to PGP keypair. Only required if
+      `use-existing-keypair` is set to `false`.
 
   use-passphrase:
     type: boolean
@@ -69,17 +69,44 @@ parameters:
       generating a PGP keypair. Only required if `use-existing-keypair`
       is set to `false`.
 
+  store-generated-keypair:
+    type: boolean
+    default: true
+    description: >
+      Store public and private portions of generated keypair as CircleCI
+      environment variables?
+
   public-key:
     type: env_var_name
     default: BIN_AUTHZ_PUBLIC_KEY
     description: >
       Name of environment variable storing the public portion of the keypair
-      with which to sign the attestation. Not required if
-      `use-existing-keypair` is set to `false`. Store the public key in
-      Contexts or as a project-level environment variable, as a single-line
-      string, with newlines replaced with the newline string literal `\n`.
-      Use an RSA-2048-type key. See Google's documentation for details:
+      with which to sign the attestation. If `use-existing-keypair` is set
+      to `false` and `store-generated-keypair` is set to true, the public
+      key will be stored in CircleCI as a project environment variable under
+      this name. Otherwise, please store the public key in Contexts or as a
+      project-level environment variable, as a single-line string, with
+      newlines replaced with the newline string literal `\n`. Use an RSA-
+      2048-type key. See Google's PGP key documentation for details:
       https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
+
+  private-key:
+    type: env_var_name
+    default: BIN_AUTHZ_PRIVATE_KEY
+    description: >
+      Name of environment variable under which to store the private portion
+      of the keypair generated to use with Binary Authorization. Only
+      required if `use-existing-keypair` is set to `false` and
+      `store-generated-keypair` is set to true.
+
+  circle-token:
+    type: env_var_name
+    default: CIRCLE_TOKEN
+    description: >
+      Name of environment variable storing a CircleCI API token, for
+      authenticating calls to store project environment variables. Only
+      required if `use-existing-keypair` is set to `false` and
+      `store-generated-keypair` is set to true.
 
   note-id:
     type: string
@@ -110,27 +137,40 @@ steps:
   - unless:
       condition: <<parameters.use-existing-keypair>>
       steps:
-        - run:
-            name: Boost entropy for key generation
-            command: |
-              # set sudo to work whether logged in as root user or non-root user
-              if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
+        - generate-keypair:
+            keypair-name: <<parameters.keypair-name>>
+            keypair-email: <<parameters.keypair-email>>
+            use-passphrase: <<parameters.use-passphrase>>
+            keypair-passphrase: <<parameters.keypair-passphrase>>
+            store-generated-keypair: <<parameters.store-generated-keypair>>
+            public-key: <<parameters.public-key>>
+            private-key: <<parameters.private-key>>
+            circle-token: <<parameters.circle-token>>
 
-              $SUDO apt-get install -y haveged
+  # - unless:
+  #     condition: <<parameters.use-existing-keypair>>
+  #     steps:
+  #       - run:
+  #           name: Boost entropy for key generation
+  #           command: |
+  #             # set sudo to work whether logged in as root user or non-root user
+  #             if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
 
-        - run:
-            name: Generate PGP keypair
-            command: |
-              gpg --batch --gen-key <(
-                cat \<<- EOF
-                  Key-Type: RSA
-                  Key-Length: 2048
-                  Name-Real: <<parameters.keypair-name>>
-                  Name-Email: <<parameters.keypair-email>><<#parameters.use-passphrase>>
-                  Passphrase: $<<parameters.keypair-passphrase>><</parameters.use-passphrase>>
-                  %commit
-              EOF
-              )
+  #             $SUDO apt-get install -y haveged
+
+  #       - run:
+  #           name: Generate PGP keypair
+  #           command: |
+  #             gpg --batch --gen-key <(
+  #               cat \<<- EOF
+  #                 Key-Type: RSA
+  #                 Key-Length: 2048
+  #                 Name-Real: <<parameters.keypair-name>>
+  #                 Name-Email: <<parameters.keypair-email>><<#parameters.use-passphrase>>
+  #                 Passphrase: $<<parameters.keypair-passphrase>><</parameters.use-passphrase>>
+  #                 %commit
+  #             EOF
+  #             )
 
   - run:
       name: Add PGP public key to attestor

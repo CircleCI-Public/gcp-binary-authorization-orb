@@ -223,6 +223,9 @@ workflows:
 
           # setup-only
           gke-cluster-name: test-cluster
+          store-generated-keypair: true
+          public-key: PUBLIC_KEY_TEST
+          private-key: PRIVATE_KEY_TEST
           #
 
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
