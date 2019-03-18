@@ -1,20 +1,48 @@
 description: >
-  Get set up to use Google's Binary Authorization on CircleCI. This
-  command is designed to be run once to initialize Binary Authorization
-  for a particular CircleCI project. It will enable all required APIs,
-  optionally create a GKE cluster, create a Container Analysis note and
-  an attestor, optionally generate and store a PGP keypair, and
-  optionally create and store a Binary Authorization policy YAML file.
-  After running this command successfully, it can be removed from your
-  config.yml file. To use this command, at least one existing Google
-  project is required; if using a multi-project Binary Authorization
-  setup, three separate Google projects (deployer, attestor,
-  attestation) are required. For easier execution, this command is also
-  available as an orb job, also called `setup`. For additional
-  information, see Google's Binary Authorization documentation:
+  Get set up to use Google's Binary Authorization on CircleCI. This job
+  is designed to be run once to initialize Binary Authorization for a
+  particular CircleCI project. It will enable all required APIs,
+  optionally create a GKE cluster, create an attestor, optionally
+  generate and store a PGP keypair, and optionally create and store a
+  Binary Authorization policy YAML file. After running this job
+  successfully, it can be removed from your config.yml file. To use this
+  job, at least one existing Google project is required; if using a
+  multi-project Binary Authorization setup, three separate Google
+  projects (deployer, attestor, attestation) are required. This job is
+  also available as an orb command, also called `setup`, if more control
+  over its mode of execution is desired. For further information, see
+  Google's Binary Authorization documentation:
   https://cloud.google.com/binary-authorization/docs/overview
 
+executor: <<parameters.executor>>
+
 parameters:
+  executor:
+    type: executor
+    default: google
+    description: >
+      Executor to use for this job, defaults to Google's official
+      Docker image with the gcloud CLI preinstalled
+
+  checkout:
+    type: boolean
+    default: false
+    description: >
+      Checkout as a first step? Default is `false`
+
+  attach-workspace:
+    type: boolean
+    default: false
+    description: >
+      Attach to an existing workspace? Default is `false`
+
+  workspace-root:
+    type: string
+    default: workspace
+    description: >
+      Workspace root path that is either an absolute path or a path relative
+      to the working directory.
+
   google-compute-zone:
     type: env_var_name
     default: GOOGLE_COMPUTE_ZONE
@@ -298,80 +326,33 @@ parameters:
 
 steps:
   - when:
-      condition: <<parameters.multi-project-setup>>
+      condition: <<parameters.checkout>>
       steps:
-        - run:
-            name: Enable GCP APIs
-            command: |
-              gcloud services \
-                --project=$<<parameters.deployer-project-id>> \
-                enable \
-                container.googleapis.com \
-                binaryauthorization.googleapis.com
-
-              gcloud services \
-                --project=$<<parameters.attestor-project-id>> \
-                enable \
-                containeranalysis.googleapis.com \
-                binaryauthorization.googleapis.com \
-
-              gcloud services \
-                --project=$<<parameters.attestation-project-id>> \
-                enable \
-                containeranalysis.googleapis.com \
-                binaryauthorization.googleapis.com
-
-  - unless:
-      condition: <<parameters.multi-project-setup>>
-      steps:
-        - run:
-            name: Enable GCP APIs
-            command: |
-              gcloud services \
-                --project=$<<parameters.google-project-id>> \
-                enable \
-                container.googleapis.com \
-                containeranalysis.googleapis.com \
-                binaryauthorization.googleapis.com
-
-  - run:
-      name: Enable Binary Authorization
-      command: |
-        gcloud beta container clusters update \
-          <<parameters.gke-cluster-name>> \
-          --enable-binauthz \
-          --zone $<<parameters.google-compute-zone>>
+        - checkout
 
   - when:
-      condition: <<parameters.create-new-gke-cluster>>
+      condition: <<parameters.attach-workspace>>
       steps:
-        - run:
-            name: Create GKE cluster
-            command: |
-              gcloud \
-                --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
-                beta container clusters create \
-                --enable-binauthz \
-                --zone $<<parameters.google-compute-zone>> \
-                <<parameters.gke-cluster-name>>
+        - attach_workspace:
+            at: <<parameters.workspace-root>>
 
-  - run:
-      name: Configure kubectl
-      command: |
-        gcloud \
-          --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
-          container clusters get-credentials \
-          --zone $<<parameters.google-compute-zone>> \
-          <<parameters.gke-cluster-name>>
+  - gcp-cli/install
+  - gcp-cli/initialize
 
-  - create-note:
-      attestor: <<parameters.attestor>>
-      attestor-hint: <<parameters.attestor-hint>>
+  - setup:
+      google-compute-zone: <<parameters.google-compute-zone>>
       multi-project-setup: <<parameters.multi-project-setup>>
       google-project-id: <<parameters.google-project-id>>
       google-service-account: <<parameters.google-service-account>>
+      deployer-project-id: <<parameters.deployer-project-id>>
+      deployer-service-account: <<parameters.deployer-service-account>>
       attestor-project-id: <<parameters.attestor-project-id>>
       attestor-service-account: <<parameters.attestor-service-account>>
+      attestation-project-id: <<parameters.attestation-project-id>>
+      create-new-gke-cluster: <<parameters.create-new-gke-cluster>>
+      gke-cluster-name: <<parameters.gke-cluster-name>>
+      attestor: <<parameters.attestor>>
+      attestor-hint: <<parameters.attestor-hint>>
       note-id: <<parameters.note-id>>
       note-description-short: <<parameters.note-description-short>>
       note-description-long: <<parameters.note-description-long>>
@@ -380,35 +361,19 @@ steps:
       related-note-names: <<parameters.related-note-names>>
       use-note-file: <<parameters.use-note-file>>
       note-filepath: <<parameters.note-filepath>>
-
-  - create-attestor:
-      attestor: <<parameters.attestor>>
-      multi-project-setup: <<parameters.multi-project-setup>>
-      google-project-id: <<parameters.google-project-id>>
-      attestor-project-id: <<parameters.attestor-project-id>>
       use-existing-keypair: <<parameters.use-existing-keypair>>
       keypair-email: <<parameters.keypair-email>>
       keypair-name: <<parameters.keypair-name>>
       use-passphrase: <<parameters.use-passphrase>>
       keypair-passphrase: <<parameters.keypair-passphrase>>
       public-key: <<parameters.public-key>>
-      note-id: <<parameters.note-id>>
-      deployer-service-account: <<parameters.deployer-service-account>>
-
-  - when:
-      condition: <<parameters.configure-policy>>
-      steps:
-        - configure-policy:
-            multi-project-setup: <<parameters.multi-project-setup>>
-            google-project-id: <<parameters.google-project-id>>
-            attestor-project-id: <<parameters.attestor-project-id>>
-            deployer-project-id: <<parameters.deployer-project-id>>
-            use-policy-file: <<parameters.use-policy-file>>
-            policy-filepath: <<parameters.policy-filepath>>
-            admission-whitelist-patterns: <<parameters.admission-whitelist-patterns>>
-            default-evaluation-mode: <<parameters.default-evaluation-mode>>
-            default-required-attestors: <<parameters.default-required-attestors>>
-            cluster-specific-rules: <<parameters.cluster-specific-rules>>
-            cluster-specific-specifier: <<parameters.cluster-specific-specifier>>
-            cluster-specific-eval-mode: <<parameters.cluster-specific-eval-mode>>
-            cluster-specific-required-attestors: <<parameters.cluster-specific-required-attestors>>
+      configure-policy: <<parameters.configure-policy>>
+      use-policy-file: <<parameters.use-policy-file>>
+      policy-filepath: <<parameters.policy-filepath>>
+      admission-whitelist-patterns: <<parameters.admission-whitelist-patterns>>
+      default-evaluation-mode: <<parameters.default-evaluation-mode>>
+      default-required-attestors: <<parameters.default-required-attestors>>
+      cluster-specific-rules: <<parameters.cluster-specific-rules>>
+      cluster-specific-specifier: <<parameters.cluster-specific-specifier>>
+      cluster-specific-eval-mode: <<parameters.cluster-specific-eval-mode>>
+      cluster-specific-required-attestors: <<parameters.cluster-specific-required-attestors>>

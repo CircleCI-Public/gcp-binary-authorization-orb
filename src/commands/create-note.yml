@@ -30,29 +30,30 @@ parameters:
     type: env_var_name
     default: GOOGLE_PROJECT_ID
     description: >
-      Environment variable name storing Google Project ID. Not Required if
-      using a multi-project setup.
+      Name of environment variable storing the Google project ID. Not
+      required if using a multi-project setup.
 
   google-service-account:
     type: env_var_name
     default: GOOGLE_SERVICE_ACCOUNT
     description: >
-      Service account address for the Google Project. Not Required if
-      using a multi-project setup.
+      Name of environment variable storing the service account address for
+      the Google project. Not required if using a multi-project setup.
 
   attestor-project-id:
     type: env_var_name
     default: ATTESTOR_PROJECT_ID
     description: >
-      Google Project ID for the Attestor project. Only required if using
-      a multi-project setup.
+      Name of environment variable storing the Google project ID for the
+      attestor project. Only required if using a multi-project setup.
 
   attestor-service-account:
     type: env_var_name
     default: ATTESTOR_SERVICE_ACCOUNT
     description: >
-      Service account address for the Attestor project. Only required if
-      using a multi-project setup.
+      Name of environment variable storing the service account address for
+      the attestor Google project. Only required if using a multi-project
+      setup.
 
   note-id:
     type: string
@@ -179,3 +180,6 @@ steps:
                 -H "Authorization: Bearer $(gcloud auth print-access-token)" \
                 --data-binary @/tmp/iam_request.json \
                 "https://containeranalysis.googleapis.com/v1beta1/projects/$<<parameters.attestor-project-id>>/notes/<<parameters.note-id>>:setIamPolicy"
+
+  - store_artifacts:
+      path: <<parameters.note-filepath>>

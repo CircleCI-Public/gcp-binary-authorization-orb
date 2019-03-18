@@ -23,8 +23,8 @@ usage:
         - bin-authz/create-attestation:
             context: your-context
             attestor: $CIRCLE_USERNAME # default value
-            keypair-email: your@email.com
-            gke-cluster-env-var: YOUR_GKE_CLUSTER_NAME_ENV_VAR
+            keypair-email: email.address@used.to.generate.keypair.com
+            gke-cluster-name: your-GKE-cluster-name
             use-note-file: true
             note-filepath: your-container-analysis-note.jason
             use-policy-file: true
