@@ -69,6 +69,9 @@ steps:
   - run:
       name: Generate PGP keypair
       command: |
+        GPG_TTY=$(tty)
+        export GPG_TTY
+
         gpg --batch --gen-key <(
           cat \<<- EOF
             Key-Type: RSA
