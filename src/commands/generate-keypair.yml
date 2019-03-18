@@ -73,7 +73,7 @@ steps:
             name: Generate PGP keypair
             command: |
               # have to generate like this on gpg v2.1 or newer
-              if [[ $(gpg --version | grep ") 2\." | grep -v ") 2\.0") ]]; then
+              if [[ $(gpg --version | grep "\) 2\." | grep -v "\) 2\.0") ]]; then
                 gpg --batch --gen-key <(
                   cat \<<- EOF
                     Key-Type: RSA
@@ -86,7 +86,7 @@ steps:
                 )
 
               # & like this on gpg v2.0.x or older
-              elif [[ $(gpg --version | grep ") 1\." | grep ") 2\.0") ]]; then
+              elif [[ $(gpg --version | grep "\) 1\." | grep "\) 2\.0") ]]; then
                 gpg --batch --gen-key <(
                   cat \<<- EOF
                     Key-Type: RSA
