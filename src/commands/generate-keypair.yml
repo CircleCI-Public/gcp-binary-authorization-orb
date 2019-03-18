@@ -66,22 +66,55 @@ steps:
 
         $SUDO apt-get install -y haveged
 
-  - run:
-      name: Generate PGP keypair
-      command: |
-        GPG_TTY=$(tty)
-        export GPG_TTY
+  - unless:
+      condition: <<parameters.use-passphrase>>
+      steps:
+        - run:
+            name: Generate PGP keypair
+            command: |
+              # have to generate like this on gpg v2.1 or newer
+              if [[ $(gpg --version | grep ") 2." && gpg --version | grep -v ") 2.0") ]]; then
+                gpg --batch --gen-key <(
+                  cat \<<- EOF
+                    Key-Type: RSA
+                    Key-Length: 2048
+                    Name-Real: <<parameters.keypair-name>>
+                    Name-Email: <<parameters.keypair-email>>
+                    %commit
+                    %no-ask-passphrase
+                EOF
+                )
 
-        gpg --batch --gen-key <(
-          cat \<<- EOF
-            Key-Type: RSA
-            Key-Length: 2048
-            Name-Real: <<parameters.keypair-name>>
-            Name-Email: <<parameters.keypair-email>><<#parameters.use-passphrase>>
-            Passphrase: $<<parameters.keypair-passphrase>><</parameters.use-passphrase>>
-            %commit
-        EOF
-        )
+              # & like this on gpg v2.0.x or older
+              elif [[ $(gpg --version | grep ") 1." || gpg --version | grep ") 2.0") ]]; then
+                gpg --batch --gen-key <(
+                  cat \<<- EOF
+                    Key-Type: RSA
+                    Key-Length: 2048
+                    Name-Real: <<parameters.keypair-name>>
+                    Name-Email: <<parameters.keypair-email>>
+                    %commit
+                    %no-protection
+                EOF
+                )
+              fi
+
+  - when:
+      condition: <<parameters.use-passphrase>>
+      steps:
+        - run:
+            name: Generate PGP keypair
+            command: |
+              gpg --batch --gen-key <(
+                cat \<<- EOF
+                  Key-Type: RSA
+                  Key-Length: 2048
+                  Name-Real: <<parameters.keypair-name>>
+                  Name-Email: <<parameters.keypair-email>>
+                  Passphrase: $<<parameters.keypair-passphrase>>
+                  %commit
+              EOF
+              )
 
   - run:
       name: Store keypair in CircleCI
