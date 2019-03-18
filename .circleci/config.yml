@@ -138,9 +138,13 @@ workflows:
           name: test-job-google-dev
           context: orb-publishing
           run-setup: true
+
+          # setup-only
+          gke-cluster-name: test-cluster
+          #
+
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
-          # gke-cluster-name: test-cluster
           # admission-whitelist-patterns: gcr.io/google_containers/*
           # default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
           # cluster-specific-rules: true
@@ -153,11 +157,15 @@ workflows:
       - bin-authz/create-attestation:
           name: test-job-machine-dev
           context: orb-publishing
-          run-setup: true
           executor: bin-authz/machine
+          run-setup: true
+
+          # setup-only
+          gke-cluster-name: test-cluster
+          #
+
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
-          # gke-cluster-name: test-cluster
           # admission-whitelist-patterns: gcr.io/google_containers/*
           # default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
           # cluster-specific-rules: true
@@ -170,11 +178,15 @@ workflows:
       - bin-authz/create-attestation:
           name: test-job-docker-dev
           context: orb-publishing
-          # run-setup: true
           executor: gcp-cli/default
+          run-setup: true
+
+          # setup-only
+          gke-cluster-name: test-cluster
+          #
+
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
-          # gke-cluster-name: test-cluster
           # admission-whitelist-patterns: gcr.io/google_containers/*
           # default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
           # cluster-specific-rules: true
