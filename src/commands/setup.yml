@@ -332,7 +332,7 @@ steps:
                 --project=$<<parameters.google-project-id>> \
                 enable \
                 container.googleapis.com \
-                containeranalysis.googleapis.com
+                containeranalysis.googleapis.com \
                 serviceusage.googleapis.com \
                 binaryauthorization.googleapis.com
 
