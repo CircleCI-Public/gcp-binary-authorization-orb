@@ -75,27 +75,27 @@ steps:
               # have to generate like this on gpg v2.1 or newer
               if gpg --version | grep ") 2\." | grep -v ") 2\.0"; then
                 gpg --batch --gen-key <(
-                  cat \<<- EOF
+                  cat \<<- EOM
                     Key-Type: RSA
                     Key-Length: 2048
                     Name-Real: <<parameters.keypair-name>>
                     Name-Email: <<parameters.keypair-email>>
                     %commit
                     %no-ask-passphrase
-                EOF
+                EOM
                 )
 
               # & like this on gpg v2.0.x or older
               elif gpg --version | grep ") 1\." | grep ") 2\.0"; then
                 gpg --batch --gen-key <(
-                  cat \<<- EOF
+                  cat \<<- EOM
                     Key-Type: RSA
                     Key-Length: 2048
                     Name-Real: <<parameters.keypair-name>>
                     Name-Email: <<parameters.keypair-email>>
                     %commit
                     %no-protection
-                EOF
+                EOM
                 )
               fi
 
