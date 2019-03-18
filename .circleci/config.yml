@@ -137,8 +137,8 @@ workflows:
       - bin-authz/create-attestation:
           name: test-job-google-dev
           context: orb-publishing
-          # run-setup: true
-          # attestor: $CIRCLE_USERNAME
+          run-setup: true
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
           # gke-cluster-name: test-cluster
           # admission-whitelist-patterns: gcr.io/google_containers/*
@@ -148,14 +148,14 @@ workflows:
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
           filters: *integration-dev_filters
-          # post-steps: *delete-attestor
+          post-steps: *delete-attestor
 
       - bin-authz/create-attestation:
           name: test-job-machine-dev
           context: orb-publishing
-          # run-setup: true
+          run-setup: true
           executor: bin-authz/machine
-          # attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
           # gke-cluster-name: test-cluster
           # admission-whitelist-patterns: gcr.io/google_containers/*
@@ -165,14 +165,14 @@ workflows:
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
           filters: *integration-dev_filters
-          # post-steps: *delete-attestor
+          post-steps: *delete-attestor
 
       - bin-authz/create-attestation:
           name: test-job-docker-dev
           context: orb-publishing
           # run-setup: true
           executor: gcp-cli/default
-          # attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           keypair-email: rose@circleci.com
           # gke-cluster-name: test-cluster
           # admission-whitelist-patterns: gcr.io/google_containers/*
@@ -182,7 +182,7 @@ workflows:
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
           filters: *integration-dev_filters
-          # post-steps: *delete-attestor
+          post-steps: *delete-attestor
 
       # triggered by master branch commits
       # - test-docker:
