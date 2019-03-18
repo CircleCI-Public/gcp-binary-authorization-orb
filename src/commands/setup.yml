@@ -297,29 +297,44 @@ parameters:
       To specify multiple attestors, use a comma-separated string.
 
 steps:
-  - run:
-      name: Enable GCP APIs
-      command: |
-        gcloud services \
-          --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
-          enable \
-          container.googleapis.com \
-          binaryauthorization.googleapis.com
+  - when:
+      condition: <<parameters.multi-project-setup>>
+      steps:
+        - run:
+            name: Enable GCP APIs
+            command: |
+              gcloud services \
+                --project=$<<parameters.deployer-project-id>> \
+                enable \
+                container.googleapis.com \
+                serviceusage.googleapis.com \
+                binaryauthorization.googleapis.com
 
-        gcloud services \
-          --project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
-          enable \
-          containeranalysis.googleapis.com \
-          binaryauthorization.googleapis.com \
+              gcloud services \
+                --project=$<<parameters.attestor-project-id>> \
+                enable \
+                containeranalysis.googleapis.com \
+                binaryauthorization.googleapis.com \
 
-        gcloud services \
-          --project=$<<#parameters.multi-project-setup>><<parameters.attestation-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
-          enable \
-          containeranalysis.googleapis.com \
-          binaryauthorization.googleapis.com \
+              gcloud services \
+                --project=$<<parameters.attestation-project-id>> \
+                enable \
+                containeranalysis.googleapis.com \
+                binaryauthorization.googleapis.com
 
-        # what about this ?
-        # serviceusage.googleapis.com \
+  - unless:
+      condition: <<parameters.multi-project-setup>>
+      steps:
+        - run:
+            name: Enable GCP APIs
+            command: |
+              gcloud services \
+                --project=$<<parameters.google-project-id>> \
+                enable \
+                container.googleapis.com \
+                containeranalysis.googleapis.com
+                serviceusage.googleapis.com \
+                binaryauthorization.googleapis.com
 
   - run:
       name: Enable Binary Authorization

@@ -101,7 +101,8 @@ steps:
   - run:
       name: Create attestor
       command: |
-        gcloud --project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+        gcloud \
+          --project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
             beta container binauthz attestors create <<parameters.attestor>> \
             --attestation-authority-note=<<parameters.note-id>> \
             --attestation-authority-note-project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>>
@@ -158,7 +159,8 @@ steps:
   - run:
       name: Verify attestor creation with key
       command: |
-        gcloud --project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+        gcloud \
+          --project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
           beta container binauthz attestors list | \
           grep "<<parameters.attestor>>"
 
@@ -168,7 +170,8 @@ steps:
         - run:
             name: Add deployer project IAM role binding
             command: |
-              gcloud --project $<<parameters.attestor-project-id>> \
+              gcloud \
+                --project $<<parameters.attestor-project-id>> \
                 beta container binauthz attestors add-iam-policy-binding \
                 "projects/$<<parameters.attestor-project-id>>/attestors/<<parameters.attestor>>" \
                 --member="serviceAccount:$<<parameters.deployer-service-account>>" \

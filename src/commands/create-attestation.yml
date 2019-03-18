@@ -221,7 +221,8 @@ steps:
         FINGERPRINT=$(cat FINGERPRINT.txt)
         DIGEST=$(cat DIGEST.txt)
 
-        gcloud --project=$<<#parameters.multi-project-setup>><<parameters.attestation-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+        gcloud \
+          --project=$<<#parameters.multi-project-setup>><<parameters.attestation-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
           beta container binauthz attestations create \
           --artifact-url="<<parameters.image-path>>@$DIGEST" \
           --attestor="projects/$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>>/attestors/<<parameters.attestor>>" \
@@ -234,7 +235,9 @@ steps:
   - run:
       name: Verify attestation creation
       command: |
-        sleep 10 && gcloud --project=$<<#parameters.multi-project-setup>><<parameters.attestation-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+        sleep 10 && \
+          gcloud \
+          --project=$<<#parameters.multi-project-setup>><<parameters.attestation-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
           beta container binauthz attestations list \
           --attestor=<<parameters.attestor>> \
           --attestor-project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> | \
