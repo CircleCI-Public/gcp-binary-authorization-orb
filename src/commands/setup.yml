@@ -307,7 +307,6 @@ steps:
                 --project=$<<parameters.deployer-project-id>> \
                 enable \
                 container.googleapis.com \
-                serviceusage.googleapis.com \
                 binaryauthorization.googleapis.com
 
               gcloud services \
@@ -333,7 +332,6 @@ steps:
                 enable \
                 container.googleapis.com \
                 containeranalysis.googleapis.com \
-                serviceusage.googleapis.com \
                 binaryauthorization.googleapis.com
 
   - run:
