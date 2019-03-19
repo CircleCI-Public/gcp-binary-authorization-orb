@@ -356,32 +356,13 @@ steps:
                 binaryauthorization.googleapis.com
 
   - run:
-      name: Enable Binary Authorization
-      command: |
-        gcloud beta container clusters update \
-          <<parameters.gke-cluster-name>> \
-          --enable-binauthz \
-          --zone $<<parameters.google-compute-zone>>
-
-  - when:
-      condition: <<parameters.create-new-gke-cluster>>
-      steps:
-        - run:
-            name: Create GKE cluster
-            command: |
-              gcloud \
-                --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
-                beta container clusters create \
-                --enable-binauthz \
-                --zone $<<parameters.google-compute-zone>> \
-                <<parameters.gke-cluster-name>>
-
-  - run:
-      name: Configure kubectl
+      name: <<#parameters.create-new-gke-cluster>>Create<</parameters.create-new-gke-cluster>><<^parameters.create-new-gke-cluster>>Enable<</parameters.create-new-gke-cluster>> Binary Authorization<<#parameters.create-new-gke-cluster>>-enabled GKE cluster<</parameters.create-new-gke-cluster>>
       command: |
         gcloud \
           --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
-          container clusters get-credentials \
+          beta container clusters \
+          <<#parameters.create-new-gke-cluster>>create<</parameters.create-new-gke-cluster>><<^parameters.create-new-gke-cluster>>update<</parameters.create-new-gke-cluster>> \
+          --enable-binauthz \
           --zone $<<parameters.google-compute-zone>> \
           <<parameters.gke-cluster-name>>
 

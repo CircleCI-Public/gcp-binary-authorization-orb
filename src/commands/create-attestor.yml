@@ -147,31 +147,6 @@ steps:
             private-key: <<parameters.private-key>>
             circle-token: <<parameters.circle-token>>
 
-  # - unless:
-  #     condition: <<parameters.use-existing-keypair>>
-  #     steps:
-  #       - run:
-  #           name: Boost entropy for key generation
-  #           command: |
-  #             # set sudo to work whether logged in as root user or non-root user
-  #             if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
-
-  #             $SUDO apt-get install -y haveged
-
-  #       - run:
-  #           name: Generate PGP keypair
-  #           command: |
-  #             gpg --batch --gen-key <(
-  #               cat \<<- EOF
-  #                 Key-Type: RSA
-  #                 Key-Length: 2048
-  #                 Name-Real: <<parameters.keypair-name>>
-  #                 Name-Email: <<parameters.keypair-email>><<#parameters.use-passphrase>>
-  #                 Passphrase: $<<parameters.keypair-passphrase>><</parameters.use-passphrase>>
-  #                 %commit
-  #             EOF
-  #             )
-
   - run:
       name: Add PGP public key to attestor
       command: |

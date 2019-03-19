@@ -1,0 +1,19 @@
+description: >
+  Get setup to use Binary Authorization on CircleCI. The `run-setup`
+  job will enable all required GCP APIs; enable Binary Authorization
+  for a given GKE cluster (and first create that cluster, if necessary);
+  create a container analysis note; create an attestor; and, optionally,
+  create a Binary Authorization policy. This simple example uses the
+  minimum required parameters that do not have default values.
+
+usage:
+  version: 2.1
+
+  orbs:
+    bin-authz: circleci/gcp-binary-authorization@1.0.0
+
+    workflows:
+      setup_binary_authorization:
+        jobs:
+          - bin-authz/run-setup:
+              gke-cluster-name: your-cluster
