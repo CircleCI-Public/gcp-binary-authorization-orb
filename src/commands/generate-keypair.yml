@@ -95,7 +95,7 @@ steps:
               fi
 
         - run:
-            name: Generate PGP keypair
+            name: Generate PGP keypair from file
             command: |
               gpg --batch --gen-key generated-key
               rm -rf generated-key
@@ -145,11 +145,9 @@ steps:
         fi
 
         curl -X POST --header "Content-Type: application/json" -d \
-          '{"name":"<<parameters.public-key>>", \
-          "value":"$PUBLIC_KEY_ENV_VAR"}' \
+          '{"name":"<<parameters.public-key>>", "value":"$PUBLIC_KEY_ENV_VAR"}' \
           https://circleci.com/api/v1.1/project/$VCS_TYPE/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/envvar?circle-token=$<<parameters.circle-token>>
 
         curl -X POST --header "Content-Type: application/json" -d \
-          '{"name":"<<parameters.private-key>>", \
-          "value":"$PRIVATE_KEY_ENV_VAR"}' \
+          '{"name":"<<parameters.private-key>>", "value":"$PRIVATE_KEY_ENV_VAR"}' \
           https://circleci.com/api/v1.1/project/$VCS_TYPE/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/envvar?circle-token=$<<parameters.circle-token>>
