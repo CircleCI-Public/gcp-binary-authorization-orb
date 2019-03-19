@@ -142,6 +142,11 @@ workflows:
 
           # setup-only
           gke-cluster-name: test-cluster
+          store-generated-keypair: true
+          use-existing-keypair: false
+          public-key: PUBLIC_KEY_TEST1
+          private-key: PRIVATE_KEY_TEST1
+          keypair-name: testing
           #
 
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
@@ -163,6 +168,11 @@ workflows:
 
           # setup-only
           gke-cluster-name: test-cluster
+          store-generated-keypair: true
+          use-existing-keypair: false
+          public-key: PUBLIC_KEY_TEST2
+          private-key: PRIVATE_KEY_TEST2
+          keypair-name: testing
           #
 
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
@@ -184,6 +194,11 @@ workflows:
 
           # setup-only
           gke-cluster-name: test-cluster
+          store-generated-keypair: true
+          use-existing-keypair: false
+          public-key: PUBLIC_KEY_TEST3
+          private-key: PRIVATE_KEY_TEST3
+          keypair-name: testing
           #
 
           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM

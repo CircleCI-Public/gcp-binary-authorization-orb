@@ -194,6 +194,20 @@ parameters:
       generating a PGP keypair. Only required if `use-existing-keypair`
       is set to `false`.
 
+  store-generated-keypair:
+    type: boolean
+    default: true
+    description: >
+      Store public and private portions of generated keypair as CircleCI
+      environment variables?
+
+  circle-token:
+    type: env_var_name
+    default: CIRCLE_TOKEN
+    description: >
+      Name of environment variable storing a CircleCI API token, for
+      authenticating calls to store project environment variables
+
   public-key:
     type: env_var_name
     default: BIN_AUTHZ_PUBLIC_KEY
@@ -205,6 +219,13 @@ parameters:
       string, with newlines replaced with the newline string literal `\n`.
       Use an RSA-2048-type key. See Google's documentation for details:
       https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
+
+  private-key:
+    type: env_var_name
+    default: BIN_AUTHZ_PRIVATE_KEY
+    description: >
+      Name of environment variable under which to store the private portion
+      of the keypair generated to use with Binary Authorization
 
   configure-policy:
     type: boolean
@@ -335,32 +356,13 @@ steps:
                 binaryauthorization.googleapis.com
 
   - run:
-      name: Enable Binary Authorization
-      command: |
-        gcloud beta container clusters update \
-          <<parameters.gke-cluster-name>> \
-          --enable-binauthz \
-          --zone $<<parameters.google-compute-zone>>
-
-  - when:
-      condition: <<parameters.create-new-gke-cluster>>
-      steps:
-        - run:
-            name: Create GKE cluster
-            command: |
-              gcloud \
-                --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
-                beta container clusters create \
-                --enable-binauthz \
-                --zone $<<parameters.google-compute-zone>> \
-                <<parameters.gke-cluster-name>>
-
-  - run:
-      name: Configure kubectl
+      name: <<#parameters.create-new-gke-cluster>>Create<</parameters.create-new-gke-cluster>><<^parameters.create-new-gke-cluster>>Enable<</parameters.create-new-gke-cluster>> Binary Authorization<<#parameters.create-new-gke-cluster>>-enabled GKE cluster<</parameters.create-new-gke-cluster>>
       command: |
         gcloud \
           --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
-          container clusters get-credentials \
+          beta container clusters \
+          <<#parameters.create-new-gke-cluster>>create<</parameters.create-new-gke-cluster>><<^parameters.create-new-gke-cluster>>update<</parameters.create-new-gke-cluster>> \
+          --enable-binauthz \
           --zone $<<parameters.google-compute-zone>> \
           <<parameters.gke-cluster-name>>
 
@@ -387,11 +389,14 @@ steps:
       google-project-id: <<parameters.google-project-id>>
       attestor-project-id: <<parameters.attestor-project-id>>
       use-existing-keypair: <<parameters.use-existing-keypair>>
-      keypair-email: <<parameters.keypair-email>>
       keypair-name: <<parameters.keypair-name>>
+      keypair-email: <<parameters.keypair-email>>
       use-passphrase: <<parameters.use-passphrase>>
       keypair-passphrase: <<parameters.keypair-passphrase>>
+      store-generated-keypair: <<parameters.store-generated-keypair>>
       public-key: <<parameters.public-key>>
+      private-key: <<parameters.private-key>>
+      circle-token: <<parameters.circle-token>>
       note-id: <<parameters.note-id>>
       deployer-service-account: <<parameters.deployer-service-account>>
 

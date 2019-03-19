@@ -1,0 +1,37 @@
+description: >
+  Get set up to use Binary Authorization on CircleCI, and complete an
+  attestation signing for a particular container image, all at once. The
+  `create-attestation` job will run all required setup commands, then
+  create and sign an attestation allowing the container image to be
+  successfully deployed. This example uses the minimum required
+  parameters and thus assumes the following: there is an existing GKE
+  cluster to use with Binary Authorization, and there is an existing PGP
+  keypair stored in CircleCI. A container analysis note, attestor,
+  Binary Authorization policy, and attestation are created on-the-fly.
+  Although not shown in this example, a Docker image would likely be
+  built and deployed to a staging/test environment in a previous job,
+  and then deployed to a production cluster in a subsequent job.
+
+usage:
+  version: 2.1
+
+  orbs:
+    bin-authz: circleci/gcp-binary-authorization@1.0.0
+
+  workflows:
+    setup_and_run_binary_authorization:
+      jobs:
+        - bin-authz/create-attestation:
+            run-setup: true
+            gke-cluster-name: your-gke-cluster
+            keypair-email: email-address@used-to-generate-keypair.com
+            note-description-long: >
+              Longform description of container analysis note
+            configure-policy: true
+            image-path: e.g., gcr.io/your-project/your-image
+            image-tag: tag-that-will-be-deployed
+            deployment-steps:
+              - run: |
+                  echo "your deployment logic can live here"
+                  echo "or in a subsequent workflow job"
+                  echo "see `simple-deploy-attested-image` example for sample kubectl deployment syntax"

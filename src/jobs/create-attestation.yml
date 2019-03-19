@@ -159,6 +159,20 @@ parameters:
       Name of environment variable storing the passphrase used to
       generate PGP keypair
 
+  store-generated-keypair:
+    type: boolean
+    default: true
+    description: >
+      Store public and private portions of generated keypair as CircleCI
+      environment variables?
+
+  circle-token:
+    type: env_var_name
+    default: CIRCLE_TOKEN
+    description: >
+      Name of environment variable storing a CircleCI API token, for
+      authenticating calls to store project environment variables
+
   public-key:
     type: env_var_name
     default: BIN_AUTHZ_PUBLIC_KEY
@@ -412,11 +426,14 @@ steps:
             use-note-file: <<parameters.use-note-file>>
             note-filepath: <<parameters.note-filepath>>
             use-existing-keypair: <<parameters.use-existing-keypair>>
-            keypair-email: <<parameters.keypair-email>>
             keypair-name: <<parameters.keypair-name>>
+            keypair-email: <<parameters.keypair-email>>
             use-passphrase: <<parameters.use-passphrase>>
             keypair-passphrase: <<parameters.keypair-passphrase>>
             public-key: <<parameters.public-key>>
+            private-key: <<parameters.private-key>>
+            store-generated-keypair: <<parameters.store-generated-keypair>>
+            circle-token: <<parameters.circle-token>>
             configure-policy: <<parameters.configure-policy>>
             use-policy-file: <<parameters.use-policy-file>>
             policy-filepath: <<parameters.policy-filepath>>
@@ -427,6 +444,13 @@ steps:
             cluster-specific-specifier: <<parameters.cluster-specific-specifier>>
             cluster-specific-eval-mode: <<parameters.cluster-specific-eval-mode>>
             cluster-specific-required-attestors: <<parameters.cluster-specific-required-attestors>>
+
+  - get-gke-credentials:
+      google-compute-zone: <<parameters.google-compute-zone>>
+      multi-project-setup: <<parameters.multi-project-setup>>
+      google-project-id: <<parameters.google-project-id>>
+      deployer-project-id: <<parameters.deployer-project-id>>
+      gke-cluster-name: <<parameters.gke-cluster-name>>
 
   - when:
       condition: <<parameters.configure-policy>>

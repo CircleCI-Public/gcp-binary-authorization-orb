@@ -182,7 +182,7 @@ steps:
               # export GPG_TTY
 
               # have to sign like this on gpg v1.x
-              if [[ $(gpg --version | grep ") 1.") ]]; then
+              if [[ $(gpg --version | grep ") 1\.") ]]; then
                 echo $<<parameters.keypair-passphrase>> | gpg \
                   --batch --yes --passphrase-fd 0 \
                   --local-user <<parameters.keypair-email>> \
@@ -192,7 +192,7 @@ steps:
                   --sign <<parameters.payload-filepath>>
 
               # & sign like this on gpg v2.x
-              elif [[ $(gpg --version | grep ") 2.") ]]; then
+              elif [[ $(gpg --version | grep ") 2\.") ]]; then
                 echo $<<parameters.keypair-passphrase>> | gpg \
                   --pinentry-mode loopback \
                   --local-user <<parameters.keypair-email>> \
