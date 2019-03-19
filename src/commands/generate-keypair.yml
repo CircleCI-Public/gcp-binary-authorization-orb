@@ -70,34 +70,35 @@ steps:
       condition: <<parameters.use-passphrase>>
       steps:
         - run:
-            name: Generate PGP keypair
+            name: Generate PGP keypair file
             command: |
               # have to generate like this on gpg v2.1 or newer
-              if gpg --version | grep ") 2\." | grep -v ") 2\.0"; then
-                gpg --batch --gen-key <(
-                  cat \<<- EOM
-                    Key-Type: RSA
-                    Key-Length: 2048
-                    Name-Real: <<parameters.keypair-name>>
-                    Name-Email: <<parameters.keypair-email>>
-                    %commit
-                    %no-ask-passphrase
-                EOM
-                )
+              if [[ $(gpg --version | grep ") 2\.") && $(gpg --version | grep -v ") 2\.0") ]]; then
+
+                echo "Key-Type: RSA" \>> generated-key
+                echo "Key-Length: 2048" \>> generated-key
+                echo "Name-Real: <<parameters.keypair-name>>" \>> generated-key
+                echo "Name-Email: <<parameters.keypair-email>>" \>> generated-key
+                echo "%no-protection" \>> generated-key
+                echo "%commit" \>> generated-key
 
               # & like this on gpg v2.0.x or older
-              elif gpg --version | grep ") 1\." | grep ") 2\.0"; then
-                gpg --batch --gen-key <(
-                  cat \<<- EOM
-                    Key-Type: RSA
-                    Key-Length: 2048
-                    Name-Real: <<parameters.keypair-name>>
-                    Name-Email: <<parameters.keypair-email>>
-                    %commit
-                    %no-protection
-                EOM
-                )
+              elif [[ $(gpg --version | grep ") 1\.") || $(gpg --version | grep ") 2\.0") ]]; then
+
+                echo "Key-Type: RSA" \>> generated-key
+                echo "Key-Length: 2048" \>> generated-key
+                echo "Name-Real: <<parameters.keypair-name>>" \>> generated-key
+                echo "Name-Email: <<parameters.keypair-email>>" \>> generated-key
+                echo "%no-ask-passphrase" \>> generated-key
+                echo "%commit" \>> generated-key
+
               fi
+
+        - run:
+            name: Generate PGP keypair
+            command: |
+              gpg --batch --gen-key generated-key
+              rm -rf generated-key
 
   - when:
       condition: <<parameters.use-passphrase>>
