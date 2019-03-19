@@ -1,5 +1,5 @@
 description: >
-  Get setup to use Binary Authorization on CircleCI. The `run-setup`
+  Get set up to use Binary Authorization on CircleCI. The `run-setup`
   job will enable all required GCP APIs; enable Binary Authorization
   for a given GKE cluster (and first create that cluster, if necessary);
   create a container analysis note; create an attestor; and, optionally,
