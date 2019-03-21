@@ -93,13 +93,12 @@ parameters:
       Name of environment variable storing the service account address for
       the Google project. Not required if using a multi-project setup.
 
-  attestor-service-account:
+  google-service-key:
     type: env_var_name
-    default: ATTESTOR_SERVICE_ACCOUNT
+    default: GOOGLE_SERVICE_KEY
     description: >
-      Name of environment variable storing the service account address for
-      the attestor Google project. Only required if using a multi-project
-      setup.
+      Name of environment variable storing the full service key JSON file
+      for the Google project. Not required if using a multi-project setup.
 
   deployer-service-account:
     type: env_var_name
@@ -107,6 +106,22 @@ parameters:
     description: >
       Name of environment variable storing the service account address for
       the deployer Google project. Only required if using a multi-project
+      setup.
+
+  deployer-service-key:
+    type: env_var_name
+    default: DEPLOYER_SERVICE_KEY
+    description: >
+      Name of environment variable storing the full service key JSON file
+      for the deployer Google project. Only required if using a multi-
+      project setup.
+
+  attestor-service-account:
+    type: env_var_name
+    default: ATTESTOR_SERVICE_ACCOUNT
+    description: >
+      Name of environment variable storing the service account address for
+      the attestor Google project. Only required if using a multi-project
       setup.
 
   # setup
@@ -177,24 +192,26 @@ parameters:
     type: env_var_name
     default: BIN_AUTHZ_PUBLIC_KEY
     description: >
-      Name of environment variable storing the public portion of the keypair
-      with which to sign the attestation. Not required if
-      `binauth_use-existing-keypair` is set to `false`. Store the public key
-      in Contexts or as a project-level environment variable, as a single-
-      line string, with newlines replaced with the newline string literal
-      `\n`. Use an RSA-2048-type key. For details, see the following:
+      Name of environment variable storing (or under which to store, if
+      `use-existing-keypair` is false and `store-generated-keypair` is true)
+      the public portion of the keypair with which to sign the attestation.
+      If `use-existing-keypair` is true, store the public key in Contexts or
+      as a project-level environment variable, as a single- line string,
+      with newlines replaced with the newline string literal `\n`. Use an
+      RSA-2048-type key. For details, see the following documentation:
       https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
 
   private-key:
     type: env_var_name
     default: BIN_AUTHZ_PRIVATE_KEY
     description: >
-      Name of environment variable storing the private portion of the
-      keypair with which to sign the attestation. Not required if
-      `use-existing-keypair` is set to `false`. Store the private
-      key in Contexts or as a project-level environment variable, as a
-      single-line string, with newlines replaced with the newline string
-      literal `\n`. Use an RSA-2048-type key. Details available here:
+      Name of environment variable storing (or under which to store, if
+      `use-existing-keypair` is false and `store-generated-keypair` is true)
+      the private portion of the keypair with which to sign the attestation.
+      If `use-existing-keypair` is true, store the private key in Contexts or
+      as a project-level environment variable, as a single- line string,
+      with newlines replaced with the newline string literal `\n`. Use an
+      RSA-2048-type key. For details, see the following documentation:
       https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
 
   # attestor
@@ -398,7 +415,11 @@ steps:
             at: <<parameters.workspace-root>>
 
   - gcp-cli/install
-  - gcp-cli/initialize
+
+  - gcp-cli/initialize:
+      gcloud-service-key: <<#parameters.multi-project-setup>><<parameters.deployer-service-key>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-service-key>><</parameters.multi-project-setup>>
+      google-project-id: <<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>>
+      google-compute-zone: <<parameters.google-compute-zone>>
 
   - when:
       condition: <<parameters.run-setup>>

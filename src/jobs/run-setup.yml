@@ -72,6 +72,13 @@ parameters:
       Name of environment variable storing the service account address for
       the Google project. Not required if using a multi-project setup.
 
+  google-service-key:
+    type: env_var_name
+    default: GOOGLE_SERVICE_KEY
+    description: >
+      Name of environment variable storing the full service key JSON file
+      for the Google project. Not required if using a multi-project setup.
+
   deployer-project-id:
     type: env_var_name
     default: DEPLOYER_PROJECT_ID
@@ -86,6 +93,14 @@ parameters:
       Name of environment variable storing the service account address for
       the deployer Google project. Only required if using a multi-project
       setup.
+
+  deployer-service-key:
+    type: env_var_name
+    default: DEPLOYER_SERVICE_KEY
+    description: >
+      Name of environment variable storing the full service key JSON file
+      for the deployer Google project. Only required if using a multi-
+      project setup.
 
   attestor-project-id:
     type: env_var_name
@@ -360,7 +375,11 @@ steps:
             at: <<parameters.workspace-root>>
 
   - gcp-cli/install
-  - gcp-cli/initialize
+
+  - gcp-cli/initialize:
+      gcloud-service-key: <<#parameters.multi-project-setup>><<parameters.deployer-service-key>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-service-key>><</parameters.multi-project-setup>>
+      google-project-id: <<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>>
+      google-compute-zone: <<parameters.google-compute-zone>>
 
   - setup:
       google-compute-zone: <<parameters.google-compute-zone>>

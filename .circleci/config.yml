@@ -73,10 +73,37 @@ integration-master_filters: &integration-master_filters
 
 # test-google-master, test-docker-master, test-machine-master,
 prod-deploy_requires: &prod-deploy_requires
-  [test-job-google-master, test-job-docker-master, test-job-machine-master]
+  [
+    test-job-google-master, test-job-docker-master, test-job-machine-master
+  ]
 
 delete-attestor: &delete-attestor
-  [run: {when: "always", name: "Clean up attestor", command: "gcloud alpha container binauthz attestors delete $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM"}]
+  [
+    run: {
+      when: "always",
+      name: "Clean up attestor",
+      command: "gcloud alpha container binauthz attestors delete $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM"
+    }
+  ]
+
+multi-project-create-all-post-steps: &multi-project-create-all-post-steps
+  [
+    run: {
+      when: "always",
+      name: "Clean up attestor",
+      command: "gcloud alpha container binauthz attestors delete $CIRCLE_USERNAME"
+    },
+    run: {
+      when: "always",
+      name: "Clean up GKE cluster",
+      command: "gcloud container clusters delete --quiet multi-project-create-all-test-cluster"
+    },
+    run: {
+      when: "always",
+      name: "Clean up keypair environment variables",
+      command: "curl -X DELETE https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/envvar/TEST_PUBLIC_KEY?circle-token=$CIRCLE_TOKEN && curl -X DELETE https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/envvar/TEST_PRIVATE_KEY?circle-token=$CIRCLE_TOKEN"
+    }
+  ]
 
 workflows:
   lint_pack-validate_publish-dev:
@@ -117,23 +144,6 @@ workflows:
   integration-tests_prod-release:
     jobs:
       # triggered by non-master branch commits
-      # - test-docker:
-      #     name: test-docker-dev
-      #     context: orb-publishing
-      #     filters: *integration-dev_filters
-      #     post-steps: *delete-attestor
-
-      # - test-google:
-      #     name: test-google-dev
-      #     context: orb-publishing
-      #     filters: *integration-dev_filters
-      #     post-steps: *delete-attestor
-
-      # - test-machine:
-      #     name: test-machine-dev
-      #     context: orb-publishing
-      #     filters: *integration-dev_filters
-      #     post-steps: *delete-attestor
 
       - bin-authz/create-attestation:
           name: test-job-google-dev
@@ -212,24 +222,29 @@ workflows:
           filters: *integration-dev_filters
           post-steps: *delete-attestor
 
+      # re-enable this job when GCP access control work is done
+      # - bin-authz/create-attestation:
+      #     name: multi-project-create-all-google-dev
+      #     context: orb-publishing
+      #     run-setup: true
+      #     multi-project-setup: true
+      #     create-new-gke-cluster: true
+      #     gke-cluster-name: multi-project-create-all-test-cluster
+      #     use-existing-keypair: false
+      #     keypair-name: test-keypair
+      #     keypair-email: community/partner@circleci.com
+      #     use-passphrase: true
+      #     keypair-passphrase: TEST_PASSPHRASE
+      #     store-generated-keypair: true
+      #     public-key: TEST_PUBLIC_KEY
+      #     private-key: TEST_PRIVATE_KEY
+      #     configure-policy: true
+      #     image-path: gcr.io/google-containers/google-containers-test-image
+      #     image-tag: "2017-01-23"
+      #     filters: *integration-dev_filters
+      #     post-steps: *multi-project-create-all-post-steps
+
       # triggered by master branch commits
-      # - test-docker:
-      #     name: test-docker-master
-      #     context: orb-publishing
-      #     filters: *integration-master_filters
-      #     post-steps: *delete-attestor
-
-      # - test-google:
-      #     name: test-google-master
-      #     context: orb-publishing
-      #     filters: *integration-master_filters
-      #     post-steps: *delete-attestor
-
-      # - test-machine:
-      #     name: test-machine-master
-      #     context: orb-publishing
-      #     filters: *integration-master_filters
-      #     post-steps: *delete-attestor
 
       - bin-authz/create-attestation:
           name: test-job-google-master
@@ -292,6 +307,28 @@ workflows:
           image-tag: "2017-01-23"
           filters: *integration-master_filters
           post-steps: *delete-attestor
+
+      # re-enable this job when GCP access control work is done
+      # - bin-authz/create-attestation:
+      #     name: multi-project-create-all-google-master
+      #     context: orb-publishing
+      #     run-setup: true
+      #     multi-project-setup: true
+      #     create-new-gke-cluster: true
+      #     gke-cluster-name: multi-project-create-all-test-cluster
+      #     use-existing-keypair: false
+      #     keypair-name: test-keypair
+      #     keypair-email: community/partner@circleci.com
+      #     use-passphrase: true
+      #     keypair-passphrase: TEST_PASSPHRASE
+      #     store-generated-keypair: true
+      #     public-key: TEST_PUBLIC_KEY
+      #     private-key: TEST_PRIVATE_KEY
+      #     configure-policy: true
+      #     image-path: gcr.io/google-containers/google-containers-test-image
+      #     image-tag: "2017-01-23"
+      #     filters: *integration-master_filters
+      #     post-steps: *multi-project-create-all-post-steps
 
       # patch, minor, or major publishing
       - orb-tools/dev-promote-prod:
