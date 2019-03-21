@@ -151,7 +151,6 @@ workflows:
           run-setup: true
 
           # setup-only
-          create-new-gke-cluster: true
           gke-cluster-name: test-cluster
           store-generated-keypair: true
           use-existing-keypair: false
@@ -178,7 +177,6 @@ workflows:
           run-setup: true
 
           # setup-only
-          create-new-gke-cluster: true
           gke-cluster-name: test-cluster
           store-generated-keypair: true
           use-existing-keypair: false
@@ -205,7 +203,6 @@ workflows:
           run-setup: true
 
           # setup-only
-          create-new-gke-cluster: true
           gke-cluster-name: test-cluster
           store-generated-keypair: true
           use-existing-keypair: false
