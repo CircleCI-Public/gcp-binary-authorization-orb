@@ -93,10 +93,7 @@ multi-project-create-all-post-steps: &multi-project-create-all-post-steps
     run: {
       when: "always",
       name: "Clean up keypair environment variables",
-      command: |
-        "curl -X DELETE https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/envvar/TEST_PUBLIC_KEY?circle-token=$CIRCLE_TOKEN
-
-        curl -X DELETE https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/envvar/TEST_PRIVATE_KEY?circle-token=$CIRCLE_TOKEN"
+      command: "curl -X DELETE https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/envvar/TEST_PUBLIC_KEY?circle-token=$CIRCLE_TOKEN && curl -X DELETE https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/envvar/TEST_PRIVATE_KEY?circle-token=$CIRCLE_TOKEN"
     }
   ]
 
