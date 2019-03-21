@@ -98,9 +98,7 @@ parameters:
     default: GOOGLE_SERVICE_KEY
     description: >
       Name of environment variable storing the full service key JSON file
-      for the Google project, represented as a single-line string, with
-      newlines replaced with the newline string literal `\n`. Not required
-      if using a multi-project setup.
+      for the Google project. Not required if using a multi-project setup.
 
   deployer-service-account:
     type: env_var_name
@@ -115,9 +113,8 @@ parameters:
     default: DEPLOYER_SERVICE_KEY
     description: >
       Name of environment variable storing the full service key JSON file
-      for the deployer Google project, represented as a single-line string,
-      with newlines replaced with the newline string literal `\n`. Only
-      required if using a multi-project setup.
+      for the deployer Google project. Only required if using a multi-
+      project setup.
 
   attestor-service-account:
     type: env_var_name

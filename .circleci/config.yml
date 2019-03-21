@@ -74,7 +74,7 @@ integration-master_filters: &integration-master_filters
 # test-google-master, test-docker-master, test-machine-master,
 prod-deploy_requires: &prod-deploy_requires
   [
-    multi-project-create-all-google-master
+    test-job-google-master, test-job-docker-master, test-job-machine-master
   ]
 
 delete-attestor: &delete-attestor
@@ -144,48 +144,191 @@ workflows:
   integration-tests_prod-release:
     jobs:
       # triggered by non-master branch commits
+
       - bin-authz/create-attestation:
-          name: multi-project-create-all-google-dev
+          name: test-job-google-dev
           context: orb-publishing
           run-setup: true
-          multi-project-setup: true
-          create-new-gke-cluster: true
-          gke-cluster-name: multi-project-create-all-test-cluster
-          use-existing-keypair: false
-          keypair-name: test-keypair
-          keypair-email: community/partner@circleci.com
-          use-passphrase: true
-          keypair-passphrase: TEST_PASSPHRASE
+
+          # setup-only
+          gke-cluster-name: test-cluster
           store-generated-keypair: true
-          public-key: TEST_PUBLIC_KEY
-          private-key: TEST_PRIVATE_KEY
-          configure-policy: true
+          use-existing-keypair: false
+          public-key: PUBLIC_KEY_TEST1
+          private-key: PRIVATE_KEY_TEST1
+          keypair-name: testing
+          #
+
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          keypair-email: rose@circleci.com
+          # admission-whitelist-patterns: gcr.io/google_containers/*
+          # default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          # cluster-specific-rules: true
+          # cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
           filters: *integration-dev_filters
-          post-steps: *multi-project-create-all-post-steps
+          post-steps: *delete-attestor
+
+      - bin-authz/create-attestation:
+          name: test-job-machine-dev
+          context: orb-publishing
+          executor: bin-authz/machine
+          run-setup: true
+
+          # setup-only
+          gke-cluster-name: test-cluster
+          store-generated-keypair: true
+          use-existing-keypair: false
+          public-key: PUBLIC_KEY_TEST2
+          private-key: PRIVATE_KEY_TEST2
+          keypair-name: testing
+          #
+
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          keypair-email: rose@circleci.com
+          # admission-whitelist-patterns: gcr.io/google_containers/*
+          # default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          # cluster-specific-rules: true
+          # cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          filters: *integration-dev_filters
+          post-steps: *delete-attestor
+
+      - bin-authz/create-attestation:
+          name: test-job-docker-dev
+          context: orb-publishing
+          executor: gcp-cli/default
+          run-setup: true
+
+          # setup-only
+          gke-cluster-name: test-cluster
+          store-generated-keypair: true
+          use-existing-keypair: false
+          public-key: PUBLIC_KEY_TEST3
+          private-key: PRIVATE_KEY_TEST3
+          keypair-name: testing
+          #
+
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          keypair-email: rose@circleci.com
+          # admission-whitelist-patterns: gcr.io/google_containers/*
+          # default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          # cluster-specific-rules: true
+          # cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          filters: *integration-dev_filters
+          post-steps: *delete-attestor
+
+      # re-enable this job when GCP access control work is done
+      # - bin-authz/create-attestation:
+      #     name: multi-project-create-all-google-dev
+      #     context: orb-publishing
+      #     run-setup: true
+      #     multi-project-setup: true
+      #     create-new-gke-cluster: true
+      #     gke-cluster-name: multi-project-create-all-test-cluster
+      #     use-existing-keypair: false
+      #     keypair-name: test-keypair
+      #     keypair-email: community/partner@circleci.com
+      #     use-passphrase: true
+      #     keypair-passphrase: TEST_PASSPHRASE
+      #     store-generated-keypair: true
+      #     public-key: TEST_PUBLIC_KEY
+      #     private-key: TEST_PRIVATE_KEY
+      #     configure-policy: true
+      #     image-path: gcr.io/google-containers/google-containers-test-image
+      #     image-tag: "2017-01-23"
+      #     filters: *integration-dev_filters
+      #     post-steps: *multi-project-create-all-post-steps
 
       # triggered by master branch commits
+
       - bin-authz/create-attestation:
-          name: multi-project-create-all-google-master
+          name: test-job-google-master
           context: orb-publishing
           run-setup: true
-          multi-project-setup: true
-          create-new-gke-cluster: true
-          gke-cluster-name: multi-project-create-all-test-cluster
-          use-existing-keypair: false
-          keypair-name: test-keypair
-          keypair-email: community/partner@circleci.com
-          use-passphrase: true
-          keypair-passphrase: TEST_PASSPHRASE
-          store-generated-keypair: true
-          public-key: TEST_PUBLIC_KEY
-          private-key: TEST_PRIVATE_KEY
-          configure-policy: true
+
+          # setup-only
+          gke-cluster-name: test-cluster
+          #
+
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          keypair-email: rose@circleci.com
+          # admission-whitelist-patterns: gcr.io/google_containers/*
+          # default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          # cluster-specific-rules: true
+          # cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
           filters: *integration-master_filters
-          post-steps: *multi-project-create-all-post-steps
+          post-steps: *delete-attestor
+
+      - bin-authz/create-attestation:
+          name: test-job-machine-master
+          context: orb-publishing
+          executor: bin-authz/machine
+          run-setup: true
+
+          # setup-only
+          gke-cluster-name: test-cluster
+          #
+
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          keypair-email: rose@circleci.com
+          # admission-whitelist-patterns: gcr.io/google_containers/*
+          # default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          # cluster-specific-rules: true
+          # cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          filters: *integration-master_filters
+          post-steps: *delete-attestor
+
+      - bin-authz/create-attestation:
+          name: test-job-docker-master
+          context: orb-publishing
+          executor: gcp-cli/default
+          run-setup: true
+
+          # setup-only
+          gke-cluster-name: test-cluster
+          #
+
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          keypair-email: rose@circleci.com
+          # admission-whitelist-patterns: gcr.io/google_containers/*
+          # default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          # cluster-specific-rules: true
+          # cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          filters: *integration-master_filters
+          post-steps: *delete-attestor
+
+      # re-enable this job when GCP access control work is done
+      # - bin-authz/create-attestation:
+      #     name: multi-project-create-all-google-master
+      #     context: orb-publishing
+      #     run-setup: true
+      #     multi-project-setup: true
+      #     create-new-gke-cluster: true
+      #     gke-cluster-name: multi-project-create-all-test-cluster
+      #     use-existing-keypair: false
+      #     keypair-name: test-keypair
+      #     keypair-email: community/partner@circleci.com
+      #     use-passphrase: true
+      #     keypair-passphrase: TEST_PASSPHRASE
+      #     store-generated-keypair: true
+      #     public-key: TEST_PUBLIC_KEY
+      #     private-key: TEST_PRIVATE_KEY
+      #     configure-policy: true
+      #     image-path: gcr.io/google-containers/google-containers-test-image
+      #     image-tag: "2017-01-23"
+      #     filters: *integration-master_filters
+      #     post-steps: *multi-project-create-all-post-steps
 
       # patch, minor, or major publishing
       - orb-tools/dev-promote-prod:
