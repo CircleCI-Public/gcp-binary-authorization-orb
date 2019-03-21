@@ -155,7 +155,7 @@ workflows:
           keypair-name: test-keypair
           keypair-email: community/partner@circleci.com
           use-passphrase: true
-          keypair-passphrase: test-passphrase
+          keypair-passphrase: TEST_PASSPHRASE
           store-generated-keypair: true
           public-key: TEST_PUBLIC_KEY
           private-key: TEST_PRIVATE_KEY
