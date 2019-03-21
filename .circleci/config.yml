@@ -96,7 +96,7 @@ multi-project-create-all-post-steps: &multi-project-create-all-post-steps
     run: {
       when: "always",
       name: "Clean up GKE cluster",
-      command: "gcloud container clusters delete test-cluster"
+      command: "gcloud container clusters delete --quiet multi-project-create-all-test-cluster"
     },
     run: {
       when: "always",
@@ -150,7 +150,7 @@ workflows:
           run-setup: true
           multi-project-setup: true
           create-new-gke-cluster: true
-          gke-cluster-name: test-cluster
+          gke-cluster-name: multi-project-create-all-test-cluster
           use-existing-keypair: false
           keypair-name: test-keypair
           keypair-email: community/partner@circleci.com
@@ -172,7 +172,7 @@ workflows:
           run-setup: true
           multi-project-setup: true
           create-new-gke-cluster: true
-          gke-cluster-name: test-cluster
+          gke-cluster-name: multi-project-create-all-test-cluster
           use-existing-keypair: false
           keypair-name: test-keypair
           keypair-email: community/partner@circleci.com
