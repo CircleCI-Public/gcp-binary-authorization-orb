@@ -73,10 +73,18 @@ integration-master_filters: &integration-master_filters
 
 # test-google-master, test-docker-master, test-machine-master,
 prod-deploy_requires: &prod-deploy_requires
-  [test-job-google-master, test-job-docker-master, test-job-machine-master]
+  [
+    multi-project-create-all-google-master
+  ]
 
 delete-attestor: &delete-attestor
-  [run: {when: "always", name: "Clean up attestor", command: "gcloud alpha container binauthz attestors delete $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM"}]
+  [
+    run: {
+      when: "always",
+      name: "Clean up attestor",
+      command: "gcloud alpha container binauthz attestors delete $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM"
+    }
+  ]
 
 multi-project-create-all-post-steps: &multi-project-create-all-post-steps
   [
