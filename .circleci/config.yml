@@ -146,8 +146,8 @@ workflows:
                 cluster-name: multi-project-google
 
             - cleanup-env-vars:
-                public-key-name: MULTI_PROJECT_GOOGLE_PUB_KEY
-                private-key-name: MULTI_PROJECT_GOOGLE_PRIV_KEY
+                public-key: MULTI_PROJECT_GOOGLE_PUB_KEY
+                private-key: MULTI_PROJECT_GOOGLE_PRIV_KEY
 
       - bin-authz/create-attestation:
           name: multi-project-machine-dev
@@ -191,8 +191,8 @@ workflows:
                 cluster-name: multi-project-machine
 
             - cleanup-env-vars:
-                public-key-name: MULTI_PROJECT_MACHINE_PUB_KEY
-                private-key-name: MULTI_PROJECT_MACHINE_PRIV_KEY
+                public-key: MULTI_PROJECT_MACHINE_PUB_KEY
+                private-key: MULTI_PROJECT_MACHINE_PRIV_KEY
 
       - bin-authz/create-attestation:
           name: multi-project-docker-dev
@@ -236,8 +236,8 @@ workflows:
                 cluster-name: multi-project-docker
 
             - cleanup-env-vars:
-                public-key-name: MULTI_PROJECT_DOCKER_PUB_KEY
-                private-key-name: MULTI_PROJECT_DOCKER_PRIV_KEY
+                public-key: MULTI_PROJECT_DOCKER_PUB_KEY
+                private-key: MULTI_PROJECT_DOCKER_PRIV_KEY
 
       # SINGLE-PROJECT
       - bin-authz/create-attestation:
@@ -281,8 +281,8 @@ workflows:
                 cluster-name: single-project-google
 
             - cleanup-env-vars:
-                public-key-name: SINGLE_PROJECT_GOOGLE_PUB_KEY
-                private-key-name: SINGLE_PROJECT_GOOGLE_PRIV_KEY
+                public-key: SINGLE_PROJECT_GOOGLE_PUB_KEY
+                private-key: SINGLE_PROJECT_GOOGLE_PRIV_KEY
 
       - bin-authz/create-attestation:
           name: single-project-machine-dev
@@ -326,8 +326,8 @@ workflows:
                 cluster-name: single-project-machine
 
             - cleanup-env-vars:
-                public-key-name: SINGLE_PROJECT_MACHINE_PUB_KEY
-                private-key-name: SINGLE_PROJECT_MACHINE_PRIV_KEY
+                public-key: SINGLE_PROJECT_MACHINE_PUB_KEY
+                private-key: SINGLE_PROJECT_MACHINE_PRIV_KEY
 
       - bin-authz/create-attestation:
           name: single-project-docker-dev
@@ -370,8 +370,8 @@ workflows:
                 cluster-name: single-project-docker
 
             - cleanup-env-vars:
-                public-key-name: SINGLE_PROJECT_DOCKER_PUB_KEY
-                private-key-name: SINGLE_PROJECT_DOCKER_PRIV_KEY
+                public-key: SINGLE_PROJECT_DOCKER_PUB_KEY
+                private-key: SINGLE_PROJECT_DOCKER_PRIV_KEY
 
       # triggered by master branch commits
 
