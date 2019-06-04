@@ -3,7 +3,7 @@ version: 2.1
 orbs:
   bin-authz: circleci/gcp-binary-authorization@dev:alpha
   gcp-cli: circleci/gcp-cli@1.3.0
-  orb-tools: circleci/orb-tools@8.5.0
+  orb-tools: circleci/orb-tools@8.14.0
 
 # yaml anchor filters
 integration-dev_filters: &integration-dev_filters
