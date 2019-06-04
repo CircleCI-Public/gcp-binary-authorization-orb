@@ -333,11 +333,13 @@ workflows:
           name: single-project-docker-dev
           context: orb-publishing
           executor: gcp-cli/default
+          google-project-id: BINAUTHZ_SINGLE_PROJECT_ID
 
           # setup
           run-setup: true
           create-new-gke-cluster: true
           gke-cluster-name: single-project-docker
+
 
           # keypair
           use-existing-keypair: false
