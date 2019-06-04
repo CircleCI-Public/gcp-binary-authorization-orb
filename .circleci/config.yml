@@ -4,6 +4,8 @@ orbs:
   bin-authz: circleci/gcp-binary-authorization@dev:alpha
   gcp-cli: circleci/gcp-cli@1.3.0
   orb-tools: circleci/orb-tools@8.14.0
+  queue: eddiewebb/queue@1.1.2
+
 
 # yaml anchor filters
 integration-dev_filters: &integration-dev_filters
@@ -70,21 +72,22 @@ workflows:
       - orb-tools/lint
 
       - orb-tools/pack:
-          requires:
-            - orb-tools/lint
+          requires: [orb-tools/lint]
 
       - orb-tools/publish-dev:
           orb-name: circleci/gcp-binary-authorization
           context: orb-publishing
-          requires:
-            - orb-tools/pack
+          requires: [orb-tools/pack]
+
+      - queue/block_workflow:
+          consider-branch: false
+          requires: [orb-tools/publish-dev]
 
       - orb-tools/trigger-integration-workflow:
           name: trigger-integration-dev
           context: orb-publishing
           ssh-fingerprints: 30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
-          requires:
-            - orb-tools/publish-dev
+          requires: [orb-tools/publish-dev]
           filters:
             branches:
               ignore: master
@@ -94,8 +97,7 @@ workflows:
           context: orb-publishing
           ssh-fingerprints: 30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
           tag: master
-          requires:
-            - orb-tools/publish-dev
+          requires: [orb-tools/publish-dev]
           filters:
             branches:
               only: master
