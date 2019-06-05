@@ -64,7 +64,17 @@ steps:
         # set sudo to work whether logged in as root user or non-root user
         if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
 
-        $SUDO apt-get install -y haveged
+        if uname -a | grep Darwin > /dev/null 2>&1; then
+          exit 0
+        elif cat /etc/issue | grep Alpine > /dev/null 2>&1; then
+          apk add haveged > /dev/null 2>&1
+        elif cat /etc/issue | grep Debian > /dev/null 2>&1; then
+          $SUDO apt-get install -y haveged > /dev/null 2>&1
+        elif cat /etc/issue | grep Ubuntu > /dev/null 2>&1; then
+          $SUDO apt-get install -y haveged > /dev/null 2>&1
+        fi
+
+        echo "Success! Package containing HAVEGE algorithm installed to boost entropy"
 
   - unless:
       condition: <<parameters.use-passphrase>>
@@ -115,7 +125,9 @@ steps:
                   Passphrase: $<<parameters.keypair-passphrase>>
                   %commit
               EOF
-              )
+              ) > /dev/null 2>&1
+
+              echo "Success! GPG kepair generated"
 
   - run:
       name: Store keypair in CircleCI
@@ -146,8 +158,10 @@ steps:
 
         curl -X POST --header "Content-Type: application/json" -d \
           '{"name":"<<parameters.public-key>>", "value":"$PUBLIC_KEY_ENV_VAR"}' \
-          https://circleci.com/api/v1.1/project/$VCS_TYPE/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/envvar?circle-token=$<<parameters.circle-token>>
+          https://circleci.com/api/v1.1/project/$VCS_TYPE/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/envvar?circle-token=$<<parameters.circle-token>> > /dev/null 2>&1
 
         curl -X POST --header "Content-Type: application/json" -d \
           '{"name":"<<parameters.private-key>>", "value":"$PRIVATE_KEY_ENV_VAR"}' \
-          https://circleci.com/api/v1.1/project/$VCS_TYPE/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/envvar?circle-token=$<<parameters.circle-token>>
+          https://circleci.com/api/v1.1/project/$VCS_TYPE/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/envvar?circle-token=$<<parameters.circle-token>> > /dev/null 2>&1
+
+        echo "Success! PGP keypair stored as CircleCI project environment variables"

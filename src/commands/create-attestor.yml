@@ -134,6 +134,8 @@ steps:
             --attestation-authority-note=<<parameters.note-id>> \
             --attestation-authority-note-project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>>
 
+        echo "Success! Attestor <<parameters.attestor>> has been created"
+
   - unless:
       condition: <<parameters.use-existing-keypair>>
       steps:

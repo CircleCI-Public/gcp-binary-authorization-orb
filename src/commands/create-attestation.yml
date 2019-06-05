@@ -118,6 +118,8 @@ steps:
 
         echo $DIGEST > DIGEST.txt
 
+        echo "Success! Image digest stored"
+
   - run:
       name: Create attestation payload
       command: |
@@ -126,6 +128,8 @@ steps:
         gcloud beta container binauthz create-signature-payload \
           --artifact-url="<<parameters.image-path>>@$DIGEST" \
           > <<parameters.payload-filepath>>
+
+        echo "Success! Attestion payload created"
 
   - when:
       condition: <<parameters.use-existing-keypair>>
@@ -154,6 +158,8 @@ steps:
         FINGERPRINT=${arrFINGERPRINT[-1]}
 
         echo $FINGERPRINT > FINGERPRINT.txt
+
+        echo "Success! PGP keypair fingerprint extracted"
 
   - when:
       condition: <<parameters.use-existing-keypair>>
@@ -203,6 +209,8 @@ steps:
 
               fi
 
+              echo "Success! Attestation payload signed"
+
   - unless:
       condition: <<parameters.use-passphrase>>
       steps:
@@ -214,6 +222,8 @@ steps:
                 --armor \
                 --output /tmp/generated_signature.pgp \
                 --sign <<parameters.payload-filepath>>
+
+              echo "Success! Attestation payload signed"
 
   - run:
       name: Create attestation
@@ -231,6 +241,8 @@ steps:
 
           rm -rf FINGERPRINT.txt
           rm -rf DIGEST.txt
+
+          echo "Success! Attestation created"
 
   - run:
       name: Verify attestation creation
