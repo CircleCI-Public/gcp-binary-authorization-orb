@@ -236,7 +236,7 @@ workflows:
           public-key: MULTI_PROJECT_GOOGLE_PUB_KEY
           private-key: MULTI_PROJECT_GOOGLE_PRIV_KEY
           # attestor
-          attestor: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           # policy
           configure-policy: true
           default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
@@ -274,7 +274,7 @@ workflows:
           public-key: MULTI_PROJECT_MACHINE_PUB_KEY
           private-key: MULTI_PROJECT_MACHINE_PRIV_KEY
           # attestor
-          attestor: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           # policy
           configure-policy: true
           default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
@@ -312,7 +312,7 @@ workflows:
           public-key: MULTI_PROJECT_DOCKER_PUB_KEY
           private-key: MULTI_PROJECT_DOCKER_PRIV_KEY
           # attestor
-          attestor: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           # policy
           configure-policy: true
           default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
