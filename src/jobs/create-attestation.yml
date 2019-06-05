@@ -222,7 +222,9 @@ parameters:
       Name of the attestation authority for the container analysis note.
       If the attestor does not yet exist, it will be created. Defaults to
       the value of the `$CIRCLE_USERNAME` environment variable (VCS user who
-      triggered the CircleCI job).
+      triggered the CircleCI job). If using a multi-project setup, make sure
+      to provide a fully qualiified reference ID in the following form:
+      `projects/[attestor project ID]/attestors/[name of attestor]`
 
   attestor-hint:
     type: string
