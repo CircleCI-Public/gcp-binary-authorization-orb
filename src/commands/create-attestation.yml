@@ -140,7 +140,17 @@ steps:
               echo -e $<<parameters.private-key>> > private.key
 
               gpg --import public.key
-              gpg --import private.key
+
+              if <<parameters.use-passphrase>>; then
+                echo use-agent >> ~/.gnupg/gpg.conf
+                echo pinentry-mode loopback >> ~/.gnupg/gpg.conf
+                echo allow-loopback-pinentry >> ~/.gnupg/gpg-agent.conf
+                echo RELOADAGENT | gpg-connect-agent
+
+                echo "$<<parameters.keypair-passphrase>>" | gpg --import private.key
+              else
+                gpg --import private.key
+              fi
 
   - run:
       name: Extract keypair fingerprint
