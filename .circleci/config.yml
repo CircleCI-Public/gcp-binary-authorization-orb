@@ -220,12 +220,12 @@ workflows:
           # use-passphrase: true
           # keypair-passphrase: BIN_AUTHZ_KEYPAIR_PASSPHRASE #default
           public-key: BIN_AUTHZ_PUBLIC_KEY_WITH_PW
-          # private-key: # supposedly not required here
+          private-key: BIN_AUTHZ_PRIVATE_KEY_WITH_PW
           # attestor
           attestor: existing-keypair-attestor-with-pw
           # policy
           configure-policy: true
-          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/existing-keypair-attestor-with-pw
           # image/attestation
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
@@ -320,7 +320,7 @@ workflows:
           # keypair
           keypair-email: community-partner@circleci.com
           public-key: BIN_AUTHZ_PUBLIC_KEY_PASSWORDLESS
-          # private-key: # supposedly not required here
+          private-key: BIN_AUTHZ_PRIVATE_KEY_PASSWORDLESS
           # attestor
           attestor: existing-keypair-attestor-passwordless
           # policy

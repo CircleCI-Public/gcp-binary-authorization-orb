@@ -263,7 +263,9 @@ parameters:
     description: >
       Name of environment variable under which to store the private portion
       of the keypair generated to use with Binary Authorization. Only
-      required if generating and storing a new keypair.
+      required here if `use-existing-keypair` is set to `false` and
+      `store-generated-keypair` is set to true (required by subsequent
+      commands either way).
 
   circle-token:
     type: env_var_name

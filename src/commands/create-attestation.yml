@@ -76,8 +76,7 @@ parameters:
     default: BIN_AUTHZ_PRIVATE_KEY
     description: >
       Name of environment variable storing the private portion of the
-      keypair with which to sign the attestation. Not required if
-      `use-existing-keypair` is set to `false`. Store the private key in
+      keypair with which to sign the attestation. Unless `use-existing-keypair` is set to `false`, store the private key in
       Contexts or as a project-level environment variable, as a single-line
       string, with newlines replaced with the newline string literal `\n`.
       Use an RSA-2048-type key. See Google's documentation for details:

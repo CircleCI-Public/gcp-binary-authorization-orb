@@ -213,11 +213,13 @@ parameters:
     default: BIN_AUTHZ_PUBLIC_KEY
     description: >
       Name of environment variable storing the public portion of the keypair
-      with which to sign the attestation. Not required if
-      `use-existing-keypair` is set to `false`. Store the public key in
-      Contexts or as a project-level environment variable, as a single-line
-      string, with newlines replaced with the newline string literal `\n`.
-      Use an RSA-2048-type key. See Google's documentation for details:
+      with which to sign the attestation. If `use-existing-keypair` is set
+      to `false` and `store-generated-keypair` is set to true, the public
+      key will be stored in CircleCI as a project environment variable under
+      this name. Otherwise, please store the public key in Contexts or as a
+      project-level environment variable, as a single-line string, with
+      newlines replaced with the newline string literal `\n`. Use an RSA-
+      2048-type key. See Google's PGP key documentation for details:
       https://cloud.google.com/binary-authorization/docs/creating-attestors-cli#create_a_pgp_key_pair
 
   private-key:
@@ -225,7 +227,10 @@ parameters:
     default: BIN_AUTHZ_PRIVATE_KEY
     description: >
       Name of environment variable under which to store the private portion
-      of the keypair generated to use with Binary Authorization
+      of the keypair generated to use with Binary Authorization. Only
+      required here if `use-existing-keypair` is set to `false` and
+      `store-generated-keypair` is set to true (required by subsequent
+      commands either way).
 
   configure-policy:
     type: boolean
