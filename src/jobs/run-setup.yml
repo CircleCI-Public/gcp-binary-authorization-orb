@@ -16,8 +16,6 @@ description: >
 
 executor: <<parameters.executor>>
 
-<<#parameters.resource-class>>resource_class: <<parameters.resource-class>><<<</parameters.resource-class>>>>
-
 parameters:
   executor:
     type: executor
@@ -25,15 +23,6 @@ parameters:
     description: >
       Executor to use for this job, defaults to Google's official
       Docker image with the gcloud CLI preinstalled
-
-  resource-class:
-    type: enum
-    enum: ["", small, medium, medium+, large, xlarge]
-    default: ""
-    description: >
-      If specified, and if using a Docker-based executor, the
-      resource_class with which this job should be run:
-      https://circleci.com/docs/2.0/configuration-reference/#resource_class
 
   checkout:
     type: boolean

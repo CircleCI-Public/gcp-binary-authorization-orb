@@ -9,5 +9,15 @@ parameters:
       Version of the Google Cloud SDK Docker image to use. For full list,
       see https://hub.docker.com/r/google/cloud-sdk/tags
 
+  resource-class:
+    type: enum
+    enum: [small, medium, medium+, large, xlarge]
+    default: medium
+    description: >
+      The resource_class with which this job should be run:
+      https://circleci.com/docs/2.0/configuration-reference/#resource_class
+
+resource_class: <<parameters.resource-class>>
+
 docker:
   - image: google/cloud-sdk:<<parameters.tag>>
