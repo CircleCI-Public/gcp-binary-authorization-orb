@@ -8,8 +8,8 @@ usage:
   version: 2.1
 
   orbs:
-    gcp-gcr: circleci/gcp-gcr@1.0.0
-    bin-authz: circleci/gcp-binary-authorization@1.0.0
+    gcp-gcr: circleci/gcp-gcr@x.y.z
+    bin-authz: circleci/gcp-binary-authorization@x.y.z
 
   workflows:
     push_sign_deploy:
