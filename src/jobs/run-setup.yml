@@ -218,9 +218,10 @@ parameters:
 
   keypair-email:
     type: string
+    default: ""
     description: >
-      Email address to attach to PGP keypair. Only required if
-      `use-existing-keypair` is set to `false`.
+      Email address to attach to PGP keypair. Only required here if
+      `use-existing-keypair` is set to `false` (required by subsequent commands either way).
 
   keypair-name:
     type: string

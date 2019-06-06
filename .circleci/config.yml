@@ -207,6 +207,7 @@ workflows:
           create-new-gke-cluster: true
           gke-cluster-name: single-project-docker
           # keypair
+          keypair-email: community-partner@circleci.com
           # do we need pw if the existing keypair has one ? probably / how ?
           # use-passphrase: true
           # keypair-passphrase: BIN_AUTHZ_KEYPAIR_PASSPHRASE #default
@@ -309,6 +310,7 @@ workflows:
           create-new-gke-cluster: true
           gke-cluster-name: multi-project-docker
           # keypair
+          keypair-email: community-partner@circleci.com
           public-key: BIN_AUTHZ_PUBLIC_KEY_PASSWORDLESS
           # private-key: # supposedly not required here
           # attestor
