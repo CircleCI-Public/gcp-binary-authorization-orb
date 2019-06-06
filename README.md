@@ -69,4 +69,4 @@ See the following links for more information about using CircleCI orbs:
 
 We welcome [issues](https://github.com/CircleCI-Public/gcp-binary-authorization-orb/issues) to and [pull requests](https://github.com/CircleCI-Public/gcp-binary-authorization-orb/pulls) against this repository!
 
-For further questions/comments about this or other orbs, visit [CircleCI's orbs discussion forum](https://discuss.circleci.com/c/orbs).
+For further questions/comments about this or other orbs, visit [CircleCI's orbs discussion forum](https://discuss.circleci.com/c/ecosystem/orbs).
