@@ -58,6 +58,14 @@ parameters:
       being used. See the following for details:
       https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
 
+  enable-apis:
+    type: boolean
+    default: true
+    description: >
+      Do required APIs (container.googleapis.com,
+      containeranalysis.googleapis.com, binaryauthorization.googleapis.com)
+      need to be enabled?
+
   google-project-id:
     type: env_var_name
     default: GOOGLE_PROJECT_ID
@@ -427,6 +435,7 @@ steps:
         - setup:
             google-compute-zone: <<parameters.google-compute-zone>>
             multi-project-setup: <<parameters.multi-project-setup>>
+            enable-apis: <<parameters.enable-apis>>
             google-project-id: <<parameters.google-project-id>>
             google-service-account: <<parameters.google-service-account>>
             deployer-project-id: <<parameters.deployer-project-id>>

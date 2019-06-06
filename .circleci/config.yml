@@ -147,6 +147,7 @@ workflows:
           name: single-project-google-dev
           # setup
           run-setup: true
+          enable-apis: false
           create-new-gke-cluster: true
           gke-cluster-name: single-project-google
           # keypair
@@ -180,6 +181,7 @@ workflows:
           executor: bin-authz/machine
           # setup
           run-setup: true
+          enable-apis: false
           create-new-gke-cluster: true
           gke-cluster-name: single-project-machine
           # keypair
@@ -216,6 +218,7 @@ workflows:
           executor: gcp-cli/default
           # setup
           run-setup: true
+          enable-apis: false
           create-new-gke-cluster: true
           gke-cluster-name: single-project-docker
           # keypair
@@ -246,6 +249,7 @@ workflows:
           multi-project-setup: true
           # setup
           run-setup: true
+          enable-apis: false
           create-new-gke-cluster: true
           gke-cluster-name: multi-project-google
           # keypair
@@ -283,6 +287,7 @@ workflows:
           multi-project-setup: true
           # setup
           run-setup: true
+          enable-apis: false
           create-new-gke-cluster: true
           gke-cluster-name: multi-project-machine
           # keypair
@@ -317,6 +322,7 @@ workflows:
           multi-project-setup: true
           # setup
           run-setup: true
+          enable-apis: false
           create-new-gke-cluster: true
           gke-cluster-name: multi-project-docker
           # keypair
@@ -349,6 +355,7 @@ workflows:
           name: single-project-google-master
           # setup
           run-setup: true
+          enable-apis: false
           create-new-gke-cluster: true
           gke-cluster-name: single-project-google
           # keypair
@@ -382,6 +389,7 @@ workflows:
           executor: bin-authz/machine
           # setup
           run-setup: true
+          enable-apis: false
           create-new-gke-cluster: true
           gke-cluster-name: single-project-machine
           # keypair
@@ -418,6 +426,7 @@ workflows:
           executor: gcp-cli/default
           # setup
           run-setup: true
+          enable-apis: false
           create-new-gke-cluster: true
           gke-cluster-name: single-project-docker
           # keypair
@@ -448,6 +457,7 @@ workflows:
           multi-project-setup: true
           # setup
           run-setup: true
+          enable-apis: false
           create-new-gke-cluster: true
           gke-cluster-name: multi-project-google
           # keypair
@@ -485,6 +495,7 @@ workflows:
           multi-project-setup: true
           # setup
           run-setup: true
+          enable-apis: false
           create-new-gke-cluster: true
           gke-cluster-name: multi-project-machine
           # keypair
@@ -519,6 +530,7 @@ workflows:
           multi-project-setup: true
           # setup
           run-setup: true
+          enable-apis: false
           create-new-gke-cluster: true
           gke-cluster-name: multi-project-docker
           # keypair

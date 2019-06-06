@@ -30,6 +30,14 @@ parameters:
       being used. See the following for details:
       https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
 
+  enable-apis:
+    type: boolean
+    default: true
+    description: >
+      Do required APIs (container.googleapis.com,
+      containeranalysis.googleapis.com, binaryauthorization.googleapis.com)
+      need to be enabled?
+
   google-project-id:
     type: env_var_name
     default: GOOGLE_PROJECT_ID
@@ -324,41 +332,44 @@ parameters:
 
 steps:
   - when:
-      condition: <<parameters.multi-project-setup>>
+      condition: <<parameters.enable-apis>>
       steps:
-        - run:
-            name: Enable GCP APIs
-            command: |
-              gcloud services \
-                --project=$<<parameters.deployer-project-id>> \
-                enable \
-                container.googleapis.com \
-                binaryauthorization.googleapis.com
+        - when:
+            condition: <<parameters.multi-project-setup>>
+            steps:
+              - run:
+                  name: Enable GCP APIs
+                  command: |
+                    gcloud services \
+                      --project=$<<parameters.deployer-project-id>> \
+                      enable \
+                      container.googleapis.com \
+                      binaryauthorization.googleapis.com
 
-              gcloud services \
-                --project=$<<parameters.attestor-project-id>> \
-                enable \
-                containeranalysis.googleapis.com \
-                binaryauthorization.googleapis.com \
+                    gcloud services \
+                      --project=$<<parameters.attestor-project-id>> \
+                      enable \
+                      containeranalysis.googleapis.com \
+                      binaryauthorization.googleapis.com \
 
-              gcloud services \
-                --project=$<<parameters.attestation-project-id>> \
-                enable \
-                containeranalysis.googleapis.com \
-                binaryauthorization.googleapis.com
+                    gcloud services \
+                      --project=$<<parameters.attestation-project-id>> \
+                      enable \
+                      containeranalysis.googleapis.com \
+                      binaryauthorization.googleapis.com
 
-  - unless:
-      condition: <<parameters.multi-project-setup>>
-      steps:
-        - run:
-            name: Enable GCP APIs
-            command: |
-              gcloud services \
-                --project=$<<parameters.google-project-id>> \
-                enable \
-                container.googleapis.com \
-                containeranalysis.googleapis.com \
-                binaryauthorization.googleapis.com
+        - unless:
+            condition: <<parameters.multi-project-setup>>
+            steps:
+              - run:
+                  name: Enable GCP APIs
+                  command: |
+                    gcloud services \
+                      --project=$<<parameters.google-project-id>> \
+                      enable \
+                      container.googleapis.com \
+                      containeranalysis.googleapis.com \
+                      binaryauthorization.googleapis.com
 
   - run:
       name: <<#parameters.create-new-gke-cluster>>Create<</parameters.create-new-gke-cluster>><<^parameters.create-new-gke-cluster>>Enable<</parameters.create-new-gke-cluster>> Binary Authorization<<#parameters.create-new-gke-cluster>>-enabled GKE cluster<</parameters.create-new-gke-cluster>>
