@@ -44,7 +44,7 @@ orbs:
        - binary-authorization/create-attestation
 ```
 
-The `create-attestation` job will sign/authorize a specific tag of a container stored in a Google container registry for deployment to GKE, provided whatever conditions specified via a [Binary Authorizatiion policy YAML file](https://cloud.google.com/binary-authorization/docs/policy-yaml-reference) have been met. If these conditions are _not_ met, any attempted deployments to GKE will be blocked.
+The `create-attestation` job will sign/authorize a specific tag of a container stored in a Google container registry for deployment to GKE, provided whatever conditions specified via a [Binary Authorization policy YAML file](https://cloud.google.com/binary-authorization/docs/policy-yaml-reference) have been met. If these conditions are _not_ met, any attempted deployments to GKE will be blocked.
 
 `create-attestation` can also run all required setup steps, by passing the `run-setup: true` parameter. After successfully running these steps once, the parameter should be removed.
 
