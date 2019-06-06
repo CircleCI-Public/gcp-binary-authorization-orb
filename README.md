@@ -48,7 +48,7 @@ The `create-attestation` job will sign/authorize a specific tag of a container s
 
 `create-attestation` can also run all required setup steps, by passing the `run-setup: true` parameter. After successfully running these steps once, the parameter should be removed.
 
-### Documentation
+## Documentation
 
 See the following links for more information about Google's Binary Authorization:
 
