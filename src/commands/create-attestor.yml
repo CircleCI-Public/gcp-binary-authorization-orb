@@ -50,6 +50,7 @@ parameters:
 
   keypair-email:
     type: string
+    default: ""
     description: >
       Email address to attach to PGP keypair. Only required if
       `use-existing-keypair` is set to `false`.
