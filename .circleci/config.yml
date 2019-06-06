@@ -31,18 +31,26 @@ commands:
         type: string
       cluster-name:
         type: string
+      cleanup-keys:
+        type: boolean
+        default: true
       public-key:
         type: string
+        default: ""
       private-key:
         type: string
+        default: ""
     steps:
       - cleanup-attestor:
           attestor: <<parameters.attestor>>
       - cleanup-cluster:
           cluster-name: <<parameters.cluster-name>>
-      - cleanup-env-vars:
-          public-key: <<parameters.public-key>>
-          private-key: <<parameters.private-key>>
+      - when:
+          condition: <<parameters.cleanup-keys>>
+          steps:
+            - cleanup-env-vars:
+                public-key: <<parameters.public-key>>
+                private-key: <<parameters.private-key>>
 
   cleanup-attestor:
     parameters:
