@@ -25,8 +25,10 @@ commands:
     steps:
       - cleanup-attestor:
           attestor: <<parameters.attestor>>
+
       - cleanup-cluster:
           cluster-name: <<parameters.cluster-name>>
+
       - when:
           condition: <<parameters.cleanup-keys>>
           steps:
