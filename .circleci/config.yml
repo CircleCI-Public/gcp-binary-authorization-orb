@@ -129,6 +129,8 @@ workflows:
       # triggered by non-master branch commits
 
       # SINGLE-PROJECT
+      # generate/store keypair w/ passphrase
+      # no cluster-specific rules
       - bin-authz/create-attestation:
           name: single-project-google-dev
           # setup
@@ -147,9 +149,6 @@ workflows:
           # policy
           configure-policy: true
           default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          cluster-specific-rules: true
-          cluster-specific-specifier: CLUSTER_SPECIFIER_SINGLE_GOOGLE
-          cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           # image/attestation
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
@@ -162,6 +161,8 @@ workflows:
                 public-key: SINGLE_PROJECT_GOOGLE_PUB_KEY
                 private-key: SINGLE_PROJECT_GOOGLE_PRIV_KEY
 
+      # generate/store keypair w/o passphrase
+      # cluster-specific rules
       - bin-authz/create-attestation:
           name: single-project-machine-dev
           executor: bin-authz/machine
@@ -173,7 +174,7 @@ workflows:
           use-existing-keypair: false
           keypair-name: single-project-machine
           keypair-email: community-partner@circleci.com
-          use-passphrase: true
+          use-passphrase: false
           public-key: SINGLE_PROJECT_MACHINE_PUB_KEY
           private-key: SINGLE_PROJECT_MACHINE_PRIV_KEY
           # attestor
@@ -196,6 +197,8 @@ workflows:
                 public-key: SINGLE_PROJECT_MACHINE_PUB_KEY
                 private-key: SINGLE_PROJECT_MACHINE_PRIV_KEY
 
+      # use existing keypair (w/ pw)
+      # no cluster-specific rules
       - bin-authz/create-attestation:
           name: single-project-docker-dev
           executor: gcp-cli/default
@@ -204,20 +207,16 @@ workflows:
           create-new-gke-cluster: true
           gke-cluster-name: single-project-docker
           # keypair
-          use-existing-keypair: false
-          keypair-name: single-project-docker
-          keypair-email: community-partner@circleci.com
-          use-passphrase: true
-          public-key: SINGLE_PROJECT_DOCKER_PUB_KEY
-          private-key: SINGLE_PROJECT_DOCKER_PRIV_KEY
+          # do we need pw if the existing keypair has one ? probably / how ?
+          # use-passphrase: true
+          # keypair-passphrase: BIN_AUTHZ_KEYPAIR_PASSPHRASE #default
+          public-key: BIN_AUTHZ_PUBLIC_KEY_WITH_PW
+          # private-key: # supposedly not required here
           # attestor
-          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          attestor: existing-keypair-attestor-with-pw
           # policy
           configure-policy: true
           default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          cluster-specific-rules: true
-          cluster-specific-specifier: CLUSTER_SPECIFIER_SINGLE_DOCKER
-          cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           # image/attestation
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
@@ -225,12 +224,12 @@ workflows:
           filters: *integration-dev_filters
           post-steps:
             - cleanup:
-                attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+                attestor: existing-keypair-attestor-with-pw
                 cluster-name: single-project-docker
-                public-key: SINGLE_PROJECT_DOCKER_PUB_KEY
-                private-key: SINGLE_PROJECT_DOCKER_PRIV_KEY
 
       # MULTI-PROJECT
+      # generate/store keypair w/ passphrase
+      # cluster-specific rules
       - bin-authz/create-attestation:
           name: multi-project-google-dev
           multi-project-setup: true
@@ -251,7 +250,7 @@ workflows:
           configure-policy: true
           default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           cluster-specific-rules: true
-          cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_GOOGLE
+          cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_MACHINE
           cluster-specific-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           # image/attestation
           image-path: gcr.io/google-containers/google-containers-test-image
@@ -265,6 +264,8 @@ workflows:
                 public-key: MULTI_PROJECT_GOOGLE_PUB_KEY
                 private-key: MULTI_PROJECT_GOOGLE_PRIV_KEY
 
+      # generate/store keypair w/o passphrase
+      # no cluster-specific rules
       - bin-authz/create-attestation:
           name: multi-project-machine-dev
           executor: bin-authz/machine
@@ -277,7 +278,7 @@ workflows:
           use-existing-keypair: false
           keypair-name: multi-project-machine
           keypair-email: community-partner@circleci.com
-          use-passphrase: true
+          use-passphrase: false
           public-key: MULTI_PROJECT_MACHINE_PUB_KEY
           private-key: MULTI_PROJECT_MACHINE_PRIV_KEY
           # attestor
@@ -285,9 +286,6 @@ workflows:
           # policy
           configure-policy: true
           default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-          cluster-specific-rules: true
-          cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_MACHINE
-          cluster-specific-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
           # image/attestation
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
@@ -300,6 +298,8 @@ workflows:
                 public-key: MULTI_PROJECT_MACHINE_PUB_KEY
                 private-key: MULTI_PROJECT_MACHINE_PRIV_KEY
 
+      # use existing keypair (passwordless)
+      # cluster-specific rules
       - bin-authz/create-attestation:
           name: multi-project-docker-dev
           executor: gcp-cli/default
@@ -309,20 +309,16 @@ workflows:
           create-new-gke-cluster: true
           gke-cluster-name: multi-project-docker
           # keypair
-          use-existing-keypair: false
-          keypair-name: multi-project-docker
-          keypair-email: community-partner@circleci.com
-          use-passphrase: true
-          public-key: MULTI_PROJECT_DOCKER_PUB_KEY
-          private-key: MULTI_PROJECT_DOCKER_PRIV_KEY
+          public-key: BIN_AUTHZ_PUBLIC_KEY_PASSWORDLESS
+          # private-key: # supposedly not required here
           # attestor
-          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          attestor: existing-keypair-attestor-passwordless
           # policy
           configure-policy: true
-          default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
           cluster-specific-rules: true
-          cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_DOCKER
-          cluster-specific-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_MACHINE
+          cluster-specific-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
           # image/attestation
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
@@ -330,10 +326,8 @@ workflows:
           filters: *integration-dev_filters
           post-steps:
             - cleanup:
-                attestor: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+                attestor: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
                 cluster-name: multi-project-docker
-                public-key: MULTI_PROJECT_DOCKER_PUB_KEY
-                private-key: MULTI_PROJECT_DOCKER_PRIV_KEY
 
       # triggered by master branch commits
 

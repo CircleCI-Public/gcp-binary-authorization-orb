@@ -88,7 +88,7 @@ parameters:
       project-level environment variable, as a single-line string, with
       newlines replaced with the newline string literal `\n`. Use an RSA-
       2048-type key. See Google's PGP key documentation for details:
-      https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
+      https://cloud.google.com/binary-authorization/docs/creating-attestors-cli#create_a_pgp_key_pair
 
   private-key:
     type: env_var_name
