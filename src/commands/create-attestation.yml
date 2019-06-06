@@ -89,7 +89,11 @@ parameters:
   use-passphrase:
     type: boolean
     default: false
-    description: Does the existing PGP keypair have a passphrase?
+    description: >
+      If `use-existing-keypair` is set to `false`: does the existing PGP
+      keypair have a passphrase? If `use-existing-keypair` is set to
+      `true`: was the newly generated PGP keypair created with a
+      passphrase?
 
   keypair-passphrase:
     type: env_var_name
