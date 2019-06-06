@@ -16,7 +16,7 @@ usage:
   version: 2.1
 
   orbs:
-    bin-authz: circleci/gcp-binary-authorization@1.0.0
+    bin-authz: circleci/gcp-binary-authorization@x.y.z
 
   workflows:
     setup_and_run_binary_authorization:

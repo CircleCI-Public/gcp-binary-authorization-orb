@@ -133,6 +133,8 @@ steps:
               }
               EOM
 
+              echo "Success! Container analysis note created at <<parameters.note-filepath>>"
+
   - run:
       name: Store Container Analysis note
       command: |

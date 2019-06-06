@@ -19,7 +19,7 @@ executor: <<parameters.executor>>
 parameters:
   executor:
     type: executor
-    default: google
+    default: default
     description: >
       Executor to use for this job, defaults to Google's official
       Docker image with the gcloud CLI preinstalled
@@ -57,6 +57,14 @@ parameters:
       Set to `true` if a multi-GCP project Binary Authorization setup is
       being used. See the following for details:
       https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
+
+  enable-apis:
+    type: boolean
+    default: true
+    description: >
+      Do required APIs (container.googleapis.com,
+      containeranalysis.googleapis.com, binaryauthorization.googleapis.com)
+      need to be enabled?
 
   google-project-id:
     type: env_var_name
@@ -218,9 +226,10 @@ parameters:
 
   keypair-email:
     type: string
+    default: ""
     description: >
-      Email address to attach to PGP keypair. Only required if
-      `use-existing-keypair` is set to `false`.
+      Email address to attach to PGP keypair. Only required here if
+      `use-existing-keypair` is set to `false` (required by subsequent commands either way).
 
   keypair-name:
     type: string
@@ -254,7 +263,7 @@ parameters:
       key in Contexts or as a project-level environment variable, as a
       single-line string, with newlines replaced with the newline string
       literal `\n`. Use an RSA-2048-type key. See Google's documentation:
-      https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
+      https://cloud.google.com/binary-authorization/docs/creating-attestors-cli#create_a_pgp_key_pair
 
   private-key:
     type: env_var_name
@@ -262,7 +271,9 @@ parameters:
     description: >
       Name of environment variable under which to store the private portion
       of the keypair generated to use with Binary Authorization. Only
-      required if generating and storing a new keypair.
+      required here if `use-existing-keypair` is set to `false` and
+      `store-generated-keypair` is set to true (required by subsequent
+      commands either way).
 
   circle-token:
     type: env_var_name
@@ -384,6 +395,7 @@ steps:
   - setup:
       google-compute-zone: <<parameters.google-compute-zone>>
       multi-project-setup: <<parameters.multi-project-setup>>
+      enable-apis: <<parameters.enable-apis>>
       google-project-id: <<parameters.google-project-id>>
       google-service-account: <<parameters.google-service-account>>
       deployer-project-id: <<parameters.deployer-project-id>>

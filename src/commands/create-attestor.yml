@@ -50,9 +50,10 @@ parameters:
 
   keypair-email:
     type: string
+    default: ""
     description: >
-      Email address to attach to PGP keypair. Only required if
-      `use-existing-keypair` is set to `false`.
+      Email address to attach to PGP keypair. Only required here if
+      `use-existing-keypair` is set to `false` (required by subsequent commands either way).
 
   use-passphrase:
     type: boolean
@@ -88,7 +89,7 @@ parameters:
       project-level environment variable, as a single-line string, with
       newlines replaced with the newline string literal `\n`. Use an RSA-
       2048-type key. See Google's PGP key documentation for details:
-      https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
+      https://cloud.google.com/binary-authorization/docs/creating-attestors-cli#create_a_pgp_key_pair
 
   private-key:
     type: env_var_name
@@ -96,8 +97,9 @@ parameters:
     description: >
       Name of environment variable under which to store the private portion
       of the keypair generated to use with Binary Authorization. Only
-      required if `use-existing-keypair` is set to `false` and
-      `store-generated-keypair` is set to true.
+      required here if `use-existing-keypair` is set to `false` and
+      `store-generated-keypair` is set to true (required by subsequent
+      commands either way).
 
   circle-token:
     type: env_var_name
@@ -134,6 +136,8 @@ steps:
             --attestation-authority-note=<<parameters.note-id>> \
             --attestation-authority-note-project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>>
 
+        echo "Success! Attestor <<parameters.attestor>> has been created"
+
   - unless:
       condition: <<parameters.use-existing-keypair>>
       steps:
@@ -168,7 +172,7 @@ steps:
         fi
 
         gcloud beta container binauthz attestors public-keys add \
-          --attestor=<<parameters.attestor>> \
+          --attestor="<<#parameters.multi-project-setup>>projects/$<<parameters.attestor-project-id>>/attestors/<</parameters.multi-project-setup>><<parameters.attestor>>" \
           --public-key-file=/tmp/generated-key.pgp
 
   - run:

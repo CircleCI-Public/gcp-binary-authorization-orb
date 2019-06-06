@@ -30,6 +30,14 @@ parameters:
       being used. See the following for details:
       https://cloud.google.com/binary-authorization/docs/multi-project-setup-cli
 
+  enable-apis:
+    type: boolean
+    default: true
+    description: >
+      Do required APIs (container.googleapis.com,
+      containeranalysis.googleapis.com, binaryauthorization.googleapis.com)
+      need to be enabled?
+
   google-project-id:
     type: env_var_name
     default: GOOGLE_PROJECT_ID
@@ -169,8 +177,8 @@ parameters:
   keypair-email:
     type: string
     description: >
-      Email address to attach to PGP keypair. Only required if
-      `use-existing-keypair` is set to `false`.
+      Email address to attach to PGP keypair. Only required here if
+      `use-existing-keypair` is set to `false` (required by subsequent commands either way).
 
   keypair-name:
     type: string
@@ -213,19 +221,24 @@ parameters:
     default: BIN_AUTHZ_PUBLIC_KEY
     description: >
       Name of environment variable storing the public portion of the keypair
-      with which to sign the attestation. Not required if
-      `use-existing-keypair` is set to `false`. Store the public key in
-      Contexts or as a project-level environment variable, as a single-line
-      string, with newlines replaced with the newline string literal `\n`.
-      Use an RSA-2048-type key. See Google's documentation for details:
-      https://cloud.google.com/binary-authorization/docs/key-concepts#pgp_keys
+      with which to sign the attestation. If `use-existing-keypair` is set
+      to `false` and `store-generated-keypair` is set to true, the public
+      key will be stored in CircleCI as a project environment variable under
+      this name. Otherwise, please store the public key in Contexts or as a
+      project-level environment variable, as a single-line string, with
+      newlines replaced with the newline string literal `\n`. Use an RSA-
+      2048-type key. See Google's PGP key documentation for details:
+      https://cloud.google.com/binary-authorization/docs/creating-attestors-cli#create_a_pgp_key_pair
 
   private-key:
     type: env_var_name
     default: BIN_AUTHZ_PRIVATE_KEY
     description: >
       Name of environment variable under which to store the private portion
-      of the keypair generated to use with Binary Authorization
+      of the keypair generated to use with Binary Authorization. Only
+      required here if `use-existing-keypair` is set to `false` and
+      `store-generated-keypair` is set to true (required by subsequent
+      commands either way).
 
   configure-policy:
     type: boolean
@@ -319,41 +332,44 @@ parameters:
 
 steps:
   - when:
-      condition: <<parameters.multi-project-setup>>
+      condition: <<parameters.enable-apis>>
       steps:
-        - run:
-            name: Enable GCP APIs
-            command: |
-              gcloud services \
-                --project=$<<parameters.deployer-project-id>> \
-                enable \
-                container.googleapis.com \
-                binaryauthorization.googleapis.com
+        - when:
+            condition: <<parameters.multi-project-setup>>
+            steps:
+              - run:
+                  name: Enable GCP APIs
+                  command: |
+                    gcloud services \
+                      --project=$<<parameters.deployer-project-id>> \
+                      enable \
+                      container.googleapis.com \
+                      binaryauthorization.googleapis.com
 
-              gcloud services \
-                --project=$<<parameters.attestor-project-id>> \
-                enable \
-                containeranalysis.googleapis.com \
-                binaryauthorization.googleapis.com \
+                    gcloud services \
+                      --project=$<<parameters.attestor-project-id>> \
+                      enable \
+                      containeranalysis.googleapis.com \
+                      binaryauthorization.googleapis.com \
 
-              gcloud services \
-                --project=$<<parameters.attestation-project-id>> \
-                enable \
-                containeranalysis.googleapis.com \
-                binaryauthorization.googleapis.com
+                    gcloud services \
+                      --project=$<<parameters.attestation-project-id>> \
+                      enable \
+                      containeranalysis.googleapis.com \
+                      binaryauthorization.googleapis.com
 
-  - unless:
-      condition: <<parameters.multi-project-setup>>
-      steps:
-        - run:
-            name: Enable GCP APIs
-            command: |
-              gcloud services \
-                --project=$<<parameters.google-project-id>> \
-                enable \
-                container.googleapis.com \
-                containeranalysis.googleapis.com \
-                binaryauthorization.googleapis.com
+        - unless:
+            condition: <<parameters.multi-project-setup>>
+            steps:
+              - run:
+                  name: Enable GCP APIs
+                  command: |
+                    gcloud services \
+                      --project=$<<parameters.google-project-id>> \
+                      enable \
+                      container.googleapis.com \
+                      containeranalysis.googleapis.com \
+                      binaryauthorization.googleapis.com
 
   - run:
       name: <<#parameters.create-new-gke-cluster>>Create<</parameters.create-new-gke-cluster>><<^parameters.create-new-gke-cluster>>Enable<</parameters.create-new-gke-cluster>> Binary Authorization<<#parameters.create-new-gke-cluster>>-enabled GKE cluster<</parameters.create-new-gke-cluster>>

@@ -143,6 +143,8 @@ steps:
 
               EOM
 
+              echo "Success! Binary Authorization policy YAML file created at <<parameters.policy-filepath>>"
+
         - run:
             name: Insert admission whitelist patterns
             command: |
@@ -177,6 +179,8 @@ steps:
               insert_whitelist \
                 <<parameters.admission-whitelist-patterns>> \
                 ADMISSION_WHITELIST_PATTERNS
+
+              echo "Success! Admission whitelist patterns inserted into Binary Authorization policy YAML"
 
         - run:
             name: Insert required attestor values
@@ -221,6 +225,8 @@ steps:
                   CLUSTER_SPECIFIC_REQUIRED_ATTESTORS \
                   "    "
               fi
+
+              echo "Success! Required attestor values inserted into Binary Authorization policy YAML"
 
   - run:
       name: Import policy YAML into Binary Authorization

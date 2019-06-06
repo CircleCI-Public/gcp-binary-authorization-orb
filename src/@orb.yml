@@ -6,4 +6,4 @@ description: >
   https://github.com/CircleCI-Public/gcp-binary-authorization-orb
 
 orbs:
-  gcp-cli: circleci/gcp-cli@1.1.0
+  gcp-cli: circleci/gcp-cli@1.5.0
