@@ -33,4 +33,7 @@ usage:
             image-tag: your-tag
             requires: [gcp-gcr/build_and_push_image]
             deployment-steps:
-              - kubectl run your-server --image gcr.io/$GOOGLE_PROJECT_ID/your-image@$YOUR_IMAGE_DIGEST --port 8080
+              - run: |
+                  kubectl run your-server \
+                    --image gcr.io/$GOOGLE_PROJECT_ID/your-image@$YOUR_IMAGE_DIGEST \
+                    --port 8080
