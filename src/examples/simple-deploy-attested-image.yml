@@ -18,7 +18,7 @@ usage:
             context: your-context # context containing any required env vars
             image: your-image # your image name
             registry-url: gcr.io # default value, here for clarity
-            tag: latest # default value
+            tag: your-tag # default value
 
         - bin-authz/create-attestation:
             context: your-context
@@ -26,11 +26,11 @@ usage:
             keypair-email: email.address@used.to.generate.keypair.com
             gke-cluster-name: your-GKE-cluster-name
             use-note-file: true
-            note-filepath: your-container-analysis-note.jason
+            note-filepath: your-container-analysis-note.json
             use-policy-file: true
             policy-filepath: your-binauthz-policy-file.yaml
             image-path: gcr.io/$GOOGLE_PROJECT_ID/your-image
-            image-tag: latest
+            image-tag: your-tag
             requires: [gcp-gcr/build_and_push_image]
             deployment-steps:
               - kubectl run your-server --image gcr.io/$GOOGLE_PROJECT_ID/your-image@$YOUR_IMAGE_DIGEST --port 8080
