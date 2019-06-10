@@ -600,7 +600,7 @@ workflows:
           default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
           cluster-specific-rules: true
           cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_MACHINE
-          cluster-specific-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
           # image/attestation
           image-path: gcr.io/gcp-gcr-orb/sample-image
           image-tag: ${CIRCLE_SHA1:0:7}
