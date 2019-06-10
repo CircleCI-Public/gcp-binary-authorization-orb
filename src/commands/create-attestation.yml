@@ -116,7 +116,7 @@ steps:
       name: Store image digest
       command: |
         DIGEST=$(gcloud container images describe \
-          <<parameters.image-path>>:<<parameters.image-tag>> \
+          "<<parameters.image-path>>:<<parameters.image-tag>>" \
           --format='get(image_summary.digest)')
 
         echo $DIGEST > DIGEST.txt
@@ -254,20 +254,24 @@ steps:
           --pgp-key-fingerprint="$FINGERPRINT"
 
           rm -rf FINGERPRINT.txt
-          rm -rf DIGEST.txt
 
           echo "Success! Attestation created"
 
   - run:
       name: Verify attestation creation
       command: |
+        DIGEST=$(cat DIGEST.txt)
+
         sleep 10 && \
           gcloud \
           --project=$<<#parameters.multi-project-setup>><<parameters.attestation-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
           beta container binauthz attestations list \
           --attestor=<<parameters.attestor>> \
-          --attestor-project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> | \
+          --attestor-project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+          --artifact-url="<<parameters.image-path>>@$DIGEST" | \
           grep -v "Listed 0 items"
+
+          rm -rf DIGEST.txt
 
   - store_artifacts:
       path: <<parameters.payload-filepath>>

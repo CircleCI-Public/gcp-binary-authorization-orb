@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   bin-authz: circleci/gcp-binary-authorization@dev:alpha
   gcp-cli: circleci/gcp-cli@1.5.0
+  gcp-gcr: circleci/gcp-gcr@0.6.0
   orb-tools: circleci/orb-tools@8.15.0
   queue: eddiewebb/queue@1.1.2
 
@@ -11,6 +12,7 @@ commands:
     parameters:
       attestor:
         type: string
+        default: ""
       cluster-name:
         type: string
       cleanup-keys:
@@ -40,7 +42,6 @@ commands:
     parameters:
       attestor:
         type: string
-
     steps:
       - run:
           when: always
@@ -52,23 +53,35 @@ commands:
     parameters:
       cluster-name:
         type: string
-
     steps:
       - run:
           when: always
           name: Cleanup cluster
           command: |
             gcloud container clusters delete --quiet \
-            <<parameters.cluster-name>>
+              <<parameters.cluster-name>>
+
+  resize-cluster:
+    parameters:
+      cluster-name:
+        type: string
+      num-nodes:
+        type: string
+    steps:
+      - run:
+          when: always
+          name: Resize cluster to <<parameters.num-nodes>> nodes
+          command: |
+            gcloud container clusters resize --quiet \
+              <<parameters.cluster-name>> \
+              --num-nodes <<parameters.num-nodes>>
 
   cleanup-env-vars:
     parameters:
       public-key:
         type: string
-
       private-key:
         type: string
-
     steps:
       - run:
           when: always
@@ -142,8 +155,42 @@ workflows:
 
   integration-tests_prod-release:
     jobs:
+      # --------------------------------------
       # triggered by non-master branch commits
+      # --------------------------------------
+
+      # - gcp-cli/install_and_initialize_cli:
+      #     name: upsize-long-running-cluster-single-proj-dev
+      #     gcloud-service-key: GOOGLE_SERVICE_KEY
+      #     google-project-id: GOOGLE_PROJECT_ID
+      #     filters: *integration-dev_filters
+      #     post-steps:
+      #       - resize-cluster:
+      #           cluster-name: binauthz-orb-test-cluster-single-proj
+      #           num-nodes: "8"
+
+      # - gcp-cli/install_and_initialize_cli:
+      #     name: upsize-long-running-cluster-multi-proj-dev
+      #     gcloud-service-key: DEPLOYER_SERVICE_KEY
+      #     google-project-id: DEPLOYER_PROJECT_ID
+      #     filters: *integration-dev_filters
+      #     post-steps:
+      #       - resize-cluster:
+      #           cluster-name: binauthz-orb-test-cluster-multi-proj
+      #           num-nodes: "8"
+
+      - gcp-gcr/build-and-push-image:
+          name: create-attestation-artifact-long-running-cluster-dev
+          gcloud-service-key: GCP_GCR_ORB_SERVICE_KEY
+          google-project-id: GCP_GCR_ORB_PROJECT_ID
+          image: sample-image
+          tag: ${CIRCLE_SHA1:0:7}
+          filters: *integration-dev_filters
+
+      # >>>>>>>>>>>>>>
       # SINGLE-PROJECT
+      # >>>>>>>>>>>>>>
+
       # generate/store keypair w/ passphrase
       # no cluster-specific rules
       - bin-authz/create-attestation:
@@ -244,7 +291,35 @@ workflows:
                 attestor: existing-keypair-attestor-with-pw
                 cluster-name: single-project-docker
 
+      # use existing keypair (w/ pw)
+      # long-running cluster, attestor
+      - bin-authz/create-attestation:
+          name: single-project-long-running-dev
+          gke-cluster-name: binauthz-orb-test-cluster-single-proj
+          # keypair
+          keypair-email: community-partner@circleci.com
+          use-passphrase: true
+          public-key: BIN_AUTHZ_PUBLIC_KEY_WITH_PW
+          private-key: BIN_AUTHZ_PRIVATE_KEY_WITH_PW
+          # policy
+          configure-policy: true
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          # image/attestation
+          image-path: gcr.io/gcp-gcr-orb/sample-image
+          image-tag: ${CIRCLE_SHA1:0:7}
+          # circle
+          filters: *integration-dev_filters
+          requires: [create-attestation-artifact-long-running-cluster-dev]
+          # upsize-long-running-cluster-single-proj-dev,
+          post-steps:
+            - resize-cluster:
+                cluster-name: binauthz-orb-test-cluster-single-proj
+                num-nodes: "0"
+
+      # >>>>>>>>>>>>>
       # MULTI-PROJECT
+      # >>>>>>>>>>>>>
+
       # generate/store keypair w/ passphrase
       # cluster-specific rules
       - bin-authz/create-attestation:
@@ -350,8 +425,67 @@ workflows:
                 attestor: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
                 cluster-name: multi-project-docker
 
+      # use existing keypair (passwordless)
+      # long-running cluster, attestor
+      - bin-authz/create-attestation:
+          name: multi-project-long-running-dev
+          multi-project-setup: true
+          gke-cluster-name: binauthz-orb-test-cluster-multi-proj
+          # keypair
+          keypair-email: community-partner@circleci.com
+          public-key: BIN_AUTHZ_PUBLIC_KEY_PASSWORDLESS
+          private-key: BIN_AUTHZ_PRIVATE_KEY_PASSWORDLESS
+          # policy
+          configure-policy: true
+          default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          # image/attestation
+          image-path: gcr.io/gcp-gcr-orb/sample-image
+          image-tag: ${CIRCLE_SHA1:0:7}
+          # circle
+          filters: *integration-dev_filters
+          requires: [create-attestation-artifact-long-running-cluster-dev]
+          # upsize-long-running-cluster-multi-proj-dev,
+          post-steps:
+            - resize-cluster:
+                cluster-name: binauthz-orb-test-cluster-multi-proj
+                num-nodes: "0"
+
+      # ----------------------------------
       # triggered by master branch commits
+      # ----------------------------------
+
+      # - gcp-cli/install_and_initialize_cli:
+      #     name: upsize-long-running-cluster-single-proj-master
+      #     gcloud-service-key: GOOGLE_SERVICE_KEY
+      #     google-project-id: GOOGLE_PROJECT_ID
+      #     filters: *integration-master_filters
+      #     post-steps:
+      #       - resize-cluster:
+      #           cluster-name: binauthz-orb-test-cluster-single-proj
+      #           num-nodes: "8"
+
+      # - gcp-cli/install_and_initialize_cli:
+      #     name: upsize-long-running-cluster-multi-proj-master
+      #     gcloud-service-key: DEPLOYER_SERVICE_KEY
+      #     google-project-id: DEPLOYER_PROJECT_ID
+      #     filters: *integration-master_filters
+      #     post-steps:
+      #       - resize-cluster:
+      #           cluster-name: binauthz-orb-test-cluster-multi-proj
+      #           num-nodes: "8"
+
+      - gcp-gcr/build-and-push-image:
+          name: create-attestation-artifact-long-running-cluster-master
+          gcloud-service-key: GCP_GCR_ORB_SERVICE_KEY
+          google-project-id: GCP_GCR_ORB_PROJECT_ID
+          image: sample-image
+          tag: ${CIRCLE_SHA1:0:7}
+          filters: *integration-master_filters
+
+      # >>>>>>>>>>>>>>
       # SINGLE-PROJECT
+      # >>>>>>>>>>>>>>
+
       # generate/store keypair w/ passphrase
       # no cluster-specific rules
       - bin-authz/create-attestation:
@@ -452,7 +586,35 @@ workflows:
                 attestor: existing-keypair-attestor-with-pw
                 cluster-name: single-project-docker
 
+      # use existing keypair (passwordless)
+      # long-running cluster, attestor
+      - bin-authz/create-attestation:
+          name: single-project-long-running-master
+          # keypair
+          keypair-email: community-partner@circleci.com
+          public-key: BIN_AUTHZ_PUBLIC_KEY_PASSWORDLESS
+          private-key: BIN_AUTHZ_PRIVATE_KEY_PASSWORDLESS
+          # policy
+          configure-policy: true
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          cluster-specific-rules: true
+          cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_MACHINE
+          cluster-specific-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          # image/attestation
+          image-path: gcr.io/gcp-gcr-orb/sample-image
+          image-tag: ${CIRCLE_SHA1:0:7}
+          # circle
+          filters: *integration-master_filters
+          requires: [create-attestation-artifact-long-running-cluster-master]
+          post-steps:
+            - resize-cluster:
+                cluster-name: binauthz-orb-test-cluster-single-proj
+                num-nodes: "0"
+
+      # >>>>>>>>>>>>>
       # MULTI-PROJECT
+      # >>>>>>>>>>>>>
+
       # generate/store keypair w/ passphrase
       # cluster-specific rules
       - bin-authz/create-attestation:
@@ -545,9 +707,6 @@ workflows:
           # policy
           configure-policy: true
           default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
-          cluster-specific-rules: true
-          cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_MACHINE
-          cluster-specific-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
           # image/attestation
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
@@ -558,7 +717,34 @@ workflows:
                 attestor: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
                 cluster-name: multi-project-docker
 
+      # use existing keypair (w/ pw)
+      # long-running cluster, attestor
+      - bin-authz/create-attestation:
+          name: multi-project-long-running-master
+          multi-project-setup: true
+          # keypair
+          keypair-email: community-partner@circleci.com
+          use-passphrase: true
+          public-key: BIN_AUTHZ_PUBLIC_KEY_WITH_PW
+          private-key: BIN_AUTHZ_PRIVATE_KEY_WITH_PW
+          # policy
+          configure-policy: true
+          default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME
+          # image/attestation
+          image-path: gcr.io/gcp-gcr-orb/sample-image
+          image-tag: ${CIRCLE_SHA1:0:7}
+          # circle
+          filters: *integration-master_filters
+          requires: [create-attestation-artifact-long-running-cluster-master]
+          post-steps:
+            - resize-cluster:
+                cluster-name: binauthz-orb-test-cluster-multi-proj
+                num-nodes: "0"
+
+      # +++++++++++++++++++++++++++++++++
       # patch, minor, or major publishing
+      # +++++++++++++++++++++++++++++++++
+
       - orb-tools/dev-promote-prod:
           name: dev-promote-patch
           context: orb-publishing
