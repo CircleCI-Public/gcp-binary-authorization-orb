@@ -182,7 +182,7 @@ workflows:
       - gcp-gcr/build-and-push-image:
           name: create-attestation-artifact-long-running-cluster-dev
           gcloud-service-key: GCP_GCR_ORB_SERVICE_KEY
-          GOOGLE_PROJECT_ID: GCP_GCR_ORB_PROJECT_ID
+          google-project-id: GCP_GCR_ORB_PROJECT_ID
           registry-url: us.gcr.io
           image: sample-image
           tag: ${CIRCLE_SHA1:0:7}
