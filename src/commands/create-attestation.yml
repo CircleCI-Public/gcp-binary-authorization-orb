@@ -116,7 +116,7 @@ steps:
       name: Store image digest
       command: |
         DIGEST=$(gcloud container images describe \
-          <<parameters.image-path>>:<<parameters.image-tag>> \
+          "<<parameters.image-path>>:<<parameters.image-tag>>" \
           --format='get(image_summary.digest)')
 
         echo $DIGEST > DIGEST.txt
