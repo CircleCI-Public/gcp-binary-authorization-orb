@@ -111,9 +111,11 @@ prod-deploy_requires: &prod-deploy_requires
     single-project-google-master,
     single-project-machine-master,
     single-project-docker-master,
+    single-project-long-running-master,
     multi-project-google-master,
     multi-project-machine-master,
-    multi-project-docker-master
+    multi-project-docker-master,
+    multi-project-long-running-master
   ]
 
 workflows:
@@ -158,26 +160,6 @@ workflows:
       # --------------------------------------
       # triggered by non-master branch commits
       # --------------------------------------
-
-      # - gcp-cli/install_and_initialize_cli:
-      #     name: upsize-long-running-cluster-single-proj-dev
-      #     gcloud-service-key: GOOGLE_SERVICE_KEY
-      #     google-project-id: GOOGLE_PROJECT_ID
-      #     filters: *integration-dev_filters
-      #     post-steps:
-      #       - resize-cluster:
-      #           cluster-name: binauthz-orb-test-cluster-single-proj
-      #           num-nodes: "8"
-
-      # - gcp-cli/install_and_initialize_cli:
-      #     name: upsize-long-running-cluster-multi-proj-dev
-      #     gcloud-service-key: DEPLOYER_SERVICE_KEY
-      #     google-project-id: DEPLOYER_PROJECT_ID
-      #     filters: *integration-dev_filters
-      #     post-steps:
-      #       - resize-cluster:
-      #           cluster-name: binauthz-orb-test-cluster-multi-proj
-      #           num-nodes: "8"
 
       - gcp-gcr/build-and-push-image:
           name: create-attestation-artifact-long-running-cluster-dev
@@ -310,7 +292,6 @@ workflows:
           # circle
           filters: *integration-dev_filters
           requires: [create-attestation-artifact-long-running-cluster-dev]
-          # upsize-long-running-cluster-single-proj-dev,
           post-steps:
             - resize-cluster:
                 cluster-name: binauthz-orb-test-cluster-single-proj
@@ -444,7 +425,6 @@ workflows:
           # circle
           filters: *integration-dev_filters
           requires: [create-attestation-artifact-long-running-cluster-dev]
-          # upsize-long-running-cluster-multi-proj-dev,
           post-steps:
             - resize-cluster:
                 cluster-name: binauthz-orb-test-cluster-multi-proj
@@ -453,26 +433,6 @@ workflows:
       # ----------------------------------
       # triggered by master branch commits
       # ----------------------------------
-
-      # - gcp-cli/install_and_initialize_cli:
-      #     name: upsize-long-running-cluster-single-proj-master
-      #     gcloud-service-key: GOOGLE_SERVICE_KEY
-      #     google-project-id: GOOGLE_PROJECT_ID
-      #     filters: *integration-master_filters
-      #     post-steps:
-      #       - resize-cluster:
-      #           cluster-name: binauthz-orb-test-cluster-single-proj
-      #           num-nodes: "8"
-
-      # - gcp-cli/install_and_initialize_cli:
-      #     name: upsize-long-running-cluster-multi-proj-master
-      #     gcloud-service-key: DEPLOYER_SERVICE_KEY
-      #     google-project-id: DEPLOYER_PROJECT_ID
-      #     filters: *integration-master_filters
-      #     post-steps:
-      #       - resize-cluster:
-      #           cluster-name: binauthz-orb-test-cluster-multi-proj
-      #           num-nodes: "8"
 
       - gcp-gcr/build-and-push-image:
           name: create-attestation-artifact-long-running-cluster-master
