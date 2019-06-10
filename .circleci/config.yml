@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   bin-authz: circleci/gcp-binary-authorization@dev:alpha
   gcp-cli: circleci/gcp-cli@1.5.0
+  gcp-gcr: circleci/gcp-gcr@0.6.0
   orb-tools: circleci/orb-tools@8.15.0
   queue: eddiewebb/queue@1.1.2
 
@@ -158,25 +159,32 @@ workflows:
       # triggered by non-master branch commits
       # --------------------------------------
 
-      - gcp-cli/install_and_initialize_cli:
-          name: upsize-long-running-cluster-single-proj-dev
-          gcloud-service-key: GOOGLE_SERVICE_KEY
-          google-project-id: GOOGLE_PROJECT_ID
-          filters: *integration-dev_filters
-          post-steps:
-            - resize-cluster:
-                cluster-name: binauthz-orb-test-cluster-single-proj
-                num-nodes: "8"
+      # - gcp-cli/install_and_initialize_cli:
+      #     name: upsize-long-running-cluster-single-proj-dev
+      #     gcloud-service-key: GOOGLE_SERVICE_KEY
+      #     google-project-id: GOOGLE_PROJECT_ID
+      #     filters: *integration-dev_filters
+      #     post-steps:
+      #       - resize-cluster:
+      #           cluster-name: binauthz-orb-test-cluster-single-proj
+      #           num-nodes: "8"
 
-      - gcp-cli/install_and_initialize_cli:
-          name: upsize-long-running-cluster-multi-proj-dev
-          gcloud-service-key: DEPLOYER_SERVICE_KEY
-          google-project-id: DEPLOYER_PROJECT_ID
+      # - gcp-cli/install_and_initialize_cli:
+      #     name: upsize-long-running-cluster-multi-proj-dev
+      #     gcloud-service-key: DEPLOYER_SERVICE_KEY
+      #     google-project-id: DEPLOYER_PROJECT_ID
+      #     filters: *integration-dev_filters
+      #     post-steps:
+      #       - resize-cluster:
+      #           cluster-name: binauthz-orb-test-cluster-multi-proj
+      #           num-nodes: "8"
+
+      - gcp-gcr/build-and-push-image:
+          name: create-attestation-artifact-long-running-cluster-dev
+          registry-url: us.gcr.io
+          image: sample-image
+          tag: ${CIRCLE_SHA1:0:7}
           filters: *integration-dev_filters
-          post-steps:
-            - resize-cluster:
-                cluster-name: binauthz-orb-test-cluster-multi-proj
-                num-nodes: "8"
 
       # >>>>>>>>>>>>>>
       # SINGLE-PROJECT
@@ -296,11 +304,12 @@ workflows:
           configure-policy: true
           default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME
           # image/attestation
-          image-path: gcr.io/google-containers/google-containers-test-image
-          image-tag: "2017-01-23"
+          image-path: gcr.io/gcp-gcr-orb/sample-image
+          image-tag: ${CIRCLE_SHA1:0:7}
           # circle
           filters: *integration-dev_filters
-          requires: [upsize-long-running-cluster-single-proj-dev]
+          requires: [create-attestation-artifact-long-running-cluster-dev]
+          # upsize-long-running-cluster-single-proj-dev,
           post-steps:
             - resize-cluster:
                 cluster-name: binauthz-orb-test-cluster-single-proj
@@ -432,11 +441,12 @@ workflows:
           cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_MACHINE
           cluster-specific-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME
           # image/attestation
-          image-path: gcr.io/google-containers/google-containers-test-image
-          image-tag: "2017-01-23"
+          image-path: gcr.io/gcp-gcr-orb/sample-image
+          image-tag: ${CIRCLE_SHA1:0:7}
           # circle
           filters: *integration-dev_filters
-          requires: [upsize-long-running-cluster-multi-proj-dev]
+          requires: [create-attestation-artifact-long-running-cluster-dev]
+          # upsize-long-running-cluster-multi-proj-dev,
           post-steps:
             - resize-cluster:
                 cluster-name: binauthz-orb-test-cluster-multi-proj
