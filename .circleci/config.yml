@@ -68,6 +68,7 @@ commands:
         type: string
     steps:
       - run:
+          when: always
           name: Resize cluster to <<parameters.num-nodes>> nodes
           command: |
             gcloud container clusters resize --quiet \
@@ -285,6 +286,7 @@ workflows:
       # long-running cluster, attestor
       - bin-authz/create-attestation:
           name: single-project-long-running-dev
+          gke-cluster-name: binauthz-orb-test-cluster-single-proj
           # keypair
           keypair-email: community-partner@circleci.com
           use-passphrase: true
@@ -418,6 +420,7 @@ workflows:
       - bin-authz/create-attestation:
           name: multi-project-long-running-dev
           multi-project-setup: true
+          gke-cluster-name: binauthz-orb-test-cluster-multi-proj
           # keypair
           keypair-email: community-partner@circleci.com
           public-key: BIN_AUTHZ_PUBLIC_KEY_PASSWORDLESS
