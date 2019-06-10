@@ -157,6 +157,26 @@ workflows:
       # triggered by non-master branch commits
       # --------------------------------------
 
+      - gcp-cli/install_and_initialize_cli:
+          name: upsize-long-running-cluster-single-proj-dev
+          gcloud-service-key: GOOGLE_SERVICE_KEY
+          google-project-id: GOOGLE_PROJECT_ID
+          filters: *integration-dev_filters
+          post-steps:
+            - resize-cluster:
+                cluster-name: binauthz-orb-test-cluster-single-proj
+                num-nodes: "8"
+
+      - gcp-cli/install_and_initialize_cli:
+          name: upsize-long-running-cluster-multi-proj-dev
+          gcloud-service-key: DEPLOYER_SERVICE_KEY
+          google-project-id: DEPLOYER_PROJECT_ID
+          filters: *integration-dev_filters
+          post-steps:
+            - resize-cluster:
+                cluster-name: binauthz-orb-test-cluster-multi-proj
+                num-nodes: "8"
+
       # >>>>>>>>>>>>>>
       # SINGLE-PROJECT
       # >>>>>>>>>>>>>>
@@ -265,10 +285,6 @@ workflows:
       # long-running cluster, attestor
       - bin-authz/create-attestation:
           name: single-project-long-running-dev
-          pre-steps:
-            - resize-cluster:
-                cluster-name: binauthz-orb-test-cluster-single-proj
-                num-nodes: "8"
           # keypair
           keypair-email: community-partner@circleci.com
           use-passphrase: true
@@ -282,6 +298,7 @@ workflows:
           image-tag: "2017-01-23"
           # circle
           filters: *integration-dev_filters
+          requires: [upsize-long-running-cluster-single-proj-dev]
           post-steps:
             - resize-cluster:
                 cluster-name: binauthz-orb-test-cluster-single-proj
@@ -400,10 +417,6 @@ workflows:
       # long-running cluster, attestor
       - bin-authz/create-attestation:
           name: multi-project-long-running-dev
-          pre-steps:
-            - resize-cluster:
-                cluster-name: binauthz-orb-test-cluster-multi-proj
-                num-nodes: "8"
           multi-project-setup: true
           # keypair
           keypair-email: community-partner@circleci.com
@@ -420,6 +433,7 @@ workflows:
           image-tag: "2017-01-23"
           # circle
           filters: *integration-dev_filters
+          requires: [upsize-long-running-cluster-multi-proj-dev]
           post-steps:
             - resize-cluster:
                 cluster-name: binauthz-orb-test-cluster-multi-proj
@@ -428,6 +442,26 @@ workflows:
       # ----------------------------------
       # triggered by master branch commits
       # ----------------------------------
+
+      - gcp-cli/install_and_initialize_cli:
+          name: upsize-long-running-cluster-single-proj-master
+          gcloud-service-key: GOOGLE_SERVICE_KEY
+          google-project-id: GOOGLE_PROJECT_ID
+          filters: *integration-master_filters
+          post-steps:
+            - resize-cluster:
+                cluster-name: binauthz-orb-test-cluster-single-proj
+                num-nodes: "8"
+
+      - gcp-cli/install_and_initialize_cli:
+          name: upsize-long-running-cluster-multi-proj-master
+          gcloud-service-key: DEPLOYER_SERVICE_KEY
+          google-project-id: DEPLOYER_PROJECT_ID
+          filters: *integration-master_filters
+          post-steps:
+            - resize-cluster:
+                cluster-name: binauthz-orb-test-cluster-multi-proj
+                num-nodes: "8"
 
       # >>>>>>>>>>>>>>
       # SINGLE-PROJECT
@@ -537,10 +571,6 @@ workflows:
       # long-running cluster, attestor
       - bin-authz/create-attestation:
           name: single-project-long-running-master
-          pre-steps:
-            - resize-cluster:
-                cluster-name: binauthz-orb-test-cluster-single-proj
-                num-nodes: "8"
           # keypair
           keypair-email: community-partner@circleci.com
           public-key: BIN_AUTHZ_PUBLIC_KEY_PASSWORDLESS
@@ -556,6 +586,7 @@ workflows:
           image-tag: "2017-01-23"
           # circle
           filters: *integration-master_filters
+          requires: [upsize-long-running-cluster-single-proj-master]
           post-steps:
             - resize-cluster:
                 cluster-name: binauthz-orb-test-cluster-single-proj
@@ -674,10 +705,6 @@ workflows:
       # long-running cluster, attestor
       - bin-authz/create-attestation:
           name: multi-project-long-running-master
-          pre-steps:
-            - resize-cluster:
-                cluster-name: binauthz-orb-test-cluster-multi-proj
-                num-nodes: "8"
           multi-project-setup: true
           # keypair
           keypair-email: community-partner@circleci.com
@@ -692,6 +719,7 @@ workflows:
           image-tag: "2017-01-23"
           # circle
           filters: *integration-master_filters
+          requires: [upsize-long-running-cluster-multi-proj-master]
           post-steps:
             - resize-cluster:
                 cluster-name: binauthz-orb-test-cluster-multi-proj
