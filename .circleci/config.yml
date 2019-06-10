@@ -184,6 +184,7 @@ workflows:
           gcloud-service-key: GCP_GCR_ORB_SERVICE_KEY
           google-project-id: GCP_GCR_ORB_PROJECT_ID
           registry-url: us.gcr.io
+          path-to-dockerfile: test.Dockerfile
           image: sample-image
           tag: ${CIRCLE_SHA1:0:7}
           filters: *integration-dev_filters
