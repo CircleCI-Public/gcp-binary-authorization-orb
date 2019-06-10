@@ -4,7 +4,7 @@ orbs:
   bin-authz: circleci/gcp-binary-authorization@dev:alpha
   gcp-cli: circleci/gcp-cli@1.5.0
   gcp-gcr: circleci/gcp-gcr@0.6.0
-  orb-tools: circleci/orb-tools@8.15.0
+  orb-tools: circleci/orb-tools@8.17.0
   queue: eddiewebb/queue@1.1.2
 
 commands:
@@ -711,6 +711,7 @@ workflows:
           name: dev-promote-patch
           context: orb-publishing
           orb-name: circleci/gcp-binary-authorization
+          ssh-fingerprints: 30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
           requires: *prod-deploy_requires
           filters:
             branches:
@@ -722,6 +723,7 @@ workflows:
           name: dev-promote-minor
           context: orb-publishing
           orb-name: circleci/gcp-binary-authorization
+          ssh-fingerprints: 30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
           release: minor
           requires: *prod-deploy_requires
           filters:
@@ -734,6 +736,7 @@ workflows:
           name: dev-promote-major
           context: orb-publishing
           orb-name: circleci/gcp-binary-authorization
+          ssh-fingerprints: 30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
           release: major
           requires: *prod-deploy_requires
           filters:
