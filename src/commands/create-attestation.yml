@@ -267,7 +267,7 @@ steps:
           beta container binauthz attestations list \
           --attestor=<<parameters.attestor>> \
           --attestor-project=$<<#parameters.multi-project-setup>><<parameters.attestor-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
-          --artifact-url="<<parameters.image-path>>@$DIGEST" \ | \
+          --artifact-url="<<parameters.image-path>>@$DIGEST" | \
           grep -v "Listed 0 items"
 
   - store_artifacts:
