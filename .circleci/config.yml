@@ -590,6 +590,7 @@ workflows:
       # long-running cluster, attestor
       - bin-authz/create-attestation:
           name: single-project-long-running-master
+          gke-cluster-name: binauthz-orb-test-cluster-single-proj
           # keypair
           keypair-email: community-partner@circleci.com
           public-key: BIN_AUTHZ_PUBLIC_KEY_PASSWORDLESS
@@ -721,6 +722,7 @@ workflows:
       # long-running cluster, attestor
       - bin-authz/create-attestation:
           name: multi-project-long-running-master
+          gke-cluster-name: binauthz-orb-test-cluster-multi-proj
           multi-project-setup: true
           # keypair
           keypair-email: community-partner@circleci.com
