@@ -193,103 +193,103 @@ workflows:
 
       # generate/store keypair w/ passphrase
       # no cluster-specific rules
-      # - bin-authz/create-attestation:
-      #     name: single-project-google-dev
-      #     # setup
-      #     run-setup: true
-      #     enable-apis: false
-      #     create-new-gke-cluster: true
-      #     gke-cluster-name: single-project-google
-      #     # keypair
-      #     use-existing-keypair: false
-      #     keypair-name: single-project-google
-      #     keypair-email: community-partner@circleci.com
-      #     use-passphrase: true
-      #     public-key: SINGLE_PROJECT_GOOGLE_PUB_KEY
-      #     private-key: SINGLE_PROJECT_GOOGLE_PRIV_KEY
-      #     # attestor
-      #     attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-      #     # policy
-      #     configure-policy: true
-      #     default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-      #     # image/attestation
-      #     image-path: gcr.io/google-containers/google-containers-test-image
-      #     image-tag: "2017-01-23"
-      #     # circle
-      #     filters: *integration-dev_filters
-      #     post-steps:
-      #       - cleanup:
-      #           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-      #           cluster-name: single-project-google
-      #           public-key: SINGLE_PROJECT_GOOGLE_PUB_KEY
-      #           private-key: SINGLE_PROJECT_GOOGLE_PRIV_KEY
+      - bin-authz/create-attestation:
+          name: single-project-google-dev
+          # setup
+          run-setup: true
+          enable-apis: false
+          create-new-gke-cluster: true
+          gke-cluster-name: single-project-google
+          # keypair
+          use-existing-keypair: false
+          keypair-name: single-project-google
+          keypair-email: community-partner@circleci.com
+          use-passphrase: true
+          public-key: SINGLE_PROJECT_GOOGLE_PUB_KEY
+          private-key: SINGLE_PROJECT_GOOGLE_PRIV_KEY
+          # attestor
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          # policy
+          configure-policy: true
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          # image/attestation
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          # circle
+          filters: *integration-dev_filters
+          post-steps:
+            - cleanup:
+                attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+                cluster-name: single-project-google
+                public-key: SINGLE_PROJECT_GOOGLE_PUB_KEY
+                private-key: SINGLE_PROJECT_GOOGLE_PRIV_KEY
 
       # generate/store keypair w/o passphrase
       # cluster-specific rules
-      # - bin-authz/create-attestation:
-      #     name: single-project-machine-dev
-      #     executor: bin-authz/machine
-      #     # setup
-      #     run-setup: true
-      #     enable-apis: false
-      #     create-new-gke-cluster: true
-      #     gke-cluster-name: single-project-machine
-      #     # keypair
-      #     use-existing-keypair: false
-      #     keypair-name: single-project-machine
-      #     keypair-email: community-partner@circleci.com
-      #     use-passphrase: false
-      #     public-key: SINGLE_PROJECT_MACHINE_PUB_KEY
-      #     private-key: SINGLE_PROJECT_MACHINE_PRIV_KEY
-      #     # attestor
-      #     attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-      #     # policy
-      #     configure-policy: true
-      #     default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-      #     cluster-specific-rules: true
-      #     cluster-specific-specifier: CLUSTER_SPECIFIER_SINGLE_MACHINE
-      #     cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-      #     # image/attestation
-      #     image-path: gcr.io/google-containers/google-containers-test-image
-      #     image-tag: "2017-01-23"
-      #     # circle
-      #     filters: *integration-dev_filters
-      #     post-steps:
-      #       - cleanup:
-      #           attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-      #           cluster-name: single-project-machine
-      #           public-key: SINGLE_PROJECT_MACHINE_PUB_KEY
-      #           private-key: SINGLE_PROJECT_MACHINE_PRIV_KEY
+      - bin-authz/create-attestation:
+          name: single-project-machine-dev
+          executor: bin-authz/machine
+          # setup
+          run-setup: true
+          enable-apis: false
+          create-new-gke-cluster: true
+          gke-cluster-name: single-project-machine
+          # keypair
+          use-existing-keypair: false
+          keypair-name: single-project-machine
+          keypair-email: community-partner@circleci.com
+          use-passphrase: false
+          public-key: SINGLE_PROJECT_MACHINE_PUB_KEY
+          private-key: SINGLE_PROJECT_MACHINE_PRIV_KEY
+          # attestor
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          # policy
+          configure-policy: true
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          cluster-specific-rules: true
+          cluster-specific-specifier: CLUSTER_SPECIFIER_SINGLE_MACHINE
+          cluster-specific-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          # image/attestation
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          # circle
+          filters: *integration-dev_filters
+          post-steps:
+            - cleanup:
+                attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+                cluster-name: single-project-machine
+                public-key: SINGLE_PROJECT_MACHINE_PUB_KEY
+                private-key: SINGLE_PROJECT_MACHINE_PRIV_KEY
 
       # use existing keypair (w/ pw)
       # no cluster-specific rules
-      # - bin-authz/create-attestation:
-      #     name: single-project-docker-dev
-      #     executor: gcp-cli/default
-      #     # setup
-      #     run-setup: true
-      #     enable-apis: false
-      #     create-new-gke-cluster: true
-      #     gke-cluster-name: single-project-docker
-      #     # keypair
-      #     keypair-email: community-partner@circleci.com
-      #     use-passphrase: true
-      #     public-key: BIN_AUTHZ_PUBLIC_KEY_WITH_PW
-      #     private-key: BIN_AUTHZ_PRIVATE_KEY_WITH_PW
-      #     # attestor
-      #     attestor: existing-keypair-attestor-with-pw
-      #     # policy
-      #     configure-policy: true
-      #     default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/existing-keypair-attestor-with-pw
-      #     # image/attestation
-      #     image-path: gcr.io/google-containers/google-containers-test-image
-      #     image-tag: "2017-01-23"
-      #     # circle
-      #     filters: *integration-dev_filters
-      #     post-steps:
-      #       - cleanup:
-      #           attestor: existing-keypair-attestor-with-pw
-      #           cluster-name: single-project-docker
+      - bin-authz/create-attestation:
+          name: single-project-docker-dev
+          executor: gcp-cli/default
+          # setup
+          run-setup: true
+          enable-apis: false
+          create-new-gke-cluster: true
+          gke-cluster-name: single-project-docker
+          # keypair
+          keypair-email: community-partner@circleci.com
+          use-passphrase: true
+          public-key: BIN_AUTHZ_PUBLIC_KEY_WITH_PW
+          private-key: BIN_AUTHZ_PRIVATE_KEY_WITH_PW
+          # attestor
+          attestor: existing-keypair-attestor-with-pw
+          # policy
+          configure-policy: true
+          default-required-attestors: projects/$GOOGLE_PROJECT_ID/attestors/existing-keypair-attestor-with-pw
+          # image/attestation
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          # circle
+          filters: *integration-dev_filters
+          post-steps:
+            - cleanup:
+                attestor: existing-keypair-attestor-with-pw
+                cluster-name: single-project-docker
 
       # use existing keypair (w/ pw)
       # long-running cluster, attestor
@@ -322,108 +322,108 @@ workflows:
 
       # generate/store keypair w/ passphrase
       # cluster-specific rules
-      # - bin-authz/create-attestation:
-      #     name: multi-project-google-dev
-      #     multi-project-setup: true
-      #     # setup
-      #     run-setup: true
-      #     enable-apis: false
-      #     create-new-gke-cluster: true
-      #     gke-cluster-name: multi-project-google
-      #     # keypair
-      #     use-existing-keypair: false
-      #     keypair-name: multi-project-google
-      #     keypair-email: community-partner@circleci.com
-      #     use-passphrase: true
-      #     public-key: MULTI_PROJECT_GOOGLE_PUB_KEY
-      #     private-key: MULTI_PROJECT_GOOGLE_PRIV_KEY
-      #     # attestor
-      #     attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-      #     # policy
-      #     configure-policy: true
-      #     default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-      #     cluster-specific-rules: true
-      #     cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_MACHINE
-      #     cluster-specific-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-      #     # image/attestation
-      #     image-path: gcr.io/google-containers/google-containers-test-image
-      #     image-tag: "2017-01-23"
-      #     # circle
-      #     filters: *integration-dev_filters
-      #     post-steps:
-      #       - cleanup:
-      #           attestor: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-      #           cluster-name: multi-project-google
-      #           public-key: MULTI_PROJECT_GOOGLE_PUB_KEY
-      #           private-key: MULTI_PROJECT_GOOGLE_PRIV_KEY
+      - bin-authz/create-attestation:
+          name: multi-project-google-dev
+          multi-project-setup: true
+          # setup
+          run-setup: true
+          enable-apis: false
+          create-new-gke-cluster: true
+          gke-cluster-name: multi-project-google
+          # keypair
+          use-existing-keypair: false
+          keypair-name: multi-project-google
+          keypair-email: community-partner@circleci.com
+          use-passphrase: true
+          public-key: MULTI_PROJECT_GOOGLE_PUB_KEY
+          private-key: MULTI_PROJECT_GOOGLE_PRIV_KEY
+          # attestor
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          # policy
+          configure-policy: true
+          default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          cluster-specific-rules: true
+          cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_MACHINE
+          cluster-specific-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          # image/attestation
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          # circle
+          filters: *integration-dev_filters
+          post-steps:
+            - cleanup:
+                attestor: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+                cluster-name: multi-project-google
+                public-key: MULTI_PROJECT_GOOGLE_PUB_KEY
+                private-key: MULTI_PROJECT_GOOGLE_PRIV_KEY
 
       # generate/store keypair w/o passphrase
       # no cluster-specific rules
-      # - bin-authz/create-attestation:
-      #     name: multi-project-machine-dev
-      #     executor: bin-authz/machine
-      #     multi-project-setup: true
-      #     # setup
-      #     run-setup: true
-      #     enable-apis: false
-      #     create-new-gke-cluster: true
-      #     gke-cluster-name: multi-project-machine
-      #     # keypair
-      #     use-existing-keypair: false
-      #     keypair-name: multi-project-machine
-      #     keypair-email: community-partner@circleci.com
-      #     use-passphrase: false
-      #     public-key: MULTI_PROJECT_MACHINE_PUB_KEY
-      #     private-key: MULTI_PROJECT_MACHINE_PRIV_KEY
-      #     # attestor
-      #     attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-      #     # policy
-      #     configure-policy: true
-      #     default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-      #     # image/attestation
-      #     image-path: gcr.io/google-containers/google-containers-test-image
-      #     image-tag: "2017-01-23"
-      #     # circle
-      #     filters: *integration-dev_filters
-      #     post-steps:
-      #       - cleanup:
-      #           attestor: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
-      #           cluster-name: multi-project-machine
-      #           public-key: MULTI_PROJECT_MACHINE_PUB_KEY
-      #           private-key: MULTI_PROJECT_MACHINE_PRIV_KEY
+      - bin-authz/create-attestation:
+          name: multi-project-machine-dev
+          executor: bin-authz/machine
+          multi-project-setup: true
+          # setup
+          run-setup: true
+          enable-apis: false
+          create-new-gke-cluster: true
+          gke-cluster-name: multi-project-machine
+          # keypair
+          use-existing-keypair: false
+          keypair-name: multi-project-machine
+          keypair-email: community-partner@circleci.com
+          use-passphrase: false
+          public-key: MULTI_PROJECT_MACHINE_PUB_KEY
+          private-key: MULTI_PROJECT_MACHINE_PRIV_KEY
+          # attestor
+          attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          # policy
+          configure-policy: true
+          default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+          # image/attestation
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          # circle
+          filters: *integration-dev_filters
+          post-steps:
+            - cleanup:
+                attestor: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
+                cluster-name: multi-project-machine
+                public-key: MULTI_PROJECT_MACHINE_PUB_KEY
+                private-key: MULTI_PROJECT_MACHINE_PRIV_KEY
 
       # use existing keypair (passwordless)
       # cluster-specific rules
-      # - bin-authz/create-attestation:
-      #     name: multi-project-docker-dev
-      #     executor: gcp-cli/default
-      #     multi-project-setup: true
-      #     # setup
-      #     run-setup: true
-      #     enable-apis: false
-      #     create-new-gke-cluster: true
-      #     gke-cluster-name: multi-project-docker
-      #     # keypair
-      #     keypair-email: community-partner@circleci.com
-      #     public-key: BIN_AUTHZ_PUBLIC_KEY_PASSWORDLESS
-      #     private-key: BIN_AUTHZ_PRIVATE_KEY_PASSWORDLESS
-      #     # attestor
-      #     attestor: existing-keypair-attestor-passwordless
-      #     # policy
-      #     configure-policy: true
-      #     default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
-      #     cluster-specific-rules: true
-      #     cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_MACHINE
-      #     cluster-specific-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
-      #     # image/attestation
-      #     image-path: gcr.io/google-containers/google-containers-test-image
-      #     image-tag: "2017-01-23"
-      #     # circle
-      #     filters: *integration-dev_filters
-      #     post-steps:
-      #       - cleanup:
-      #           attestor: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
-      #           cluster-name: multi-project-docker
+      - bin-authz/create-attestation:
+          name: multi-project-docker-dev
+          executor: gcp-cli/default
+          multi-project-setup: true
+          # setup
+          run-setup: true
+          enable-apis: false
+          create-new-gke-cluster: true
+          gke-cluster-name: multi-project-docker
+          # keypair
+          keypair-email: community-partner@circleci.com
+          public-key: BIN_AUTHZ_PUBLIC_KEY_PASSWORDLESS
+          private-key: BIN_AUTHZ_PRIVATE_KEY_PASSWORDLESS
+          # attestor
+          attestor: existing-keypair-attestor-passwordless
+          # policy
+          configure-policy: true
+          default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
+          cluster-specific-rules: true
+          cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_MACHINE
+          cluster-specific-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
+          # image/attestation
+          image-path: gcr.io/google-containers/google-containers-test-image
+          image-tag: "2017-01-23"
+          # circle
+          filters: *integration-dev_filters
+          post-steps:
+            - cleanup:
+                attestor: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
+                cluster-name: multi-project-docker
 
       # use existing keypair (passwordless)
       # long-running cluster, attestor
@@ -438,9 +438,6 @@ workflows:
           # policy
           configure-policy: true
           default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME
-          cluster-specific-rules: true
-          cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_MACHINE
-          cluster-specific-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME
           # image/attestation
           image-path: gcr.io/gcp-gcr-orb/sample-image
           image-tag: ${CIRCLE_SHA1:0:7}
@@ -457,25 +454,33 @@ workflows:
       # triggered by master branch commits
       # ----------------------------------
 
-      - gcp-cli/install_and_initialize_cli:
-          name: upsize-long-running-cluster-single-proj-master
-          gcloud-service-key: GOOGLE_SERVICE_KEY
-          google-project-id: GOOGLE_PROJECT_ID
-          filters: *integration-master_filters
-          post-steps:
-            - resize-cluster:
-                cluster-name: binauthz-orb-test-cluster-single-proj
-                num-nodes: "8"
+      # - gcp-cli/install_and_initialize_cli:
+      #     name: upsize-long-running-cluster-single-proj-master
+      #     gcloud-service-key: GOOGLE_SERVICE_KEY
+      #     google-project-id: GOOGLE_PROJECT_ID
+      #     filters: *integration-master_filters
+      #     post-steps:
+      #       - resize-cluster:
+      #           cluster-name: binauthz-orb-test-cluster-single-proj
+      #           num-nodes: "8"
 
-      - gcp-cli/install_and_initialize_cli:
-          name: upsize-long-running-cluster-multi-proj-master
-          gcloud-service-key: DEPLOYER_SERVICE_KEY
-          google-project-id: DEPLOYER_PROJECT_ID
+      # - gcp-cli/install_and_initialize_cli:
+      #     name: upsize-long-running-cluster-multi-proj-master
+      #     gcloud-service-key: DEPLOYER_SERVICE_KEY
+      #     google-project-id: DEPLOYER_PROJECT_ID
+      #     filters: *integration-master_filters
+      #     post-steps:
+      #       - resize-cluster:
+      #           cluster-name: binauthz-orb-test-cluster-multi-proj
+      #           num-nodes: "8"
+
+      - gcp-gcr/build-and-push-image:
+          name: create-attestation-artifact-long-running-cluster-master
+          gcloud-service-key: GCP_GCR_ORB_SERVICE_KEY
+          google-project-id: GCP_GCR_ORB_PROJECT_ID
+          image: sample-image
+          tag: ${CIRCLE_SHA1:0:7}
           filters: *integration-master_filters
-          post-steps:
-            - resize-cluster:
-                cluster-name: binauthz-orb-test-cluster-multi-proj
-                num-nodes: "8"
 
       # >>>>>>>>>>>>>>
       # SINGLE-PROJECT
@@ -596,11 +601,11 @@ workflows:
           cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_MACHINE
           cluster-specific-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME
           # image/attestation
-          image-path: gcr.io/google-containers/google-containers-test-image
-          image-tag: "2017-01-23"
+          image-path: gcr.io/gcp-gcr-orb/sample-image
+          image-tag: ${CIRCLE_SHA1:0:7}
           # circle
           filters: *integration-master_filters
-          requires: [upsize-long-running-cluster-single-proj-master]
+          requires: [create-attestation-artifact-long-running-cluster-master]
           post-steps:
             - resize-cluster:
                 cluster-name: binauthz-orb-test-cluster-single-proj
@@ -702,9 +707,6 @@ workflows:
           # policy
           configure-policy: true
           default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
-          cluster-specific-rules: true
-          cluster-specific-specifier: CLUSTER_SPECIFIER_MULTI_MACHINE
-          cluster-specific-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
           # image/attestation
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
@@ -729,11 +731,11 @@ workflows:
           configure-policy: true
           default-required-attestors: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME
           # image/attestation
-          image-path: gcr.io/google-containers/google-containers-test-image
-          image-tag: "2017-01-23"
+          image-path: gcr.io/gcp-gcr-orb/sample-image
+          image-tag: ${CIRCLE_SHA1:0:7}
           # circle
           filters: *integration-master_filters
-          requires: [upsize-long-running-cluster-multi-proj-master]
+          requires: [create-attestation-artifact-long-running-cluster-master]
           post-steps:
             - resize-cluster:
                 cluster-name: binauthz-orb-test-cluster-multi-proj
