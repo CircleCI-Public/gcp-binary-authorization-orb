@@ -2,12 +2,12 @@ description: >
   CircleCI's VM image, often useful for working with Docker images
 
 parameters:
-  tag:
+  image-tag:
     type: string
     default: ubuntu-1604:201903-01
     description: >
-      Version of CircleCI's machine executor image to use. For full list,
-      see https://circleci.com/docs/2.0/configuration-reference/#machine
+      Version of CircleCI's machine executor to use. For full list, see
+      https://circleci.com/docs/2.0/configuration-reference/#machine
 
 machine:
-  image: circleci/classic:<<parameters.tag>>
+  image: circleci/<<parameters.image-tag>>
