@@ -104,6 +104,8 @@ steps:
 
               fi
 
+              echo "Success! PGP keypair file generated"
+
         - run:
             name: Generate PGP keypair from file
             command: |

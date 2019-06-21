@@ -2,9 +2,9 @@ version: 2.1
 
 orbs:
   bin-authz: circleci/gcp-binary-authorization@dev:alpha
-  gcp-cli: circleci/gcp-cli@1.5.0
+  gcp-cli: circleci/gcp-cli@1.8.1
   gcp-gcr: circleci/gcp-gcr@0.6.0
-  orb-tools: circleci/orb-tools@8.27.0
+  orb-tools: circleci/orb-tools@8.27.1
   queue: eddiewebb/queue@1.1.2
 
 commands:

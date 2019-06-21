@@ -7,4 +7,4 @@ description: >
 
 orbs:
   gcp-cli: circleci/gcp-cli@1.8.1
-  orb-tools: circleci/orb-tools@8.27.0
+  orb-tools: circleci/orb-tools@8.27.1

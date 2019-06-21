@@ -184,13 +184,16 @@ steps:
               # set sudo to work whether logged in as root user or non-root user
               if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
 
-              $SUDO apt-get -y install expect
+              $SUDO apt-get -y install expect > /dev/null 2>&1
 
               FINGERPRINT=$(cat FINGERPRINT.txt)
 
               expect -c "spawn gpg --edit-key \
                 $FINGERPRINT \
-                trust quit; send \"5\ry\r\"; expect eof"
+                trust quit; send \"5\ry\r\"; expect eof" \
+                > /dev/null 2>&1
+
+              echo "Success! PGP keypair marked as trusted"
 
   - when:
       condition: <<parameters.use-passphrase>>
