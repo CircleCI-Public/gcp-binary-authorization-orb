@@ -28,6 +28,8 @@ commands:
       - cleanup-attestor:
           attestor: <<parameters.attestor>>
 
+      - run: sleep 10
+
       - cleanup-cluster:
           cluster-name: <<parameters.cluster-name>>
 
