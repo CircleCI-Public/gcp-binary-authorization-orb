@@ -231,7 +231,8 @@ steps:
   - run:
       name: Import policy YAML into Binary Authorization
       command: |
-        gcloud --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
+        gcloud \
+          --project=$<<#parameters.multi-project-setup>><<parameters.deployer-project-id>><</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>><</parameters.multi-project-setup>> \
           beta container binauthz policy import \
           <<parameters.policy-filepath>>
 
