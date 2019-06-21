@@ -238,6 +238,7 @@ workflows:
           image-tag: "2017-01-23"
           # circle
           filters: *integration-dev_filters
+          requires: [single-project-google-dev]
           post-steps:
             - cleanup:
                 attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
@@ -270,6 +271,7 @@ workflows:
           image-tag: "2017-01-23"
           # circle
           filters: *integration-dev_filters
+          requires: [single-project-machine-dev]
           post-steps:
             - cleanup:
                 attestor: existing-keypair-attestor-with-pw
@@ -368,6 +370,7 @@ workflows:
           image-tag: "2017-01-23"
           # circle
           filters: *integration-dev_filters
+          requires: [multi-project-google-dev]
           post-steps:
             - cleanup:
                 attestor: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
@@ -403,6 +406,7 @@ workflows:
           image-tag: "2017-01-23"
           # circle
           filters: *integration-dev_filters
+          requires: [multi-project-machine-dev]
           post-steps:
             - cleanup:
                 attestor: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
@@ -511,6 +515,7 @@ workflows:
           image-tag: "2017-01-23"
           # circle
           filters: *integration-master_filters
+          requires: [single-project-google-master]
           post-steps:
             - cleanup:
                 attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
@@ -543,6 +548,7 @@ workflows:
           image-tag: "2017-01-23"
           # circle
           filters: *integration-master_filters
+          requires: [single-project-machine-master]
           post-steps:
             - cleanup:
                 attestor: existing-keypair-attestor-with-pw
@@ -643,6 +649,7 @@ workflows:
           image-tag: "2017-01-23"
           # circle
           filters: *integration-master_filters
+          requires: [multi-project-google-master]
           post-steps:
             - cleanup:
                 attestor: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
@@ -675,6 +682,7 @@ workflows:
           image-tag: "2017-01-23"
           # circle
           filters: *integration-master_filters
+          requires: [multi-project-machine-master]
           post-steps:
             - cleanup:
                 attestor: projects/$ATTESTOR_PROJECT_ID/attestors/existing-keypair-attestor-passwordless
