@@ -422,6 +422,10 @@ steps:
         - attach_workspace:
             at: <<parameters.workspace-root>>
 
+    - orb-tools/check-env-var-param:
+      command-name: Checking whether required env vars are set to run `create-attestation` job...
+      param: <<^parameters.run-setup>><<parameters.google-compute-zone>>,<<#parameters.multi-project-setup>><<parameters.deployer-project-id>>,<<parameters.deployer-service-account>>,<<parameters.attestor-project-id>>,<<parameters.attestor-service-account>>,<<parameters.attestation-project-id>>,<</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.google-project-id>>,<<parameters.google-service-account>>,<</parameters.multi-project-setup>><<^parameters.use-existing-keypair>><<parameters.keypair-passphrase>>,<</parameters.use-existing-keypair>><<parameters.circle-token>>,<<parameters.public-key>>,<<^parameters.use-policy-file>><<#parameters.cluster-specific-rules>><<parameters.cluster-specific-specifier>>,<</parameters.cluster-specific-rules>><</parameters.use-policy-file>><</parameters.run-setup>><<#parameters.multi-project-setup>><<parameters.google-service-key>>,<</parameters.multi-project-setup>><<^parameters.multi-project-setup>><<parameters.deployer-service-key>>,<</parameters.multi-project-setup>><<parameters.private-key>>
+
   - gcp-cli/install
 
   - gcp-cli/initialize:
