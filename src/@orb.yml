@@ -1,10 +1,9 @@
-version: 2.1
-
-description: >
-  Configure Google's Binary Authorization service to sign and certify
-  container images for deployment. For more information, see orb source:
-  https://github.com/CircleCI-Public/gcp-binary-authorization-orb
-
+description: |
+  Configure Google's Binary Authorization service to sign and certify container images for deployment. For more information, see orb source: https://github.com/CircleCI-Public/gcp-binary-authorization-orb
+display:
+  source_url: https://github.com/circleci-public/gcp-binary-authorization-orb
 orbs:
   gcp-cli: circleci/gcp-cli@1.8.1
   orb-tools: circleci/orb-tools@8.27.1
+version: 2.1
+
