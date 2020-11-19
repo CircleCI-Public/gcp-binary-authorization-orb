@@ -173,7 +173,7 @@ steps:
 
         gcloud beta container binauthz attestors public-keys add \
           --attestor="<<#parameters.multi-project-setup>>projects/$<<parameters.attestor-project-id>>/attestors/<</parameters.multi-project-setup>><<parameters.attestor>>" \
-          --public-key-file=/tmp/generated-key.pgp
+          --pgp-public-key-file=/tmp/generated-key.pgp
 
   - run:
       name: Verify attestor creation with key
