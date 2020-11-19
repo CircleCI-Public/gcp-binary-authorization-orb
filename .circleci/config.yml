@@ -698,6 +698,7 @@ workflows:
           ssh-fingerprints: 30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
           requires: *prod-deploy_requires
           fail-if-semver-not-indicated: true
+          add-pr-comment: false
           publish-version-tag: false
           filters:
             branches:
