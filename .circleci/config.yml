@@ -1,11 +1,19 @@
 version: 2.1
 
 orbs:
-  bin-authz: circleci/gcp-binary-authorization@dev:alpha
-  gcp-cli: circleci/gcp-cli@1.8.1
-  gcp-gcr: circleci/gcp-gcr@0.6.0
-  orb-tools: circleci/orb-tools@8.27.1
+  bin-authz: circleci/gcp-binary-authorization@<<pipeline.parameters.dev-orb-version>>
+  gcp-cli: circleci/gcp-cli@2.1.0
+  gcp-gcr: circleci/gcp-gcr@0.11.0
+  orb-tools: circleci/orb-tools@10
   queue: eddiewebb/queue@1.1.2
+
+parameters:
+  run-integration-tests:
+    type: boolean
+    default: false
+  dev-orb-version:
+    type: string
+    default: "dev:alpha"
 
 commands:
   cleanup:
@@ -95,19 +103,6 @@ commands:
             curl -X DELETE \
               https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/envvar/<<parameters.private-key>>?circle-token=$CIRCLE_TOKEN
 
-# yaml anchor filters
-integration-dev_filters: &integration-dev_filters
-  branches:
-    ignore: /.*/
-  tags:
-    only: /integration-.*/
-
-integration-master_filters: &integration-master_filters
-  branches:
-    ignore: /.*/
-  tags:
-    only: /master-.*/
-
 prod-deploy_requires: &prod-deploy_requires
   [
     single-project-google-master,
@@ -120,44 +115,37 @@ prod-deploy_requires: &prod-deploy_requires
     multi-project-long-running-master
   ]
 
+integration-master_filters: &integration-master_filters
+  branches:
+    only: master
+
 workflows:
   lint_pack-validate_publish-dev:
+    unless: << pipeline.parameters.run-integration-tests >>
     jobs:
       - orb-tools/lint
 
       - orb-tools/pack:
           requires: [orb-tools/lint]
 
+      - queue/block_workflow:
+          consider-branch: false
+          requires: [orb-tools/lint]
+
       - orb-tools/publish-dev:
           orb-name: circleci/gcp-binary-authorization
           context: orb-publishing
-          requires: [orb-tools/pack]
+          requires:
+            - queue/block_workflow
 
-      - queue/block_workflow:
-          consider-branch: false
-          requires: [orb-tools/publish-dev]
-
-      - orb-tools/trigger-integration-workflow:
+      - orb-tools/trigger-integration-tests-workflow:
           name: trigger-integration-dev
           context: orb-publishing
-          ssh-fingerprints: 30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
-          requires: [queue/block_workflow]
-          filters:
-            branches:
-              ignore: master
-
-      - orb-tools/trigger-integration-workflow:
-          name: trigger-integration-master
-          context: orb-publishing
-          ssh-fingerprints: 30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
-          tag: master
-          cleanup-tags: true
-          requires: [queue/block_workflow]
-          filters:
-            branches:
-              only: master
+          requires:
+            - orb-tools/publish-dev
 
   integration-tests_prod-release:
+    when: << pipeline.parameters.run-integration-tests >>
     jobs:
       # --------------------------------------
       # triggered by non-master branch commits
@@ -169,7 +157,6 @@ workflows:
           google-project-id: GCP_GCR_ORB_PROJECT_ID
           image: sample-image
           tag: ${CIRCLE_SHA1:0:7}
-          filters: *integration-dev_filters
 
       # >>>>>>>>>>>>>>
       # SINGLE-PROJECT
@@ -200,7 +187,6 @@ workflows:
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
           # circle
-          filters: *integration-dev_filters
           post-steps:
             - cleanup:
                 attestor: $CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
@@ -237,7 +223,6 @@ workflows:
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
           # circle
-          filters: *integration-dev_filters
           requires: [single-project-google-dev]
           post-steps:
             - cleanup:
@@ -270,7 +255,6 @@ workflows:
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
           # circle
-          filters: *integration-dev_filters
           requires: [single-project-machine-dev]
           post-steps:
             - cleanup:
@@ -294,7 +278,6 @@ workflows:
           image-path: gcr.io/gcp-gcr-orb/sample-image
           image-tag: ${CIRCLE_SHA1:0:7}
           # circle
-          filters: *integration-dev_filters
           requires: [create-attestation-artifact-long-running-cluster-dev]
           post-steps:
             - resize-cluster:
@@ -334,7 +317,6 @@ workflows:
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
           # circle
-          filters: *integration-dev_filters
           post-steps:
             - cleanup:
                 attestor: projects/$ATTESTOR_PROJECT_ID/attestors/$CIRCLE_USERNAME-$CIRCLE_BUILD_NUM
@@ -369,7 +351,6 @@ workflows:
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
           # circle
-          filters: *integration-dev_filters
           requires: [multi-project-google-dev]
           post-steps:
             - cleanup:
@@ -405,7 +386,6 @@ workflows:
           image-path: gcr.io/google-containers/google-containers-test-image
           image-tag: "2017-01-23"
           # circle
-          filters: *integration-dev_filters
           requires: [multi-project-machine-dev]
           post-steps:
             - cleanup:
@@ -429,7 +409,6 @@ workflows:
           image-path: gcr.io/gcp-gcr-orb/sample-image
           image-tag: ${CIRCLE_SHA1:0:7}
           # circle
-          filters: *integration-dev_filters
           requires: [create-attestation-artifact-long-running-cluster-dev]
           post-steps:
             - resize-cluster:
@@ -713,44 +692,13 @@ workflows:
                 cluster-name: binauthz-orb-test-cluster-multi-proj
                 num-nodes: "0"
 
-      # +++++++++++++++++++++++++++++++++
-      # patch, minor, or major publishing
-      # +++++++++++++++++++++++++++++++++
-
-      - orb-tools/dev-promote-prod:
-          name: dev-promote-patch
+      - orb-tools/dev-promote-prod-from-commit-subject:
           context: orb-publishing
           orb-name: circleci/gcp-binary-authorization
           ssh-fingerprints: 30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
           requires: *prod-deploy_requires
+          fail-if-semver-not-indicated: true
+          publish-version-tag: false
           filters:
             branches:
-              ignore: /.*/
-            tags:
-              only: /master-patch.*/
-
-      - orb-tools/dev-promote-prod:
-          name: dev-promote-minor
-          context: orb-publishing
-          orb-name: circleci/gcp-binary-authorization
-          ssh-fingerprints: 30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
-          release: minor
-          requires: *prod-deploy_requires
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /master-minor.*/
-
-      - orb-tools/dev-promote-prod:
-          name: dev-promote-major
-          context: orb-publishing
-          orb-name: circleci/gcp-binary-authorization
-          ssh-fingerprints: 30:41:9c:09:66:60:a9:95:1a:b2:ce:07:22:50:ca:85
-          release: major
-          requires: *prod-deploy_requires
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /master-major.*/
+              only: master
